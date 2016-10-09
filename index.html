@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="RNACocktail">
+    <meta name="author" content="Mohammad Sahraeian">
+
+    <title>RNACocktail</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+    .container {
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 760px;
+}
+    </style>
+   
+    
+    <script>
+      
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-58409498-7', 'auto');
+  ga('send', 'pageview');
+
+
+  
+  /**
+* Function that tracks a click on an outbound link in Google Analytics.
+* This function takes a valid URL string as an argument, and uses that URL string
+* as the event label.
+*/
+var trackOutboundLink = function(url) {
+   ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+     function () {
+     document.location = url;
+     }
+   });
+}
+
+
+function _gaLt(event){
+    var el = event.srcElement || event.target;
+
+    /* Loop up the DOM tree through parent elements if clicked element is not a link (eg: an image inside a link) */
+    while(el && (typeof el.tagName == 'undefined' || el.tagName.toLowerCase() != 'a' || !el.href)){
+        el = el.parentNode;
+    }
+
+    if(el && el.href){
+        if(el.href.indexOf(location.host) == -1){ /* external link */
+            /* HitCallback function to either open link in either same or new window */
+            var hitBack = function(link, target){
+                target ? window.open(link, target) : window.location.href = link;
+            };
+            /* link */
+            var link = el.href;
+            /* Is target set and not _(self|parent|top)? */
+            var target = (el.target && !el.target.match(/^_(self|parent|top)$/i)) ? el.target : false;
+            /* send event with callback */
+            ga(
+                "send", "event", "Outgoing Links", link,
+                document.location.pathname + document.location.search,
+                {"hitCallback": hitBack(link, target)}
+            );
+
+            /* Prevent standard click */
+            event.preventDefault ? event.preventDefault() : event.returnValue = !1;
+        }
+
+    }
+}
+
+/* Attach the event to all clicks in the document after page has loaded */
+var w = window;
+w.addEventListener ? w.addEventListener("load",function(){document.body.addEventListener("click",_gaLt,!1)},!1)
+ : w.attachEvent && w.attachEvent("onload",function(){document.body.attachEvent("onclick",_gaLt)});
+
+</script>
+
+</head>
+
+<body>
+
+	
+
+    <div class="container" style="padding-bottom: 400px;">
+    	<div class="page-header">
+  		<h1>RNACocktail</h1>
+  		<h2>A comprehensive framework for accurate and efficient RNA-Seq analysis</h2>
+	</div>
+    
+        <div class="jumbotron">
+            <p>
+                <i>For more information contact us at <a href="mailto:bina.rd@roche.com">bina.rd@roche.com</a></i>
+            </p>
+            
+        </div>
+        
+    <h2>Publication [Open access]</h2>
+
+    <div class="panel panel-default" style="font-family:monospace;">
+        <div class="panel-body">
+<!-- 
+            <i>If you use RNACocktail in your work, please cite the following:</i><br>
+            ??<br>
+            <b>??</b><br>
+            ??
+ -->
+ 			Manuscript in preparation.
+        </div>
+    </div>
+
+<h2>Download RNACocktail</h2>
+
+<p>Latest version:  <a href="https://github.com/bioinform/RNACocktail/archive/v0.1.tar.gz"
+onclick="trackOutboundLink('https://github.com/bioinform/RNACocktail/archive/v0.1.tar.gz'); return false;">https://github.com/bioinform/RNACocktail/archive/v0.1.tar.gz</a></p>
+
+<p>For other versions, see "releases". <a href="https://github.com/bioinform/RNACocktail/releases"
+onclick="trackOutboundLink('https://github.com/bioinform/RNACocktail/releases'); return false;">https://github.com/bioinform/RNACocktail/releases</a></p>
+
+
+<h2>System Requirements</h2>
+<p>
+   The following Python packages must be installed:
+
+	<table style="width:100%">
+		  <tr>
+			<th style="width:20%">Tool</th>
+			<th style="width:20%">Version tested</th>
+			<th style="width:60%">Pipeline modes used in</th> 
+		  </tr>
+		  <tr>
+			<td><a href="http://pythonhosted.org/pybedtools">pybedtools</a></td>
+			<td>0.7.7</td>
+			<td><b>editing</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/pysam-developers/pysam">pysam</a></td>
+			<td>0.9.0</td>
+			<td><b>editing</b></td> 
+		  </tr>
+	</table>
+    <p>Note that <a href="https://github.com/arq5x/bedtools2">bedtools</a> has to be installed separately in order for pybedtools to work.</p>
+   
+   <p>In addition, paths to the following tools must be provided as RNACocktail arguments. Alternatively, the executables can be on PATH environmental variable or defined on defaults.py:</p>
+   
+	<table style="width:100%">
+		  <tr>
+			<th style="width:20%">Tool</th>
+			<th style="width:20%">Version tested</th>
+			<th style="width:60%">Pipeline modes used in</th> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/samtools/samtools">SAMtools</a></td>
+			<td>1.2</td>
+			<td><b>align</b>, <b>reconstruct</b>, <b>long_align</b>, <b>long_reconstruct</b>, and <b>editing</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="http://ccb.jhu.edu/software/hisat2/index.shtml">HISAT2</a></td>
+			<td>2.0.4</td>
+			<td><b>align</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://ccb.jhu.edu/software/stringtie/index.shtml">StringTie</a></td>
+			<td>1.2.1</td>
+			<td><b>reconstruct</b> and <b>diff</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/COMBINE-lab/salmon">Salmon</a></td>
+			<td>0.6.0</td>
+			<td><b>quantify</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/dzerbino/oases">Oases</a></td>
+			<td>0.2.09</td>
+			<td><b>assembly</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/dzerbino/velvet">Velvet</a></td>
+			<td>1.2.10</td>
+			<td><b>assembly</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://www.r-project.org/">R</a> with <a href="https://www.bioconductor.org/packages/devel/bioc/html/DESeq2.html">DESeq2</a>, <a href="https://github.com/hadley/readr">readr</a>, and <a href="https://github.com/mikelove/tximport">tximport</a> libraries</td>
+			<td>3.1.2</td>
+			<td><b>diff</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="http://bioinf.wehi.edu.au/featureCounts/">featureCounts</a></td>
+			<td>1.5.0-p1</td>
+			<td><b>diff</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="http://www.atgc-montpellier.fr/lordec/">LoRDEC</a></td>
+			<td>0.6</td>
+			<td><b>long_correct</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/alexdobin/STAR">STAR</a></td>
+			<td>2.5.0a</td>
+			<td><b>long_align</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="http://www.healthcare.uiowa.edu/labs/au/IDP/">IDP</a></td>
+			<td>0.1.9</td>
+			<td><b>long_reconstruct</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://software.broadinstitute.org/gatk/">GATK</a></td>
+			<td>3.5-0</td>
+			<td><b>variant</b> and <b>editing</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://broadinstitute.github.io/picard/">Picard</a></td>
+			<td>1.129</td>
+			<td><b>variant</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/zhqingit/giremi">GIREMI</a></td>
+			<td>0.2.1</td>
+			<td><b>editing</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/samtools/htslib">HTSlib</a></td>
+			<td>1.3</td>
+			<td><b>editing</b></td> 
+		  </tr>
+		  <tr>
+			<td><a href="https://github.com/ndaniel/fusioncatcher">FusionCatcher</a></td>
+			<td>0.99.5a beta</td>
+			<td><b>fusion</b></td> 
+		  </tr>
+	</table>
+</p>
+
+
+<h2>Installing RNACocktail</h2>
+<p>RNACocktail is a python package and can be installed using <code>pip</code>. To install type <code>pip install https://github.com/bioinform/RNACocktail/archive/v0.1.tar.gz</code>. The current version
+of RNACocktail is v0.1. In general, the install source would be https://github.com/bioinform/RNACocktail/archive/version.tar.gz</p>
+
+
+<h2>Running RNACocktail</h2>
+
+<p>Type <code>run_rnacocktail.py -h</code> for help.</p>
+<p>Type <code>run_rnacocktail.py align -h</code> for short-read alignment help.</p>
+<p>Type <code>run_rnacocktail.py reconstruct -h</code> for short-read transcriptome reconstruction help.</p>
+<p>Type <code>run_rnacocktail.py quantify -h</code> for short-read quantification help.</p>
+<p>Type <code>run_rnacocktail.py diff -h</code> for short-read differential expression help.</p>
+<p>Type <code>run_rnacocktail.py denovo -h</code> for short-read de novo assembly help.</p>
+<p>Type <code>run_rnacocktail.py long_correct -h</code> for long-read error correction help.</p>
+<p>Type <code>run_rnacocktail.py long_align -h</code> for long-read alignment help.</p>
+<p>Type <code>run_rnacocktail.py long_reconstruct -h</code> for long-read transcriptome reconstruction help.</p>
+<p>Type <code>run_rnacocktail.py variant -h</code> for variant calling help.</p>
+<p>Type <code>run_rnacocktail.py editing -h</code> for RNA editing detection help.</p>
+<p>Type <code>run_rnacocktail.py fusion -h</code> for RNA fusion detection help.</p>
+
+
+
+<h2>Testing RNACoktail</h2>
+
+<p><code>cd test</code></p>
+<p><code>./test_run.sh</code></p>
+
+
+<h2>Examples</h2>
+
+	<h4>Example 1 (align):</h4> Run of RNACocktail for alignment of paired-end short-read sequences (HISAT2).
+
+	<p><code>run_rnacocktail.py align --align_idx hisat2-idx --outdir out --workdir work --ref_gtf genes.GRCh37.gtf --1 seq_1.fq.gz  --2 seq_2.fq.gz --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py  --samtools /path/to/samtools --threads 10 --sample A </code></p>
+
+	<h4>Example 2 (align):</h4> Run of RNACocktail for alignment of single-end short-read sequences (HISAT2).
+
+	<p><code>run_rnacocktail.py align --align_idx hisat2-idx --outdir out --workdir work --ref_gtf genes.GRCh37.gtf --U seq.fq.gz --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py  --samtools /path/to/samtools --threads 10 --sample A </code></p>
+
+	<h4>Example 3 (reconstruct):</h4> Run of RNACocktail for short-read transcriptome reconstruction (StringTie).
+
+	<p><code>run_rnacocktail.py reconstruct --alignment_bam work/hisat2/A/alignments.sorted.bam --outdir out --workdir work --ref_gtf genes.GRCh37.gtf --stringtie /path/to/stringtie --threads 10 --sample A
+ </code></p>
+
+
+	<h4>Example 4 (quantify):</h4> Run of RNACocktail for (alignment-free) quantification of  paired-end short-read sequences (Salmon-SMEM).
+
+	<p><code>run_rnacocktail.py quantify --quantifier_idx salmon_fmd_idx --1 seq_1.fq.gz  --2 seq_2.fq.gz --libtype IU --salmon_k 19 --outdir out --workdir work --salmon /path/to/salmon --threads 10 --sample A --unzip
+ </code></p>
+
+	<h4>Example 5 (quantify):</h4> Run of RNACocktail for (alignment-free) quantification of  single-end short-read sequences (Salmon-SMEM).
+
+	<p><code>run_rnacocktail.py quantify --quantifier_idx salmon_fmd_idx --U seq.fq.gz --libtype U --salmon_k 19 --outdir out --workdir work --salmon /path/to/salmon --threads 10 --sample A --unzip
+ </code></p>
+
+	<h4>Example 6 (diff):</h4> Run of RNACocktail for differential expression analysis of quantifications computed using Salmon-SMEM (DESeq2).
+
+	<p><code>run_rnacocktail.py diff --quant_files work/salmon_smem/A1/quant.sf,work/salmon_smem/A2/quant.sf work/salmon_smem/B1/quant.sf,work/salmon_smem/B2/quant.sf --samples A1,A2 B1,B2 --ref_gtf genes.GRCh37.gtf --outdir out --workdir work
+ </code></p>
+
+
+	<h4>Example 7 (diff):</h4> Run of RNACocktail for differential expression analysis of reads aligned using HISAT2 on reference transcriptome (DESeq2).
+
+	<p><code>run_rnacocktail.py diff --alignments work/hisat2/A1/alignments.sorted.bam,work/hisat2/A2/alignments.sorted.bam work/hisat2/B1/alignments.sorted.bam,work/hisat2/B2/alignments.sorted.bam --samples A1,A2 B1,B2 --ref_gtf genes.GRCh37.gtf --outdir out --workdir work --featureCounts /path/to/featureCounts
+ </code></p>
+
+	<h4>Example 8 (diff):</h4> Run of RNACocktail for differential expression analysis of reads aligned using HISAT2 on StringTie computed transcriptome (DESeq2).
+
+	<p><code>run_rnacocktail.py diff --alignments work/hisat2/A1/alignments.sorted.bam,work/hisat2/A2/alignments.sorted.bam work/hisat2/B1/alignments.sorted.bam,work/hisat2/B2/alignments.sorted.bam --transcripts_gtfs work/stringtie/A1/transcripts.gtf,work/stringtie/A2/transcripts.gtf work/stringtie/B1/transcripts.gtf,work/stringtie/B2/transcripts.gtf --samples A1,A2 B1,B2 --ref_gtf genes.GRCh37.gtf --outdir out --workdir work --featureCounts /path/to/featureCounts
+ </code></p>
+
+	<h4>Example 9 (denovo):</h4> Run of RNACocktail for de novo assembly (Oases).
+
+	<p><code>run_rnacocktail.py denovo --1 seq_1.fq.gz  --2 seq_2.fq.gz --outdir out --workdir work --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --threads 4 --sample A --file_format fastq.gz
+ </code></p>
+
+	<h4>Example 10 (long_correct):</h4> Run of RNACocktail for long-read error correction (LoRDEC).
+
+	<p><code>run_rnacocktail.py long_correct --kmer 23 --solid 3 --short seq.fq.gz --long seq_long.fa --outdir out --workdir work --lordec /path/to/lordec-correct --threads 4 --sample A
+ </code></p>
+
+	<h4>Example 11 (long_align):</h4> Run of RNACocktail for long-read alignment (STARlong).
+
+	<p><code>run_rnacocktail.py long_align --long work/lordec/A/long_corrected.fa  --outdir out --workdir work --starlong /path/to/STARlong --threads 4 --sample A --sam2psl /path/to/sam2psl.py --samtools /path/to/samtools --genome_dir /path/to/STAR/genome_idx
+ </code></p>
+
+	<h4>Example 12 (long_reconstruct):</h4> Run of RNACocktail for long-read alignment (STARlong).
+
+	<p><code>run_rnacocktail.py long_reconstruct --alignment  work/hisat2/A/alignments.sorted.bam --short_junction  work/hisat2/A/splicesites.bed --long_alignment work/starlong/A/Aligned.out.psl --outdir out --workdir work --idp   /path/to/runIDP.py --threads 4 --sample A --ref_genome genome.GRCh37.fa --ref_all_gpd hg19.all.refSeq_gencode_ensemble_EST_known.gpd --ref_gpd genes.GRCh37.refFlat.txt --samtools /path/to/samtools --idp_cfg idp.cfg
+ </code></p>
+
+	<h4>Example 13 (variant):</h4> Run of RNACocktail for RNA-Seq variant calling (GATK) with enabled IndelRealignment.
+
+	<p><code>run_rnacocktail.py variant --alignment  work/hisat2/A/alignments.sorted.bam --outdir out --workdir work --picard /path/to/picard.jar --gatk /path/to/GenomeAnalysisTK.jar --threads 10 --sample A --ref_genome genome.GRCh37.fa --IndelRealignment --knownsites dbsnp_138.b37.vcf
+ </code></p>
+
+
+	<h4>Example 14 (editing):</h4> Run of RNACocktail for RNA editing detection (GIREMI)
+
+	<p><code>run_rnacocktail.py editing --alignment  work/gatk/A/bsqr.bam --variant work/gatk/A/variants_filtered.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --outdir out --workdir work --giremi_dir /path/to/giremi/directory/ --gatk /path/to/GenomeAnalysisTK.jar --samtools /path/to/samtools --htslib_dir /path/to/htslib/directory/ --threads 10 --sample A --ref_genome genome.GRCh37.fa --knownsites dbsnp_138.b37.vcf
+ </code></p>
+
+
+	<h4>Example 15 (fusion):</h4> Run of RNACocktail for RNA fusion detection (FusionCatcher)
+
+	<p><code>run_rnacocktail.py fusion --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --input  seq_1.fq.gz,seq_2.fq.gz --outdir out --workdir work --fusioncatcher /path/to/fusioncatcher --threads 4 --sample A
+ </code></p>
+
+
+<h2>Command line options</h2>
+<h3>General options</h3>
+ 
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--sample STRING</code></td>
+			<td>Sample name</td> 
+		  </tr>
+		  <tr>
+			<td><code>--threads INT</code></td>
+			<td>Number of threads to use (default: 1)</td> 
+		  </tr>
+		  <tr>
+			<td><code>--start INT</code></td>
+			<td>It re-starts executing the workflow/pipeline from the given step number. This can be used when the pipeline has crashed/stopped and one wants to re-run it from from the step where it stopped without re-running from the beginning the entire pipeline. 0 is for restarting automatically and 1 is the first step. (default is '0').</td> 
+		  </tr>
+		  <tr>
+			<td><code>--timeout INT</code></td>
+			<td>Maximum run time for commands (in seconds) (default 10000000)</td> 
+		  </tr>
+		</table>                
+<h3>Short-read alignment options</h3>
+<p><b>run_rnacocktail.py align </b></p>
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--sr_aligner STRING</code></td>
+			<td>Short-read alignment tool (default: HISAT2)</td> 
+		  </tr>
+		  <tr>
+			<td><code>--align_idx STRING</code></td>
+			<td>The basename of the index generated by the alignment tool for the reference genome</td> 
+		  </tr>
+		  <tr>
+			<td><code>--1 STRING</code></td>
+			<td>Comma-separated list of files containing mate 1s (filename usually includes _1), e.g. --1 A_1.fq,B_1.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--2 STRING</code></td>
+			<td>Comma-separated list of files containing mate 2s (filename usually includes _2), e.g. --2 A_2.fq,B_2.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--U STRING</code></td>
+			<td>Comma-separated list of files containing unpaired reads to be aligned, e.g. --U A.fq,B.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--sra STRING</code></td>
+			<td>Comma-separated list of SRA accession numbers, e.g. --sra SRR353653,SRR353654. Information about read types  is available at <a href="http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?sp=runinfo&acc=sra-acc&retmode=xml">here</a>,  where sra is SRA accession number.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--ref_gtf STRING</code></td>
+			<td>The reference transcriptome annotation file (in GTF or GFF3 format) to guide the analysis. ( --known-splicesite-infile option for HISAT will be created based on this file)</td> 
+		  </tr>
+
+		  <tr>
+			<td><code>--hisat2 STRING</code></td>
+			<td>Path to HISAT2 executable (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--hisat2_sps STRING</code></td>
+			<td>Path to hisat2_extract_splice_sites.py script. Can be found in HISAT2 package. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--samtools STRING</code></td>
+			<td>Path to samtools executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--hisat2_opts STRING</code></td>
+			<td>Other options used for HISAT2 aligner. (should be put between " ")  (For HISAT2 check <a href="http://ccb.jhu.edu/software/hisat2/manual.shtml">here</a>).</td>
+		  </tr>
+		</table>
+
+
+<h3>Short-read transcriptome reconstruction options</h3>
+<p><b>run_rnacocktail.py reconstruct </b></p>
+ 
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--reconstructor STRING</code></td>
+			<td>The transcriptome reconstruction tool to use (default: StringTie)</td> 
+		  </tr>
+		  <tr>
+			<td><code>--alignment_bam STRING</code></td>
+			<td>A BAM file with RNA-Seq read mappings which must be sorted by their genomic location (e.g. The output BAM file generated in align mode).</td> 
+		  </tr>
+		  <tr>
+			<td><code>--ref_gtf STRING</code></td>
+			<td>The reference transcriptome annotation file (in GTF or GFF3 format) to guide the analysis.</td> 
+		  </tr>
+
+		  <tr>
+			<td><code>--stringtie STRING</code></td>
+			<td>Path to StringTie executable (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--hisat2_sps STRING</code></td>
+			<td>Path to hisat2_extract_splice_sites.py script. Can be found in HISAT2 package. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--samtools STRING</code></td>
+			<td>Path to samtools executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--stringtie_opts STRING</code></td>
+			<td>Other options used for StringTie transcriptome reconstruction. (should be put between " ") (For StringTie check <a href="https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual">here</a>).</td>
+		  </tr>
+		</table>
+
+
+<h3>Alignment-free transcript quantification options</h3>
+ <p><b>run_rnacocktail.py quantify </b></p>
+
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--quantifier STRING</code></td>
+			<td>The quantification tool to use (default: Salmon-SMEM)</td> 
+		  </tr>
+		  <tr>
+			<td><code>--quantifier_idx STRING</code></td>
+			<td>The index generated for the reference transcriptome. (FMD-based index for Salmon-SMEM)</td> 
+		  </tr>
+		  <tr>
+			<td><code>--1 STRING</code></td>
+			<td>Comma-separated list of files containing mate 1s (filename usually includes _1), e.g. --1 A_1.fq,B_1.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--2 STRING</code></td>
+			<td>Comma-separated list of files containing mate 2s (filename usually includes _2), e.g. --2 A_2.fq,B_2.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--U STRING</code></td>
+			<td>Comma-separated list of files containing unpaired reads to be aligned, e.g. --U A.fq,B.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--salmon_k INT</code></td>
+			<td>SMEM's smaller than this size will not be considered by Salmon. (default 19).</td> 
+		  </tr>
+		  <tr>
+			<td><code>--libtype STRING</code></td>
+			<td>Format string describing the library type. (For Salmon check <a href="http://salmon.readthedocs.io/en/latest/library_type.html#fraglibtype">here</a>).</td> 
+		  </tr>
+
+		  <tr>
+			<td><code>--unzip</code></td>
+			<td>The sequence files are zipped. So unzip them first</td>
+		  </tr>
+		  <tr>
+			<td><code>--salmon STRING</code></td>
+			<td>Path to Salmon executable (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--salmon_smem_opts STRING</code></td>
+			<td>Other options used for Salmon-SMEM quantifications. (should be put between " ") (For Salmon check  <a href="http://salmon.readthedocs.io/en/latest/salmon.html#using-salmon">here</a>).</td>
+		  </tr>
+		</table>
+
+<h3>Differential Analysis options</h3>
+ <p><b>run_rnacocktail.py diff </b></p>
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--difftool STRING</code></td>
+			<td>The differential analysis tool to use. (default: DESeq2)</td> 
+		  </tr>
+		  <tr>
+			<td><code>--quant_files STRING</code></td>
+			<td>Quantification files for each sample (e.g. Salmon's quant.sf outputs). Replicates in same sample should be listed comma separated. e.g --quant_files A1/quant.sf,A2/quant.sf B1/quant.sf,B2/quant.sf</td> 
+		  </tr>
+		  <tr>
+			<td><code>--transcripts_gtfs STRING</code></td>
+			<td>Reconstructed transcript GTF files (for instance StringTie's transcripts.gtf output). Replicates in same sample should be listed comma separated. e.g --transcripts_gtfs A1/transcripts.gtf,A2/transcripts.gtf B1/transcripts.gtf,B2/transcripts.gtf</td> 
+		  </tr>
+		  <tr>
+			<td><code>--alignments STRING</code></td>
+			<td>Alignment BAM files for each sample (for instance HISAT2's output). Replicates in same sample should be listed comma separated. e.g --alignments A1/alignments.bam,A2/alignments.bam B1/alignments.bam,B2/alignments.bam</td> 
+		  </tr>
+		  <tr>
+			<td><code>--ref_gtf STRING</code></td>
+			<td>The reference transcriptome annotation file (in GTF or GFF3 format) to guide the analysis.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--samples STRING</code></td>
+			<td>Sample names. Number of samples and replicates should match the input quantification (--quant_files) or alignemnt (--alignments). Replicates in same sample should be listed comma separated. e.g --samples A1,A2 B1,B2</td> 
+		  </tr>
+		  <tr>
+			<td><code>--mincount INT</code></td>
+			<td>Minimum read counts per transcripts. Differential analysis pre-filtering step removes transcripts that have less than this number of reads. (default 2)</td> 
+		  </tr>
+
+		  <tr>
+			<td><code>--alpha FLOAT</code></td>
+			<td>Adjusted p-value significance level for differential analysis. (default 0.05)</td> 
+		  </tr>
+		  <tr>
+			<td><code>--R STRING</code></td>
+			<td>Path to R executable (DESeq2, readr, tximport should have been installed in R) (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--featureCounts STRING</code></td>
+			<td>Path to featureCounts executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--stringtie STRING</code></td>
+			<td>Path to StringTie executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--stringtie_merge_opts STRING</code></td>
+			<td>Other options used for StringTie merge. Can be set when the reconstructed transcript GTFs are used.(should be put between " ") (For StringTie check <a href="https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual">here</a>).</td>
+		  </tr>
+		  <tr>
+			<td><code>--featureCounts_opts STRING</code></td>
+			<td>Other options used for featureCounts. (should be put between " ") (For options check <a href="http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf">here</a>).</td>
+		  </tr>
+		</table>
+
+
+<h3>De novo assembly options</h3>
+ <p><b>run_rnacocktail.py denovo </b></p>
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--assembler STRING</code></td>
+			<td>The de novo assembler to use. (default Oases)</td>
+		  </tr>
+		  <tr>
+			<td><code>--assmebly_hash INT</code></td>
+			<td>Odd integer, or a comma separated list of odd integers that specify the assembly has length (for Oases/Velvet).</td>
+		  </tr>
+		  <tr>
+			<td><code>--file_format STRING</code></td>
+			<td>Input file format for de novo assembly Options: fasta, fastq, raw, fasta.gz, fastq.gz, raw.gz, sam, bam, fmtAuto. (default fasta)</td>
+		  </tr>
+		  <tr>
+			<td><code>--read_type STRING</code></td>
+			<td>Input sequence read type for de novo assembly Options: short, shortPaired, short2, shortPaired2, long, longPaired, reference. (Check <a href="https://www.ebi.ac.uk/~zerbino/velvet/Manual.pdf">here</a> for description) (default short)</td>
+		  </tr>
+		  <tr>
+			<td><code>--1 STRING</code></td>
+			<td>Comma-separated list of files containing mate 1s (filename usually includes _1), e.g. --1 A_1.fq,B_1.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--2 STRING</code></td>
+			<td>Comma-separated list of files containing mate 2s (filename usually includes _2), e.g. --2 A_2.fq,B_2.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--U STRING</code></td>
+			<td>Comma-separated list of files containing unpaired reads to be aligned, e.g. --U A.fq,B.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--I STRING</code></td>
+			<td>Comma-separated list of files containing interleaved paired-end reads to be assembled, e.g. --I A.fq,B.fq.</td> 
+		  </tr>
+		  <tr>
+			<td><code>--oases STRING</code></td>
+			<td>Path to oases executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--velvetg STRING</code></td>
+			<td>Path to velvetg executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--velveth STRING</code></td>
+			<td>Path to velveth executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--velveth_opts STRING</code></td>
+			<td>Other options used for assembly by velveth. (For velvet options check <a href="https://genome.ucsc.edu/FAQ/FAQformat.html">here</a>https://github.com/dzerbino/velvet/blob/master/Manual.pdf).</td>
+		  </tr>
+		  <tr>
+			<td><code>--velvetg_opts STRING</code></td>
+			<td>Other options used for assembly by velvetg. (should be put between " ") (For velvet options check <a href="https://genome.ucsc.edu/FAQ/FAQformat.html">here</a>https://github.com/dzerbino/velvet/blob/master/Manual.pdf).</td>
+		  </tr>
+		  <tr>
+			<td><code>--velveth_opts STRING</code></td>
+			<td>Other options used for assembly by velveth. (For velvet options check <a href="https://genome.ucsc.edu/FAQ/FAQformat.html">here</a>https://github.com/dzerbino/velvet/blob/master/Manual.pdf).</td>
+		  </tr>
+		  <tr>
+			<td><code>--oases_opts STRING</code></td>
+			<td>Other options used for assembly by Oases. (should be put between " ") (For Oases options check <a href="https://genome.ucsc.edu/FAQ/FAQformat.html">here</a>https://github.com/dzerbino/oases).</td>
+		  </tr>
+		</table>
+
+<h3>Long read error correction options</h3>
+ <p><b>run_rnacocktail.py long_correct </b></p>
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--long_corrector STRING</code></td>
+			<td>The long-read error correction tool to use. (default LoRDEC).</td>
+		  </tr>
+		  <tr>
+			<td><code>--kmer INT</code></td>
+			<td>LoRDEC k-mer length</td>
+		  </tr>
+		  <tr>
+			<td><code>--solid INT</code></td>
+			<td>LoRDEC solidity abundance threshold for k-mers</td>
+		  </tr>
+		  <tr>
+			<td><code>--long STRING</code></td>
+			<td>The FASTA file containing long reads</td>
+		  </tr>
+		  <tr>
+			<td><code>--short STRING</code></td>
+			<td>The FASTA or FASTQ file containing short reads.  (can be compressed .gz file)</td>
+		  </tr>
+		  <tr>
+			<td><code>--lordec STRING</code></td>
+			<td>Path to LoRDEC executable (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--lordec_opts STRING</code></td>
+			<td>Other options used for LoRDEC. (should be put between " ")  (For LoRDEC check <a href="http://www.atgc-montpellier.fr/lordec/README.html">here</a>).</td>
+		  </tr>
+		</table>
+
+
+<h3>Long read alignment options</h3>
+ <p><b>run_rnacocktail.py long_align </b></p>
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--long_aligner STRING</code></td>
+			<td>The long-read alignment tool to use. (default STARlong).</td>
+		  </tr>
+		  <tr>
+			<td><code>--long STRING</code></td>
+			<td>The FASTA file containing long reads</td>
+		  </tr>
+		  <tr>
+			<td><code>--genome_dir STRING</code></td>
+			<td>Specifies path to the genome directory where STAR genome indices where generated</td>
+		  </tr>
+		  <tr>
+			<td><code>--ref_gtf STRING</code></td>
+			<td>The reference transcriptome annotation file (in GTF or GFF3 format) to guide the analysis.</td>
+		  </tr>
+		  <tr>
+			<td><code>--starlong STRING</code></td>
+			<td>Path to STARlong executable (version 2.5.0a or later) (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--sam2psl STRING</code></td>
+			<td>Path to the sam2psl.py script. Can be found in FusionCatcher package. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--samtools STRING</code></td>
+			<td>Path to samtools executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--starlong_opts STRING</code></td>
+			<td>Other options used for LoRDEC. (should be put between " ")  (For LoRDEC check <a href="http://www.atgc-montpellier.fr/lordec/README.html">here</a>). As the default we use the following options as advised in <a href="https://github.com/PacificBiosciences/cDNA_primer/wiki/Bioinfx-study:-Optimizing-STAR-aligner-for-Iso-Seq-data">here</a>: <code>
+--outSAMattributes NH HI NM MD --readNameSeparator space --outFilterMultimapScoreRange 1 --outFilterMismatchNmax 2000 --scoreGapNoncan -20 --scoreGapGCAG -4 --scoreGapATAC -8 --scoreDelOpen -1 --scoreDelBase -1 --scoreInsOpen -1 --scoreInsBase -1 --alignEndsType Local --seedSearchStartLmax 50 --seedPerReadNmax 100000 --seedPerWindowNmax 1000 --alignTranscriptsPerReadNmax 100000 --alignTranscriptsPerWindowNmax 10000
+</code>.</td>
+		  </tr>
+		</table>
+
+<h3>Long read transcriptome reconstruction options</h3>
+ <p><b>run_rnacocktail.py long_reconstruct </b></p>
+ 		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--long_reconstructor STRING</code></td>
+			<td>The long-read transcriptome reconstruction tool to use. (default IDP).</td>
+		  </tr>
+		  <tr>
+			<td><code>--alignment STRING</code></td>
+			<td>A BAM/SAM file with short RNA-Seq read mappings (e.g. The output BAM file generated in align mode). If BAM file is given, it will be converted to SAM.</td>
+		  </tr>
+		  <tr>
+			<td><code>--short_junction STRING</code></td>
+			<td>A BED file with short RNA-Seq read junctions (e.g. The bed junction file generated in align mode.) For bed file format check <a href="https://genome.ucsc.edu/FAQ/FAQformat.html">here</a>.</td>
+		  </tr>
+		  <tr>
+			<td><code>--long_alignment STRING</code></td>
+			<td>A PSL file with long RNA-Seq read mappings (e.g. The output PSL file generated in long_align mode)</td>
+		  </tr>
+		  <tr>
+			<td><code>--mode_number INT</code></td>
+			<td>You can run IDP in two steps. If for a reason IDP finished isoform candidate construction step but was terminated in candidate selection step, you can restart the candidate selection step without re-running the isoform candidate construction. mode 0 (default): end-to-end IDP run. mode 1: generates isoform candidate pool (file: isoform_construction.NisoXX.gpd). mode 2: runs candidate selection step. Note: make sure isoform candidate pool (file: isoform_construction.NisoXX.gpd) file is already generated in temp folder.</td>
+		  </tr>
+		  <tr>
+			<td><code>--ref_genome STRING</code></td>
+			<td>The reference genome FASTA file</td>
+		  </tr>
+		  <tr>
+			<td><code>--ref_all_gpd STRING</code></td>
+			<td>GPD format annotation file for the whole genome splicing data from multiple sources including ESTs and reference genome databases. For hg19 you may use the full genome example in <a href="http://www.stanford.edu/group/wonglab/SpliceMap/hg19.all.gene_est.refFlat.txt">here</a>.</td>
+		  </tr>
+		  <tr>
+			<td><code>--ref_gpd STRING</code></td>
+			<td>The reference transcriptome annotation file (in GPD format) to guide the analysis.</td>
+		  </tr>
+		  <tr>
+			<td><code>--ref_genome STRING</code></td>
+			<td>The reference genome FASTA file</td>
+		  </tr>
+		  <tr>
+			<td><code>--samtools STRING</code></td>
+			<td>Path to samtools executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--idp STRING</code></td>
+			<td>Path to runIDP.py script. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--idp_cfg STRING</code></td>
+			<td>the .cfg file that include other options used for IDP long read transcriptome reconstruction. (For IDP check <a href="http://www.healthcare.uiowa.edu/labs/au/IDP/IDP_tutorial.asp">here</a>) These options will be used to generate the .cfg file.</td>
+		  </tr>
+		</table>
+
+
+<h3>RNA-Seq variant calling options</h3>
+ <p><b>run_rnacocktail.py variant </b></p>
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--variant_caller STRING</code></td>
+			<td>The variant caller to use. For GATK's general approach used for calling variants in RNAseq check 
+<a href="https://software.broadinstitute.org/gatk/guide/article?id=3891">here</a> (default GATK).</td>
+		  </tr>
+		  <tr>
+			<td><code>--alignment STRING</code></td>
+			<td>A BAM/SAM file with RNA-Seq read mappings. (e.g. The output BAM file generated in align mode).</td>
+		  </tr>
+		  <tr>
+			<td><code>--CleanSam</code></td>
+			<td>Use Picard's CleanSam command to clean the input alignment.</td>
+		  </tr>
+		  <tr>
+			<td><code>--IndelRealignment</code></td>
+			<td>Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).</td>
+		  </tr>
+		  <tr>
+			<td><code>--no_BaseRecalibrator</code></td>
+			<td>Don't run BaseRecalibrator step.</td>
+		  </tr>
+		  <tr>
+			<td><code>--ref_genome</code></td>
+			<td>The reference genome FASTA file</td>
+		  </tr>
+		  <tr>
+			<td><code>--knownsites</code></td>
+			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
+		  </tr>
+		  <tr>
+			<td><code>--picard</code></td>
+			<td>Path to picard executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--gatk</code></td>
+			<td>Path to GATK executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--java</code></td>
+			<td>Path to JAVA executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--java_opts</code></td>
+			<td>Java options used for picard and GATK commands. (should be put between " ") (default: -Xms1g -Xmx5g) </td>
+		  </tr>
+		  <tr>
+			<td><code>--AddOrReplaceReadGroups_opts</code></td>
+			<td>Other options used for picard AddOrReplaceReadGroups command. (should be put between " ")  (For Picard check <a href="https://broadinstitute.github.io/picard/command-line-overview.html">here</a>) (default: "SO=coordinate RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=sample")  </td>
+		  </tr>
+		  <tr>
+			<td><code>--MarkDuplicates_opts</code></td>
+			<td>Other options used for picard MarkDuplicates command. (should be put between " ")  (For Picard check <a href="https://broadinstitute.github.io/picard/command-line-overview.html">here</a>) (default: "CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT")  </td>
+		  </tr>
+		  <tr>
+			<td><code>--SplitNCigarReads_opts</code></td>
+			<td>Other options used for GATK SplitNCigarReads command. (should be put between " ")  (For GATK SplitNCigarReads check  <a href="https://software.broadinstitute.org/gatk/gatkdocs org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php">here</a>) (default: "-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS")  </td>
+		  </tr>
+		  <tr>
+			<td><code>--RealignerTargetCreator_opts</code></td>
+			<td>Other options used for GATK RealignerTargetCreator command. (should be put between " ")  (For GATK RealignerTargetCreator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php">here</a>). </td>
+		  </tr>
+		  <tr>
+			<td><code>--IndelRealigner_opts</code></td>
+			<td>Other options used for GATK IndelRealigner command. (should be put between " ")  (For GATK IndelRealigner check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php">here</a>).</td>
+		  </tr>
+		  <tr>
+			<td><code>--BaseRecalibrator_opts</code></td>
+			<td>Other options used for GATK BaseRecalibrator command. (should be put between " ")  (For GATK BaseRecalibrator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php">here</a>).</td>
+		  </tr>
+		  <tr>
+			<td><code>--PrintReads_opts</code></td>
+			<td>Other options used for GATK PrintReads command. (should be put between " ")  (For GATK PrintReads check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php">here</a>).</td>
+		  </tr>
+		  <tr>
+			<td><code>--HaplotypeCaller_opts</code></td>
+			<td>Other options used for GATK HaplotypeCaller command. (should be put between " ")  (For GATK HaplotypeCaller check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php">here</a>). (default: "-stand_call_conf 20.0 -stand_emit_conf 20.0 -dontUseSoftClippedBases" </td>
+		  </tr>
+		  <tr>
+			<td><code>--VariantFiltration_opts</code></td>
+			<td>Other options used for GATK VariantFiltration command. (should be put between " ")  (For GATK VariantFiltration check  <a href="https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php">here</a>). (default: "-window 35 -cluster 3 -filterName FS -filter 'FS > 30.0' -filterName QD -filter 'QD < 2.0'" </td>
+		  </tr>
+		</table>
+
+
+<h3>RNA editing detection options</h3>
+ <p><b>run_rnacocktail.py editing </b></p>
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--editing_caller STRING</code></td>
+			<td>The RNA Editing caller to use. (default GIREMI).</td>
+		  </tr>
+		  <tr>
+			<td><code>--alignment STRING</code></td>
+			<td>A BAM/SAM file with RNA-Seq read mappings. (e.g. The output BAM file generated in align mode).</td>
+		  </tr>
+		  <tr>
+			<td><code>--variant STRING</code></td>
+			<td>A VCF file with variants. (e.g. The output VCF file generated in variant calling mode).</td>
+		  </tr>
+		  <tr>
+			<td><code>--strand_pos STRING</code></td>
+			<td>A BED file which specifies the strand of the genes/transcripts. Each row should have 5 columns: chromosome,start,end,name,score(can be .),strand (+ or -). Examples for Human on GRCh37 can be found in test directory. You can generate this file using reference transcript annotations.</td>
+		  </tr>
+		  <tr>
+			<td><code>--genes_pos STRING</code></td>
+			<td>A BED file which specifies the positions in the genome that genes reside. Each row should have 3 columns: chromosome,start,end,name. Examples for Human on GRCh37 can be found in test directory. You can generate this file using reference transcript annotations.</td>
+		  </tr>
+		  <tr>
+			<td><code>--ref_genome STRING</code></td>
+			<td>The reference genome FASTA file</td>
+		  </tr>
+		  <tr>
+			<td><code>--knownsites</code></td>
+			<td>A database of known polymorphic sites (e.g. dbSNP) in VCF format.</td>
+		  </tr>
+		  <tr>
+			<td><code>--giremi_dir</code></td>
+			<td>Path to giremi directory that include  giremi executable and giremi.r R script. (required)</td>
+		  </tr>
+		  <tr>
+			<td><code>--htslib_dir</code></td>
+			<td>Path to HTSlib library directory. (Optional. Can be on LD_LIBRARY_PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--samtools STRING</code></td>
+			<td>Path to samtools executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--gatk</code></td>
+			<td>Path to GATK executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--java</code></td>
+			<td>Path to JAVA executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		  </tr>
+		  <tr>
+			<td><code>--java_opts</code></td>
+			<td>Java options used for GATK commands. (should be put between " ") (default: -Xms1g -Xmx5g) </td>
+		  </tr>
+		  <tr>
+			<td><code>--giremi_opts</code></td>
+			<td>Other options used for GIREMI. (should be put between " ").(For GIREMI check <a href="https://github.com/zhqingit/giremi">here</a>) </td>
+		  </tr>
+		  <tr>
+			<td><code>--VariantAnnotator_opts</code></td>
+			<td>Other options used for GATK VariantAnnotator command. (should be put between " ")  (For GATK VariantAnnotator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php">here</a>). </td>
+		  </tr>
+		</table>
+
+
+<h3>RNA fusion detection options</h3>
+ <p><b>run_rnacocktail.py fusion </b></p>
+		<table style="width:100%">
+		  <tr>
+			<th style="width:30%">Option</th>
+			<th style="width:70%">Definition</th> 
+		  </tr>
+		  <tr>
+			<td><code>--fusion_caller STRING</code></td>
+			<td>The RNA fusion caller to use.(default FusionCatcher).</td>
+		  </tr>    
+		  <tr>
+			<td><code>--data_dir STRING</code></td>
+			<td>The data directory where all the annotations files from Ensembl database are placed. This directory should be built using 'fusioncatcher-build'.</td>
+		  </tr>    
+		 <tr>
+			<td><code>--input STRING</code></td>
+			<td>The input file(s) or directory. The files should be in FASTQ or SRA format and may be or not compressed using gzip or zip. A list of files can be specified by given the filenames separated by comma. If a directory is given then it will analyze all the files found with the following extensions: .sra, .fastq, .fastq.zip, .fastq.gz, .fastq.bz2, fastq.xz, .fq, .fq.zip, .fq.gz, .fq.bz2, fz.xz, .txt, .txt.zip, .txt.gz, .txt.bz2 .</td>
+		 </tr> 
+		 <tr>
+			<td><code>--fusioncatcher</code></td>
+			<td>Path to FusionCatcher executable. (Optional. Can be on PATH or defined on defaults.py)</td>
+		 </tr>
+		 <tr>
+			<td><code>--fusioncatcher_opts</code></td>
+			<td>Other options used for FusionCatcher. (should be put between " ") (For FusionCatcher check <a href="https://github.com/ndaniel/fusioncatcher/blob/master/doc/manual.md">here</a>).</td>
+		 </tr>
+	</table>
+
+
+<h2>Preparing genome index files</h2>
+<h3>HISAT2</h3>
+<code>hisat2-build [options] reference.fa hisat2_index_basename </code>
+<p>Check <a href="http://ccb.jhu.edu/software/hisat2/manual.shtml">here</a> for more information.</p>
+
+<h3>Salmon-SMEM</h3>
+<code>salmon index -t reference.fa -i salmon_index_basename --type fmd </code>
+<p>Check <a href="http://salmon.readthedocs.io/en/latest/salmon.html#using-salmon">here</a> for more information.</p>
+
+<h3>STAR</h3>
+<code>STAR --runMode genomeGenerate --genomeDir STAR_index_basename --genomeFastaFiles reference.fa --runThreadN 4 </code>
+<p>Check <a href="http://chagall.med.cornell.edu/RNASEQcourse/STARmanual.pdf">here</a> for more information.</p>
+
+
+   </div>
+    
+    
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</body>

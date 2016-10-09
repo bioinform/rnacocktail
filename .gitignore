@@ -1,0 +1,12 @@
+*.pyc
+
+.idea/**
+
+/build
+
+/RNACocktail_Pipeline.egg-info
+
+/dist
+
+/test/example
+
