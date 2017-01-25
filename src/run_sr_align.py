@@ -18,7 +18,7 @@ def run_hisat2(align_idx=None,
     logger.info("Running alignment (HISAT2) for %s"%sample)
     if not os.path.exists(align_idx+".1.ht2"):
         logger.error("Aborting!")
-        raise Exception("No HISAT directory %s"%align_idx)
+        raise Exception("No HISAT index file %s.1.ht2"%align_idx)
         
     if seq_1 and seq_2:
         for s1 in seq_1.split(","):

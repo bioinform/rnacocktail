@@ -18,8 +18,8 @@ def tx2gene_map(ref_gtf_file,tx2gene_file):
             fields = line.strip().split()
             transcript_info = {k.split()[0]:k.split()[1] for k in ' '.join(fields[8:]).split(";")[:-1]}
             if "transcript_id" in transcript_info and "gene_id" in transcript_info:
-                t=transcript_info["transcript_id"].strip()
-                g=transcript_info["gene_id"].strip()
+                t=transcript_info["transcript_id"].strip().strip("\"")
+                g=transcript_info["gene_id"].strip().strip("\"")
                 if t not in tx2gene:
                     tx2gene[t]=g
     with open(tx2gene_file , 'wb') as csvfile:

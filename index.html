@@ -18,6 +18,10 @@
   margin-left: auto;
   max-width: 760px;
 }
+	tr:nth-child(even) {
+    	background-color: #eeeeee;
+	}
+
     </style>
    
     
@@ -270,6 +274,86 @@ of RNACocktail is v0.1. In general, the install source would be https://github.c
 
 <p><code>cd test</code></p>
 <p><code>./test_run.sh</code></p>
+
+<h2>Output files</h2>
+
+		<table style="width:100%;">
+		  <tr>
+			<th style="width:20%">Task</th>
+			<th style="width:20%">Command</th>
+			<th style="width:20%">Default Tool</th>
+			<th style="width:40%">Output Files</th> 
+		  </tr>
+		  <tr>
+			<td>Short-read alignment</td>
+			<td><code>align</code></td>
+			<td>HISAT2</td>
+			<td><p><b>alignments:</b> alignments.sorted.bam</p>
+			    <p><b>junctions:</b> splicesites.tab</p></td> 
+		  </tr>
+		  <tr>
+			<td>Short-read transcriptome reconstruction</td>
+			<td><code>reconstruct</code></td>
+			<td>StringTie</td>
+			<td><p><b>trasncripts:</b> transcripts.gtf</p>
+			    <p><b>expressions:</b> gene_abund.tab</p></td> 
+		  </tr>
+		  <tr>
+			<td>Short-read quantification</td>
+			<td><code>quantify</code></td>
+			<td>Salmon-SMEM</td>
+			<td><p><b>expressions:</b> quant.sf</p></td> 
+		  </tr>
+		  <tr>
+			<td>Short-read differential expression</td>
+			<td><code>diff</code></td>
+			<td>DESeq2</td>
+			<td><p><b>differential expressions:</b> deseq2_res.tab</p></td> 
+		  </tr>
+		  <tr>
+			<td>Short-read de novo assembly</td>
+			<td><code>denovo</code></td>
+			<td>Oases</td>
+			<td><p><b>trasncripts:</b> transcripts.fa</p></td> 
+		  </tr>
+		  <tr>
+			<td>Long-read error correction</td>
+			<td><code>long_correct</code></td>
+			<td>LoRDEC</td>
+			<td><p><b>corrected reads</b> long_corrected.fa</p></td> 
+		  </tr>
+		  <tr>
+			<td>Long-read alignment</td>
+			<td><code>long_align</code></td>
+			<td>STARlong</td>
+			<td><p><b>alignments</b> Aligned.out.psl</p></td> 
+		  </tr>
+		  <tr>
+			<td>Long-read transcriptome reconstruction</td>
+			<td><code>long_reconstruct</code></td>
+			<td>IDP</td>
+			<td><p><b>trasncripts:</b> isoform.gtf</p>
+			    <p><b>expressions:</b> isoform.exp</p></td> 
+		  </tr>
+		  <tr>
+			<td>Variant calling</td>
+			<td><code>variant</code></td>
+			<td>GATK</td>
+			<td><p><b>variants:</b> variants_filtered.vcf</p></td> 
+		  </tr>
+		  <tr>
+			<td>RNA editing detection</td>
+			<td><code>editing</code></td>
+			<td>GIREMI</td>
+			<td><p><b>edits:</b> giremi_out.txt.res</p></td> 
+		  </tr>
+		  <tr>
+			<td>RNA Fusion detection</td>
+			<td><code>fusion</code></td>
+			<td>FusionCatcher</td>
+			<td><p><b>fusions:</b> final-list_candidate-fusion-genes.txt</p></td> 
+		  </tr>
+		</table>
 
 
 <h2>Examples</h2>
