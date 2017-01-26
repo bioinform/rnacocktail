@@ -167,7 +167,7 @@ def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0,
         logger.info("--------------------------STEP %s--------------------------"%step)
         if os.path.exists("%s/out/isoform.gpd"%work_idp):
             sort_gpd("%s/out/isoform.gpd"%work_idp,"%s/out/isoform_sorted.gpd"%work_idp)
-            command="python  gpd2gtf.py \
+            command="gpd2gtf.py \
                   %s/out/isoform_sorted.gpd %s/out/isoform.exp %s/out/isoform.gtf IDP"%(work_idp,work_idp,work_idp)
             command="bash -c \"%s\""%command
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
