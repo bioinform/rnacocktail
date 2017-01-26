@@ -142,6 +142,8 @@ def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0,
                 cfg_file.write("aligner_choice = gmap \n")
             if "exon_construction_junction_span" not in cgf_dict:
                 cfg_file.write("exon_construction_junction_span = 1 \n")
+            if "read_length" not in cgf_dict:
+                cfg_file.write("read_length = 100 \n")
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
