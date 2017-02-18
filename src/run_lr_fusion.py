@@ -10,12 +10,18 @@ logger = logging.getLogger(__name__)
 
 
 
-def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+[("MT",23),("X",24),("Y",25)])):
+def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+[("MT",23),("X",24),("Y",25)]+[
+                                    ("chr%s"%k,k) for k in range(1,23)]+[("chrM",23),("chrX",24),("chrY",25)])):
     with open(in_file) as csv_file:
         spamreader = csv.reader(csv_file, delimiter='\t', quotechar='|')
         rows=[]
         for row in spamreader:
             rows.append(row)
+        others_chrs=sorted(set(map(lambda x:x[2],rows))-set(order_chrs.keys()))
+        if others_chrs:
+            max_id=max(order_chrs.values())
+            for i,c in enumerated(others_chrs):
+                order_chrs[c]=max_id+i+1
         sorted_rows=sorted(rows,key=lambda x: (order_chrs[x[2]],int(x[4])))
         with open(out_file, 'wb') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter='\t',
