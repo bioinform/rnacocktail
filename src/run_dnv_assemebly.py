@@ -113,14 +113,14 @@ def run_oases(assmebly_hash=DNV_HASH,
     step+=1
 
     
-    transcript = ""
+    transcripts = ""
     if os.path.exists("%s/transcripts.fa"%out_oases):
         logger.info("Oases was successfull!")
         logger.info("Output transcripts: %s/transcripts.fa"%out_oases)
-        transcript = "%s/transcripts.fa"%out_oases
+        transcripts = "%s/transcripts.fa"%out_oases
     else:            
         logger.info("Oases was not successfull!")
-    return transcript
+    return transcripts
 
 def run_dnv_assemebly(assembler="Oases", assmebly_hash=DNV_HASH,
                       seq_1="", seq_2="", seq_u="", seq_i="",
@@ -129,9 +129,9 @@ def run_dnv_assemebly(assembler="Oases", assmebly_hash=DNV_HASH,
                       oases_opts="", velvetg_opts="", velveth_opts="",
                       start=0, sample= "", nthreads=1,
                       workdir=None, outdir=None, timeout=TIMEOUT):
-    transcript=""
+    transcripts=""
     if assembler.upper()=="OASES":
-        transcript=run_oases(assmebly_hash=assmebly_hash,
+        transcripts=run_oases(assmebly_hash=assmebly_hash,
                       seq_1=seq_1, seq_2=seq_2, seq_u=seq_u, seq_i=seq_i,
                       file_format=file_format, read_type=read_type, 
                       oases=oases, velvetg=velvetg, velveth=velveth,
@@ -140,4 +140,4 @@ def run_dnv_assemebly(assembler="Oases", assmebly_hash=DNV_HASH,
                       workdir=workdir, outdir=outdir, timeout=timeout)
         
                       
-    return transcript
+    return transcripts

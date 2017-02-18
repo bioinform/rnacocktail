@@ -14,6 +14,7 @@ from run_dnv_assemebly import run_dnv_assemebly
 from run_lr_correct import run_lr_correct
 from run_lr_align import run_lr_align
 from run_lr_reconstruct import run_lr_reconstruct
+from run_lr_fusion import run_lr_fusion
 from run_variant import run_variant
 from run_editing import run_editing
 from run_fusion import run_fusion
@@ -117,7 +118,7 @@ def run_pipeline(args,parser):
                       featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
                       stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
                       mincount=args.mincount, alpha=args.alpha, 
-                      R=args.R, start=args.start, samples=args.samples, nthreads=args.threads,
+                      R=args.R, start=args.start, samples=args.sample, nthreads=args.threads,
                       workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
 
     elif mode=="denovo":
@@ -168,7 +169,28 @@ def run_pipeline(args,parser):
                       short_junction=args.short_junction, long_alignment=args.long_alignment,
                       mode_number=args.mode_number,
                       ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
+                      read_length=args.read_length,
                       samtools=args.samtools, idp=args.idp, idp_cfg=args.idp_cfg, 
+                      start=args.start, sample= args.sample, nthreads=args.threads,
+                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+    elif mode=="long_fusion":
+        if not args.long_fusion_caller.upper()=="IDP-FUSION":
+            logger.error("%s is not supported. \
+            \nThe supported long read fusion detection tool(s)  are: %s."%(args.long_fusion_caller,
+            LR_FUSION))
+            return os.EX_USAGE
+        logger.info("Running long read fusion detection step using %s"%args.long_fusion_caller)
+        run_lr_fusion(long_fusion_caller=args.long_fusion_caller,
+                      alignment=args.alignment, 
+                      short_junction=args.short_junction, long_alignment=args.long_alignment,
+                      short_fasta=args.short_fasta, long_fasta=args.long_fasta, 
+                      mode_number=args.mode_number,
+                      ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
+                      uniqueness_bedgraph=args.uniqueness_bedgraph,
+                      genome_bowtie2_idx=args.genome_bowtie2_idx, transcriptome_bowtie2_idx=args.transcriptome_bowtie2_idx,
+                      read_length=args.read_length,
+                      samtools=args.samtools, idpfusion=args.idpfusion, idpfusion_cfg=args.idpfusion_cfg, 
+                      star_dir=args.star_dir, bowtie2_dir=args.bowtie2_dir,
                       start=args.start, sample= args.sample, nthreads=args.threads,
                       workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
     elif mode=="variant":
@@ -224,6 +246,272 @@ def run_pipeline(args,parser):
                       fusioncatcher=args.fusioncatcher, fusioncatcher_opts=args.fusioncatcher_opts, 
                       sample= args.sample, nthreads=args.threads,
                       workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+    elif mode=="pipeline":
+        if not args.sr_aligner.upper()=="HISAT2":
+            logger.error("%s is not supported. \
+            \nThe supported short read aligner(s) are: %s."%(args.sr_aligner,SR_ALIGNERS))
+            return os.EX_USAGE
+        if not args.reconstructor.upper()=="STRINGTIE":
+            logger.error("%s is not supported. \
+            \n The supported transcriptome reconstructor(s) are: %s."%(args.reconstructor,RECONSTRUCTORS))
+            return os.EX_USAGE
+        if not args.quantifier.upper()=="SALMON-SMEM":
+            logger.error("%s is not supported. \
+            \nThe supported treanscriptome reconstructor(s) are: %s."%(args.quantifier, QUANTIFIERS))
+            return os.EX_USAGE
+        if not args.difftool.upper()=="DESEQ2":
+            logger.error("%s is not supported. \
+            \nThe supported differential analysis tool(s) are: %s."%(args.difftool,DIFFS))
+            return os.EX_USAGE
+        if not args.assembler.upper()=="OASES":
+            logger.error("%s is not supported. \
+            \nThe supported de novo assembler(s) are: %s."%(args.assembler,DNV_ASSEMBLERS))
+            return os.EX_USAGE
+        if not args.long_corrector.upper()=="LORDEC":
+            logger.error("%s is not supported. \
+            \nThe supported long read error correction tool(s) are: %s."%(args.long_corrector,LR_CORRECTORS))
+            return os.EX_USAGE
+        if not args.long_aligner.upper()=="STARLONG":
+            logger.error("%s is not supported. \
+            \nThe supported long read aligner(s) are: %s."%(args.long_aligner,LR_ALIGNERS))
+            return os.EX_USAGE
+        if not args.long_reconstructor.upper()=="IDP":
+            logger.error("%s is not supported. \
+            \nThe supported long read transcriptome reconstructor(s) are: %s."%(args.long_reconstructor,
+            LR_RECONSTRUCTOR))
+            return os.EX_USAGE
+        if not args.variant_caller.upper()=="GATK":
+            logger.error("%s is not supported. \
+            \nThe supported variant caller(s) are: %s."%(args.variant_caller,
+            variant_caller))
+            return os.EX_USAGE
+        if not args.editing_caller.upper()=="GIREMI":
+            logger.error("%s is not supported. \
+            \nThe supported RNA editing caller(s) are: %s."%(args.editing_caller,
+            editing_caller))
+            return os.EX_USAGE
+        if not args.fusion_caller.upper()=="FUSIONCATCHER":
+            logger.error("%s is not supported. \
+            \nThe supported fusion predictor(s) are: %s."%(args.fusion_caller,
+            fusion_caller))
+            return os.EX_USAGE
+
+
+        if (vars(args)["1"]=="" or vars(args)["2"]=="") and args.U=="":
+            parser.print_help()
+            logger.error("Input sequence file(s) are missing.")
+            return os.EX_USAGE
+        if (vars(args)["1"]=="" and vars(args)["2"]=="") and (args.U==""):
+            parser.print_help()
+            logger.error("In pipeline mode, only one input type is possible: paired-end (--1 and --2) or unpaired (--U)")
+            return os.EX_USAGE
+        
+        do_long=True
+#         if args.long == ""
+
+
+#         elif mode=="diff":
+#             if (not args.quant_files or not args.ref_gtf) and \
+#                (not args.alignments or (not args.transcripts_gtfs and not args.ref_gtf)):
+#                 parser.print_help()
+#                 logger.error("\n\tYou should either provode {the quantification files and a refrence GTF}, \n\
+#     \tOR {the alignment files and a (reference or assembled) GTF files}.")
+#                 return os.EX_USAGE
+#         elif mode=="variant":
+#             if args.no_BaseRecalibrator==False and args.knownsites=="":
+#                 parser.print_help()
+#                 logger.error("\n\tTo run BaseRecalibrator step, knownsites should provide. \n\
+#     \tIf you don't have knownsites, please use --no_BaseRecalibrator option.")
+#                 return os.EX_USAGE
+
+        samples=[[replicate for replicate in sample.split(",")] for sample  in args.sample]
+        all_samples=[replicate for sample  in samples for replicate in sample]
+        n_samples=sum(map(lambda x:len(x),samples))
+        input_sr={}
+        if (vars(args)["1"] and vars(args)["2"]):
+            logger.info("Inputs are paired-end reads.")
+            input_sr["1"]=vars(args)["1"].split(";")
+            input_sr["2"]=vars(args)["2"].split(";")
+            if len(input_sr["1"])!=n_samples or len(input_sr["2"])!=n_samples:
+                parser.print_help()
+                logger.error("Number of short paired-end input sequences does not match number of samples.")
+                return os.EX_USAGE
+            input_mode="paired"
+            input_sr["1"]={samples[i]:j for i,j in enumerate(vars(args)["1"].split(";"))}
+            input_sr["2"]={samples[i]:j for i,j in enumerate(vars(args)["2"].split(";"))}
+            input_sr["U"]={samples[i]:"" for i,j in enumerate(vars(args)["1"].split(";"))}
+        else:
+            logger.info("Inputs are unpaired reads.")
+            input_sr["U"]=args.U.split(";")
+            if len(input_sr["U"])!=n_samples:
+                parser.print_help()
+                logger.error("Number of short unpiared input sequences does not match number of samples.")
+                return os.EX_USAGE
+            input_mode="un-paired"
+            input_sr["U"]={samples[i]:j for i,j in enumerate(args.U.split(";"))}
+            input_sr["1"]={samples[i]:"" for i,j in enumerate(args.U.split(";"))}
+            input_sr["2"]={samples[i]:"" for i,j in enumerate(args.U.split(";"))}
+        
+        input_lr={}
+        if args.long:
+            input_lr=args.long.split(";")
+            if len(input_lr)!=n_samples:
+                parser.print_help()
+                logger.error("Number of long input sequences does not match number of samples.")
+                return os.EX_USAGE
+            input_lr={samples[i]:j for i,j in enumerate(args.long.split(";"))}
+
+        alignments_bam={}
+        transcripts={}
+        abundances={}
+        quant={}
+        variants={}
+        junctions_tab={}
+        junctions_bed={}
+        for si,sample in enumarate(samples):
+            alignments_bam[sample]={}
+            junctions_tab[sample]={}
+            junctions_bed[sample]={}
+            transcripts[sample]={}
+            abundances[sample]={}
+            quant[sample]={}
+            transcripts_dnv[sample]={}
+            for ri,[replicate] in enumerate(sample):
+                logger.info("Assigned sample ID for replicate-%d in sample-%d: %s"%(ri+1,si+1,replicate))
+                logger.info("Running align step using %s for %s"%(args.sr_aligner,replicate))
+                alignments_bam[sample][replicate],junctions_tab[sample][replicate],junctions_bed[sample][replicate]=run_sr_align(sr_aligner=args.sr_aligner, 
+                              align_idx=args.align_idx,
+                              seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
+                              seq_u=input_sr["U"][replicate],
+                              seq_sra="", ref_gtf=args.ref_gtf, 
+                              hisat2_opts=args.hisat2_opts, hisat2=args.hisat2, 
+                              hisat2_sps=args.hisat2_sps, samtools=args.samtools,
+                              start=0, sample=replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+
+                logger.info("Running reconstruct step using %s for %s"%(args.reconstructor,replicate))
+                transcripts[sample][replicate],abundances[sample][replicate]=run_reconstruct(reconstructor=args.reconstructor, alignment_bam=alignments_bam,
+                              ref_gtf=args.ref_gtf, 
+                              stringtie_opts=args.stringtie_opts, stringtie=args.stringtie,
+                              start=0, sample= replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                logger.info("Running quantification step using %s for %s"%(args.quantifier,replicate))
+                quant[sample][replicate]=run_quantify(quantifier=args.quantifier, quantifier_idx=args.quantifier_idx,
+                              seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
+                              seq_u=input_sr["U"][replicate],
+                              salmon_k=args.salmon_k, libtype=args.libtype,                      
+                              salmon_smem_opts=args.salmon_smem_opts, salmon=args.salmon,
+                              start=0, sample=replicate, nthreads=args.threads, unzip=args.unzip,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                logger.info("Running de novo assembly step using %s for %s"%(args.assembler,replicate))
+                run_dnv_assemebly(assembler=args.assembler, 
+                               assmebly_hash=args.assmebly_hash,
+                              seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
+                              seq_u=input_sr["U"][replicate], seq_i="",
+                              file_format=args.file_format, read_type=args.read_type, 
+                              oases=args.oases, velvetg=args.velvetg, velveth=args.velveth,
+                              oases_opts=args.oases_opts, velvetg_opts=args.velvetg_opts, 
+                              velveth_opts=args.velveth_opts,
+                              start=0, sample= replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+
+        logger.info("Running differential analysis step (based on alignment-free quantification results) using %s for %s"%(args.difftool,args.sample))
+        run_diff(difftool=args.difftool, quant_files=[",".join(quant[sample]) for sample in samples],
+                     alignments="",
+                      transcripts_gtfs="",
+                      ref_gtf=args.ref_gtf,
+                      featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
+                      stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
+                      mincount=args.mincount, alpha=args.alpha, 
+                      R=args.R, start=0, samples=args.sample, nthreads=args.threads,
+                      workdir=os.path.join(args.workdir, "diff-quant"), 
+                      outdir=os.path.join(args.workdir, "diff-quant"), timeout=args.timeout)
+        logger.info("Running differential analysis step (based on alignment results) using %s for %s"%(args.difftool,args.sample))
+#         if use_tgtf
+        run_diff(difftool=args.difftool, quant_files="",
+                     alignments=[",".join(alignments_bam[sample]) for sample in samples],
+                      transcripts_gtfs=[",".join(transcripts[sample]) for sample in samples],
+                      ref_gtf=args.ref_gtf,
+                      featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
+                      stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
+                      mincount=args.mincount, alpha=args.alpha, 
+                      R=args.R, start=0, samples=args.sample, nthreads=args.threads,
+                      workdir=os.path.join(args.workdir, "diff-alignment"), 
+                      outdir=os.path.join(args.workdir, "diff-alignment"), timeout=args.timeout)
+
+
+        for si,sample in enumarate(samples):
+            variants[sample]={}
+            for ri,[replicate] in enumerate(sample):
+                logger.info("Running variant calling step using %s for %"%(args.variant_caller,replicate))
+                variants[sample][replicate]=run_variant(variant_caller=args.variant_caller,
+                              alignment=alignments_bam[sample][replicate], ref_genome=args.ref_genome, 
+                              knownsites=args.knownsites,
+                              picard=args.picard, gatk=args.gatk, 
+                              java=args.java, java_opts=args.java_opts,
+                              CleanSam=args.CleanSam, IndelRealignment=args.IndelRealignment,
+                              no_BaseRecalibrator=args.no_BaseRecalibrator,
+                              AddOrReplaceReadGroups_opts=args.AddOrReplaceReadGroups_opts,
+                              MarkDuplicates_opts=args.MarkDuplicates_opts, 
+                              SplitNCigarReads_opts=args.SplitNCigarReads_opts, 
+                              RealignerTargetCreator_opts=args.RealignerTargetCreator_opts, 
+                              IndelRealigner_opts=args.IndelRealigner_opts, 
+                              BaseRecalibrator_opts=args.BaseRecalibrator_opts, 
+                              PrintReads_opts=args.PrintReads_opts, 
+                              HaplotypeCaller_opts=args.HaplotypeCaller_opts, 
+                              VariantFiltration_opts=args.VariantFiltration_opts, 
+                              start=0, sample=replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                logger.info("Running RNA editing calling step using %s for %s"%(args.editing_caller,replicate))
+                run_editing(editing_caller=args.editing_caller,
+                              alignment=alignments_bam[sample][replicate], variant=variants[sample][replicate], 
+                              strand_pos=args.strand_pos, genes_pos=args.genes_pos,
+                              ref_genome=args.ref_genome, knownsites=args.knownsites,
+                              giremi_dir=args.giremi_dir, htslib_dir=args.htslib_dir, 
+                              samtools=args.samtools, gatk=args.gatk, 
+                              java=args.java, giremi_opts=args.giremi_opts,java_opts=args.java_opts,
+                              VariantAnnotator_opts=args.VariantAnnotator_opts, 
+                              start=0, sample= replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+
+                logger.info("Running Fusion prediction step using %s for %s"%(args.fusion_caller,replicate))
+                run_fusion(fusion_caller=args.fusion_caller,
+                              data_dir=args.data_dir, input="%s,%s"%(input_sr["1"][replicate],
+                              input_sr["2"][replicate]) if input_mode=="paired" else input_sr["U"][replicate], 
+                              start=0, 
+                              fusioncatcher=args.fusioncatcher, fusioncatcher_opts=args.fusioncatcher_opts, 
+                              sample= replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+
+        for si,sample in enumarate(samples):
+            corrected[sample]={}
+            for ri,[replicate] in enumerate(sample):
+                logger.info("Running long read error correction step using %s for %s"%(args.long_corrector,replicate))
+                corrected[sample][replicate]=run_lr_correct(long_corrector=args.long_corrector, kmer=args.kmer,
+                              solid=args.kmer,long=input_lr[replicate], short="%s,%s"%(input_sr["1"][replicate],
+                              input_sr["2"][replicate]) if input_mode=="paired" else input_sr["U"][replicate], 
+                              lordec=args.lordec, lordec_opts=args.lordec_opts,
+                              start=0, sample= replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+
+                logger.info("Running long read alignment step using %s for %s"%(args.long_aligner,replicate))
+                run_lr_align(long_aligner=args.long_aligner,long=corrected[sample][replicate],
+                              genome_dir=args.star_genome_dir, ref_gtf=args.ref_gtf,
+                              starlong=args.starlong, starlong_opts=args.starlong_opts, 
+                              sam2psl=args.sam2psl, samtools=args.samtools,
+                              start=0, sample= replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                logger.info("Running long read transcriptome reconstruction step using %s for %s"%(args.long_reconstructor,replicate))
+                run_lr_reconstruct(long_reconstructor=args.long_reconstructor,
+                              alignment=alignments_bam[sample][replicate], 
+                              short_junction=junctions_bed[sample][replicate], 
+                              long_alignment=corrected[sample][replicate],
+                              mode_number=args.mode_number,
+                              ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
+                              read_length=args.read_length,
+                              samtools=args.samtools, idp=args.idp, idp_cfg=args.idp_cfg, 
+                              start=0, sample= replicate, nthreads=args.threads,
+                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
     else:
         logger.error("wrong mode %s"%(mode))
         return os.EX_USAGE

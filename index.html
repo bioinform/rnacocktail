@@ -413,7 +413,7 @@ of RNACocktail is v0.1. In general, the install source would be https://github.c
 	<p><code>run_rnacocktail.py long_align --long work/lordec/A/long_corrected.fa  --outdir out --workdir work --starlong /path/to/STARlong --threads 4 --sample A --sam2psl /path/to/sam2psl.py --samtools /path/to/samtools --genome_dir /path/to/STAR/genome_idx
  </code></p>
 
-	<h4>Example 12 (long_reconstruct):</h4> Run of RNACocktail for long-read alignment (STARlong).
+	<h4>Example 12 (long_reconstruct):</h4> Run of RNACocktail for long-read transcriptome reconstruction (IDP).
 
 	<p><code>run_rnacocktail.py long_reconstruct --alignment  work/hisat2/A/alignments.sorted.bam --short_junction  work/hisat2/A/splicesites.bed --long_alignment work/starlong/A/Aligned.out.psl --outdir out --workdir work --idp   /path/to/runIDP.py --threads 4 --sample A --ref_genome genome.GRCh37.fa --ref_all_gpd hg19.all.refSeq_gencode_ensemble_EST_known.gpd --ref_gpd genes.GRCh37.refFlat.txt --samtools /path/to/samtools --idp_cfg idp.cfg
  </code></p>

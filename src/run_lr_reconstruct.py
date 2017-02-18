@@ -24,7 +24,7 @@ def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+
 
 
 def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0, 
-                  ref_genome="", ref_all_gpd="", ref_gpd="",
+                  ref_genome="", ref_all_gpd="", ref_gpd="",read_length=100,
                   idp_cfg="", idp=IDP, samtools=SAMTOOLS,
                   start=0, sample= "", nthreads=1,
                   workdir=None, outdir=None, timeout=TIMEOUT):
@@ -143,7 +143,7 @@ def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0,
             if "exon_construction_junction_span" not in cgf_dict:
                 cfg_file.write("exon_construction_junction_span = 1 \n")
             if "read_length" not in cgf_dict:
-                cfg_file.write("read_length = 101 \n")
+                cfg_file.write("read_length = %d \n"%read_length)
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
@@ -213,7 +213,7 @@ def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0,
 
 def run_lr_reconstruct(long_reconstructor="IDP", alignment="",
                   short_junction="", long_alignment="", mode_number=0,
-                  ref_genome="", ref_all_gpd="", ref_gpd="",
+                  ref_genome="", ref_all_gpd="", ref_gpd="", read_length=100,
                   idp_cfg="", idp=IDP, samtools=SAMTOOLS,
                   start=0, sample= "", nthreads=1, 
                   workdir=None, outdir=None, timeout=TIMEOUT):
@@ -224,6 +224,7 @@ def run_lr_reconstruct(long_reconstructor="IDP", alignment="",
                       short_junction=short_junction, long_alignment=long_alignment, 
                       mode_number=mode_number,
                       ref_genome=ref_genome, ref_all_gpd=ref_all_gpd, ref_gpd=ref_gpd,
+                      read_length=read_length,
                       idp_cfg=idp_cfg, idp=idp, samtools=samtools,
                       start=start, sample= sample, nthreads=nthreads,
                       workdir=workdir, outdir=outdir, timeout=timeout)

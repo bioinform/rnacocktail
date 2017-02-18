@@ -179,13 +179,19 @@ def run_hisat2(align_idx=None,
 
 
     alignments_bam = ""
+    junctions_tab = ""
+    junctions_bed = ""
     if os.path.exists("%s/alignments.sorted.bam"%out_hisat2):
         logger.info("HISAT2 was successfull!")
         logger.info("Output alignment: %s/alignments.sorted.bam"%out_hisat2)
+        logger.info("Output junction tab: %s/splicesites.tab"%out_hisat2)
+        logger.info("Output junction bed: %s/splicesites.bed"%out_hisat2)
         alignments_bam = "%s/alignments.sorted.bam"%out_hisat2   
+        junctions_tab = "%s/splicesites.tab"%out_hisat2   
+        junctions_bed = "%s/splicesites.bed"%out_hisat2   
     else:            
         logger.info("HISAT2 was not successfull!")
-    return alignments_bam
+    return alignments_bam,junctions_tab,junctions_bed
 
 def run_sr_align(sr_aligner="HISAT2", align_idx=None,
                   seq_1="", seq_2="", seq_u="",
@@ -195,6 +201,8 @@ def run_sr_align(sr_aligner="HISAT2", align_idx=None,
                   start=0, sample= "", nthreads=1, 
                   workdir=None, outdir=None, timeout=TIMEOUT):
     alignments_bam=""
+    junctions_tab = ""
+    junctions_bed = ""
     if sr_aligner.upper()=="HISAT2":
         alignments_bam=run_hisat2(align_idx=align_idx,
                       seq_1=seq_1, seq_2=seq_2, seq_u=seq_u,
@@ -203,4 +211,4 @@ def run_sr_align(sr_aligner="HISAT2", align_idx=None,
                       samtools=samtools,
                       start=start, sample= sample, nthreads=nthreads,
                       workdir=workdir, outdir=outdir, timeout=timeout)
-    return alignments_bam
+    return alignments_bam,junctions_tab,junctions_bed

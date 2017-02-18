@@ -1,6 +1,6 @@
 MODES = set(["align", "reconstruct", "denovo",
              "quantify", "diff", "long_correct", "long_align",
-             "long_reconstruct", "variant", "editing", "fusion"])
+             "long_reconstruct", "long_fusion", "variant", "editing", "fusion","pipeline"])
 SR_ALIGNERS = set(["HISAT2"])
 RECONSTRUCTORS = set(["StringTie"])
 QUANTIFIERS = set(["Salmon-SMEM"])
@@ -9,6 +9,7 @@ DNV_ASSEMBLERS = set(["Oases"])
 LR_CORRECTORS = set(["LoRDEC"])
 LR_ALIGNERS= set(["STARlong"])
 LR_RECONSTRUCTORS= set(["IDP"])
+LR_FUSION= set(["IDP-fusion"])
 variant_caller= set(["GATK"])
 editing_caller= set(["GIRMI"])
 fusion_caller= set(["FusionCatcher"])
@@ -30,7 +31,7 @@ STARLONG_DEFAULTS = {"outSAMattributes": "NH HI NM MD", "readNameSeparator": "sp
                      "alignTranscriptsPerWindowNmax": "10000"}
 
 
-GATK_SN_RF = "ReassignOneMappingQuality"
+GATK_SN_RF = "  "
 GATK_SN_RMQF = 255
 GATK_SN_RMQT = 60
 GATK_SN_OPT = (("-rf %s " % GATK_SN_RF) if GATK_SN_RF else "") + \
@@ -41,7 +42,8 @@ GATK_HC_STANDCALLCONF = 20.0
 GATK_HC_STANDEMITCONF = 20.0
 GATK_HC_OPT = (("-stand_call_conf %f " % GATK_HC_STANDCALLCONF) if GATK_HC_STANDCALLCONF else "") + \
               (("-stand_emit_conf %f " % GATK_HC_STANDEMITCONF) if GATK_HC_STANDEMITCONF else "") + \
-              "-dontUseSoftClippedBases"
+              "-dontUseSoftClippedBases" + \
+              "-A StrandBiasBySample -A StrandAlleleCountsBySample"
 
 
 GATK_VF_WINDOW = 35
@@ -72,6 +74,9 @@ LORDEC = "lordec-correct"
 STARLONG = "STARlong"
 SAM2PSL = "sam2psl.py"
 IDP = "runIDP.py"
+IDPFUSION = "runIDP.py"
+STAR_DIR = "/us/local/bin"
+BOWTIE2_DIR = "/us/local/bin"
 PICARD = "picard.jar"
 GATK = "GenomeAnalysisTK.jar"
 JAVA = "java"
