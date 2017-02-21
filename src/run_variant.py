@@ -17,15 +17,25 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
                   PrintReads_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1,
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
 
     logger.info("Running variant calling (GATK) for %s"%sample)
     if not os.path.exists(alignment):
         logger.error("Aborting!")
-        raise Exception("No alignment file %s"%alignment)
+        error_msg="No alignment file %s"%alignment
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
     if not os.path.exists(ref_genome):
         logger.error("Aborting!")
-        raise Exception("No reference genome FASTA file %s"%ref_genome)
+        error_msg="No reference genome FASTA file %s"%ref_genome
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
 
 
     work_gatk=os.path.join(workdir,"gatk",sample)
@@ -75,7 +85,12 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     if knownsites:    
         if not os.path.exists(knownsites):
             logger.error("Aborting!")
-            raise Exception("No VCF knownsites file %s"%knownsites)
+            error_msg="No VCF knownsites file %s"%knownsites
+            if not ignore_exceptions:
+                raise Exception(error_msg)
+            else:
+                logger.error(error_msg)
+                return 1,[]
         if "--known " not in RealignerTargetCreator_opts:
             RealignerTargetCreator_opts += " --known %s"%knownsites
         if "-known " not in IndelRealigner_opts and "--knownAlleles " not in IndelRealigner_opts:
@@ -282,7 +297,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         variants = "%s/variants_filtered.vcf"%out_gatk   
     else:            
         logger.info("GATK was not successfull!")
-    return variants
+    return 0,[variants]
 
 def run_variant(variant_caller="GATK", alignment="",
                   ref_genome="", knownsites="",
@@ -295,10 +310,10 @@ def run_variant(variant_caller="GATK", alignment="",
                   PrintReads_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     variants=""
     if variant_caller.upper()=="GATK":
-        variants=run_gatk(alignment=alignment,
+        retcode,res=run_gatk(alignment=alignment,
                   ref_genome=ref_genome, knownsites=knownsites,
                   picard=picard, gatk=gatk,                  
                   java=java, java_opts=java_opts,
@@ -313,7 +328,12 @@ def run_variant(variant_caller="GATK", alignment="",
                   PrintReads_opts=PrintReads_opts,  HaplotypeCaller_opts=HaplotypeCaller_opts,
                   VariantFiltration_opts=VariantFiltration_opts,  
                   start=start, sample= sample, nthreads=nthreads, 
-                  workdir=workdir, outdir=outdir, timeout=timeout)
+                  workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
+        if retcode!=0:
+            logger.info("GATK was not successfull!")
+            return ""
+        else:
+            variants=res[0]
     return variants
     
     

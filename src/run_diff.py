@@ -37,7 +37,7 @@ def run_deseq2(quant_files="", alignments="",
               stringtie=STRINGTIE, stringtie_merge_opts="",                    
               mincount=DESeq2_MINCNT, alpha=DESeq2_ALPHA, R=R_CMD, 
               start=0, samples=[], nthreads=1,
-              workdir=None, outdir=None, timeout=TIMEOUT):
+              workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
 
     samples=map(lambda x: x.split(","),samples)
     samples_txt="-".join(map(lambda x:",".join(x),samples))
@@ -52,51 +52,105 @@ def run_deseq2(quant_files="", alignments="",
     if quant_files and ref_gtf:
         if len(quant_files) != n_samples:
             logger.error("Aborting!")
-            raise Exception("Number of input quantification files does not match the number of samples (%s != %s)"%(
-            len(quant_files),n_samples))
+            error_msg="Number of input quantification files does not match the number of samples (%s != %s)"%(
+            len(quant_files),n_samples)
+            if not ignore_exceptions:
+                raise Exception(error_msg)
+            else:
+                logger.error(error_msg)
+                return 1,[]
+
         quant_files=map(lambda x: x.split(","),quant_files)
         for i,q in enumerate(quant_files):
             if len(q) != n_replicates[i]:
                 logger.error("Aborting!")
-                raise Exception("Number of input quantification replicate files does not match the number of replicates in %d%s sample  (%s != %s)"%(
-                i+1,"st" if i>0 else "th", len(q),n_replicates[i]))
+                error_msg="Number of input quantification replicate files does not match the number of replicates in %d%s sample  (%s != %s)"%(
+                i+1,"st" if i>0 else "th", len(q),n_replicates[i])
+                if not ignore_exceptions:
+                    raise Exception(error_msg)
+                else:
+                    logger.error(error_msg)
+                    return 1,[]
+                
             for r in q:
                 if not os.path.exists(r):
                     logger.error("Aborting!")
-                    raise Exception("No qantification file %s"%r)
+                    error_msg="No qantification file %s"%r
+                    if not ignore_exceptions:
+                        raise Exception(error_msg)
+                    else:
+                        logger.error(error_msg)
+                        return 1,[]
+                    
     elif alignments and (transcripts_gtfs or ref_gtf):
         use_quant=False
         if len(alignments) != n_samples:
             logger.error("Aborting!")
-            raise Exception("Number of input alignment files does not match the number of samples (%s != %s)"%(
-            len(alignments),n_samples))
+            error_msg="Number of input alignment files does not match the number of samples (%s != %s)"%(
+            len(alignments),n_samples)
+            if not ignore_exceptions:
+                raise Exception(error_msg)
+            else:
+                logger.error(error_msg)
+                return 1,[]
             
             
         alignments=map(lambda x: x.split(","),alignments)
         for i,a in enumerate(alignments):
             if len(a) != n_replicates[i]:
                 logger.error("Aborting!")
-                raise Exception("Number of input alignment replicate files does not match the number of replicates in %d%s sample (%s != %s)"%(
-                i+1, "st" if i>0 else "th", len(a),n_replicates[i]))
+                error_msg="Number of input alignment replicate files does not match the number of replicates in %d%s sample (%s != %s)"%(
+                i+1, "st" if i>0 else "th", len(a),n_replicates[i])
+                if not ignore_exceptions:
+                    raise Exception(error_msg)
+                else:
+                    logger.error(error_msg)
+                    return 1,[]
                 
             for r in a:
                 if not os.path.exists(r):
                     logger.error("Aborting!")
-                    raise Exception("No aligment file %s"%r)
+                    error_msg="No aligment file %s"%r
+                    if not ignore_exceptions:
+                        raise Exception(error_msg)
+                    else:
+                        logger.error(error_msg)
+                        return 1,[]
+                    
         if transcripts_gtfs:
             transcripts_gtfs=map(lambda x: x.split(","),transcripts_gtfs)
             for i,a in enumerate(transcripts_gtfs):
                 if len(a) != n_replicates[i]:
                     logger.error("Aborting!")
-                    raise Exception("Number of input gtf files does not match the total number of replicates in %d%s sample (%s != %s)"%(
-                    i+1, "st" if i>0 else "th", len(a),n_replicates[i]))
+                    error_msg="Number of input gtf files does not match the total number of replicates in %d%s sample (%s != %s)"%(
+                    i+1, "st" if i>0 else "th", len(a),n_replicates[i])
+                    if not ignore_exceptions:
+                        raise Exception(error_msg)
+                    else:
+                        logger.error(error_msg)
+                        return 1,[]
+                    
+                    
         elif ref_gtf:
             use_refgtf=True
 
         if ref_gtf:   
             if not os.path.exists(ref_gtf):
                 logger.error("Aborting!")
-                raise Exception("No reference GTF file %s"%ref_gtf)
+                error_msg="No reference GTF file %s"%ref_gtf
+                if not ignore_exceptions:
+                    raise Exception(error_msg)
+                else:
+                    logger.error(error_msg)
+                    return 1,[]
+    else:
+        logger.error("Aborting!")
+        error_msg="Either (quantification files + ref_gtf) or (Alignment files + transcripts_gtfs or ref_gtf) is needed."
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
 
     work_deseq2=os.path.join(workdir,"deseq2",samples_txt)
     create_dirs([work_deseq2])
@@ -314,7 +368,7 @@ def run_deseq2(quant_files="", alignments="",
         diff = "%s/deseq2_res.tab"%out_deseq2   
     else:            
         logger.info("DESeq2 was not successfull!")
-    return diff
+    return 0, [diff]
 
 def run_diff(difftool="DESeq2", quant_files="", alignments="",
               transcripts_gtfs="",
@@ -324,15 +378,20 @@ def run_diff(difftool="DESeq2", quant_files="", alignments="",
               mincount=DESeq2_MINCNT, alpha=DESeq2_ALPHA, 
               R=R_CMD, 
               start=0, samples="", nthreads=1,
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     diff=""
     if difftool.upper()=="DESEQ2":
-        diff=run_deseq2(quant_files=quant_files, alignments=alignments,
+        retcode,res=run_deseq2(quant_files=quant_files, alignments=alignments,
                       transcripts_gtfs=transcripts_gtfs, ref_gtf=ref_gtf, 
                       featureCounts_opts=featureCounts_opts, featureCounts=featureCounts,                     
                       stringtie=stringtie, stringtie_merge_opts=stringtie_merge_opts,
                       mincount=mincount, alpha=alpha, 
                       R=R, 
                       start=start, samples=samples, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout)
+                      workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
+        if retcode!=0:
+            logger.info("DESeq2 was not successfull!")
+            return ""
+        else:
+            diff=res[0]
     return diff

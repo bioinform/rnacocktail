@@ -54,23 +54,43 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
                   idpfusion_cfg="", idpfusion=IDPFUSION, samtools=SAMTOOLS, 
                   gmap=GMAP, gmap_idx="", star_dir=STAR_DIR, bowtie2_dir=BOWTIE2_DIR,
                   start=0, sample= "", nthreads=1,
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
 
     logger.info("Running long read fusion Detection (IDP-fusion) for %s"%sample)
     if not os.path.exists(alignment):
         logger.error("Aborting!")
-        raise Exception("No input short read alignment BAM/SAM file %s"%alignment)
+        error_msg="No input short read alignment BAM/SAM file %s"%alignment
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
     if not os.path.exists(short_junction):
         logger.error("Aborting!")
-        raise Exception("No input short read junction BED file %s"%short_junction)
+        error_msg="No input short read junction BED file %s"%short_junction
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]        
     if not os.path.exists(long_alignment):
         logger.error("Aborting!")
-        raise Exception("No input long read alignment PSL file %s"%long_alignment)
+        error_msg="No input long read alignment PSL file %s"%long_alignment
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]        
         
     if idpfusion_cfg:
         if not os.path.exists(idpfusion_cfg):
             logger.error("Aborting!")
-            raise Exception("No input .cfg file %s"%idpfusion_cfg)
+            error_msg="No input .cfg file %s"%idpfusion_cfg
+            if not ignore_exceptions:
+                raise Exception(error_msg)
+            else:
+                logger.error(error_msg)
+                return 1,[]
         
 
     
@@ -321,14 +341,8 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
     msg="Copy predictions to output directory for %s."%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        if os.path.exists("%s/out/isoform.gtf"%work_idpfusion) and \
-           os.path.exists("%s/out/isoform.exp"%work_idpfusion):
-            command = "cp %s/out/isoform.gtf %s/isoform.gtf"%(
-                       work_idpfusion, out_idpfusion)
-            cmd = TimedExternalCmd(command, logger, raise_exception=True)
-            retcode = cmd.run(cmd_log_fd_out=idpfusion_log_fd, cmd_log=idpfusion_log, msg=msg, timeout=timeout)   
-            
-            command = "cp %s/out/isoform.exp %s/isoform.exp"%(
+        if os.path.exists("%s/out/fusion_report.tsv"%work_idpfusion):
+            command = "cp %s/out/fusion_report.tsv %s/fusion_report.tsv"%(
                        work_idpfusion, out_idpfusion)
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=idpfusion_log_fd, cmd_log=idpfusion_log, msg=msg, timeout=timeout)   
@@ -338,18 +352,14 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
 
 
 
-    transcripts = ""
-    abundances = ""
-    if os.path.exists("%s/isoform.gtf"%out_idpfusion) and \
-       os.path.exists("%s/isoform.exp"%out_idpfusion):
+    fusions = ""
+    if os.path.exists("%s/fusion_report.tsv"%out_idpfusion):
         logger.info("IDP-fusion was successfull!")
-        logger.info("Output isoforms: %s/isoform.gtf"%out_idpfusion)
-        logger.info("Output expressions: %s/isoform.exp"%out_idpfusion)
-        transcripts = "%s/isoform.gtf"%out_idpfusion   
-        abundances = "%s/isoform.exp"%out_idpfusion   
+        logger.info("Output fusions: %s/fusion_report.tsv"%out_idpfusion)
+        fusions = "%s/fusion_report.tsv"%out_idpfusion   
     else:            
         logger.info("IDP-fusion was not successfull!")
-    return transcripts,abundances
+    return 0,[fusions]
 
 def run_lr_fusion(long_fusion_caller="IDP-fusion", alignment="",
                   short_junction="", long_alignment="", mode_number=0,
@@ -360,11 +370,10 @@ def run_lr_fusion(long_fusion_caller="IDP-fusion", alignment="",
                   idpfusion_cfg="", idpfusion=IDPFUSION, samtools=SAMTOOLS, 
                   gmap=GMAP, gmap_idx="", star_dir=STAR_DIR, bowtie2_dir=BOWTIE2_DIR,
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
-    transcripts = ""
-    abundances = ""
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
+    fusions = ""
     if long_fusion_caller.upper()=="IDP-FUSION":
-        transcripts,abundances=run_idpfusion(alignment=alignment, 
+        retcode,res=run_idpfusion(alignment=alignment, 
                       short_junction=short_junction, long_alignment=long_alignment, 
                       mode_number=mode_number,
                       short_fasta=short_fasta, long_fasta=long_fasta, 
@@ -376,5 +385,11 @@ def run_lr_fusion(long_fusion_caller="IDP-fusion", alignment="",
                       gmap=gmap, gmap_idx=gmap_idx, star_dir=star_dir,
                       bowtie2_dir=bowtie2_dir,
                       start=start, sample= sample, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout)
-    return transcripts,abundances
+                      workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
+        if retcode!=0:
+            logger.info("IDP-fusion was not successfull!")
+            return "", ""
+        else:
+            fusions=res[0]
+                      
+    return fusions

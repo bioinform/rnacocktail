@@ -406,7 +406,7 @@ def run_pipeline(args,parser):
                                       hisat2_opts=args.hisat2_opts, hisat2=args.hisat2, 
                                       hisat2_sps=args.hisat2_sps, samtools=args.samtools,
                                       start=0, sample=replicate, nthreads=args.threads,
-                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout,ignore_exceptions=True)
                     else:
                         logger.info("******************************************************************************")
                         logger.info("Excluding align step using %s for %s"%(args.sr_aligner,replicate))
@@ -422,7 +422,7 @@ def run_pipeline(args,parser):
                                       ref_gtf=args.ref_gtf, 
                                       stringtie_opts=args.stringtie_opts, stringtie=args.stringtie,
                                       start=0, sample=replicate, nthreads=args.threads,
-                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                     else:
                         logger.info("******************************************************************************")
                         logger.info("Excluding reconstruct step using %s for %s"%(args.reconstructor,replicate))
@@ -439,7 +439,7 @@ def run_pipeline(args,parser):
                                       salmon_k=args.salmon_k, libtype=args.libtype,                      
                                       salmon_smem_opts=args.salmon_smem_opts, salmon=args.salmon,
                                       start=0, sample=replicate, nthreads=args.threads, unzip=args.unzip,
-                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                     else:
                         logger.info("******************************************************************************")
                         logger.info("Excluding quantification step using %s for %s"%(args.quantifier,replicate))
@@ -459,7 +459,7 @@ def run_pipeline(args,parser):
                                       oases_opts=args.oases_opts, velvetg_opts=args.velvetg_opts, 
                                       velveth_opts=args.velveth_opts,
                                       start=0, sample= replicate, nthreads=args.threads,
-                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                     else:
                         logger.info("******************************************************************************")
                         logger.info("Excluding de novo assembly step using %s for %s"%(args.assembler,replicate))
@@ -479,7 +479,7 @@ def run_pipeline(args,parser):
                               mincount=args.mincount, alpha=args.alpha, 
                               R=args.R, start=0, samples=args.sample, nthreads=args.threads,
                               workdir=os.path.join(args.workdir, "diff-quant"), 
-                              outdir=os.path.join(args.outdir, "diff-quant"), timeout=args.timeout)
+                              outdir=os.path.join(args.outdir, "diff-quant"), timeout=args.timeout, ignore_exceptions=True)
 
                 logger.info("******************************************************************************")
                 logger.info("Running differential analysis step (based on alignment results) using %s for %s"%(args.difftool,samples))
@@ -494,7 +494,7 @@ def run_pipeline(args,parser):
                               mincount=args.mincount, alpha=args.alpha, 
                               R=args.R, start=0, samples=args.sample, nthreads=args.threads,
                               workdir=os.path.join(args.workdir, "diff-alignment"), 
-                              outdir=os.path.join(args.outdir, "diff-alignment"), timeout=args.timeout)
+                              outdir=os.path.join(args.outdir, "diff-alignment"), timeout=args.timeout, ignore_exceptions=True)
             else:
                 logger.info("******************************************************************************")
                 logger.info("Excluding differential analysis step (based on alignment-free quantification results) using %s for %s"%(args.difftool,samples))
@@ -532,7 +532,7 @@ def run_pipeline(args,parser):
                                       HaplotypeCaller_opts=args.HaplotypeCaller_opts, 
                                       VariantFiltration_opts=args.VariantFiltration_opts, 
                                       start=0, sample=replicate, nthreads=args.threads,
-                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                     else:
                         logger.info("******************************************************************************")
                         logger.info("Excluding variant calling step using %s for %s"%(args.variant_caller,replicate))
@@ -552,7 +552,7 @@ def run_pipeline(args,parser):
                                       java=args.java, giremi_opts=args.giremi_opts,java_opts=args.java_opts,
                                       VariantAnnotator_opts=args.VariantAnnotator_opts, 
                                       start=0, sample= replicate, nthreads=args.threads,
-                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                     else:
                         logger.info("******************************************************************************")
                         logger.info("Excluding RNA editing calling step using %s for %s"%(args.editing_caller,replicate))
@@ -569,7 +569,7 @@ def run_pipeline(args,parser):
                                       start=0, 
                                       fusioncatcher=args.fusioncatcher, fusioncatcher_opts=args.fusioncatcher_opts, 
                                       sample= replicate, nthreads=args.threads,
-                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                     else:
                         logger.info("******************************************************************************")
                         logger.info("Excluding RNA editing calling step using %s for %s"%(args.editing_caller,replicate))
@@ -594,7 +594,7 @@ def run_pipeline(args,parser):
                                           input_sr["2"][replicate]) if input_mode=="paired" else input_sr["U"][replicate], 
                                           lordec=args.lordec, lordec_opts=args.lordec_opts,
                                           start=0, sample= replicate, nthreads=args.threads,
-                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                         else:
                             logger.info("******************************************************************************")
                             logger.info("Excluding long read error correction step using %s for %s"%(args.long_corrector,replicate))
@@ -612,7 +612,7 @@ def run_pipeline(args,parser):
                                           starlong=args.starlong, starlong_opts=args.starlong_opts, 
                                           sam2psl=args.sam2psl, samtools=args.samtools,
                                           start=0, sample= replicate, nthreads=args.threads,
-                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                         else:
                             logger.info("******************************************************************************")
                             logger.info("Excluding long read alignment step on corrected long-reads using %s for %s"%(args.long_aligner,replicate))
@@ -632,7 +632,7 @@ def run_pipeline(args,parser):
                                           read_length=args.read_length,
                                           samtools=args.samtools, idp=args.idp, idp_cfg=args.idp_cfg, 
                                           start=0, sample= replicate, nthreads=args.threads,
-                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                         else:
                             logger.info("******************************************************************************")
                             logger.info("Excluding long read transcriptome reconstruction step using %s for %s"%(args.long_reconstructor,replicate))
@@ -652,7 +652,7 @@ def run_pipeline(args,parser):
                                           starlong=args.starlong, starlong_opts=args.starlong_opts, 
                                           sam2psl=args.sam2psl, samtools=args.samtools,
                                           start=0, sample= replicate, nthreads=args.threads,
-                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                         else:
                             logger.info("******************************************************************************")
                             logger.info("Excluding long read alignment step on original long-reads using %s for %s"%(args.long_aligner,replicate))
@@ -674,7 +674,7 @@ def run_pipeline(args,parser):
                "Long-read alignment":[alignments_lr],
                "long-read transcriptome reconstruction":[transcripts_lr,abundances_lr],
         }
-        ordered_tasks={"Short-read alignment",
+        ordered_tasks=["Short-read alignment",
                "Short-read transcriptome reconstruction",
                "Short-read alignment-free quantification",
                "Short-read alignment-free differential analysis",
@@ -685,10 +685,10 @@ def run_pipeline(args,parser):
                "Short-read fusion detection",
                "Long-read error correction",
                "Long-read alignment",
-               "long-read transcriptome reconstruction",
-        }
+               "long-read transcriptome reconstruction"]
         success={task:[] for task in ordered_tasks}
         failure={task:[] for task in ordered_tasks}
+        print tasks
         for t,vv in tasks.iteritems():
             v=vv[0]
             if t=="Short-read alignment-free differential analysis" or t=="Short-read alignment-based differential analysis":
@@ -698,7 +698,7 @@ def run_pipeline(args,parser):
                     failure[t].append("ALL")
             else:
                 if v:
-                    for si,sample in enumarate(v):
+                    for si,sample in enumerate(samples):
                         for replicate in sample:
                             if v[si][replicate]:
                                 success[t].append(replicate)
@@ -709,22 +709,25 @@ def run_pipeline(args,parser):
         
             
         
-        logger.info("----------------------------------------------")
+        logger.info("***********************************************")
         logger.info("Successfull Runs:")
-        logger.info("----------------------------------------------")
+        logger.info("***********************************************")
         for t in ordered_tasks:
             if not set(success[t])^set(all_samples):
                 success[t]=["ALL"]
             if success[t]:
                 logger.info("%s: %s"%(t,",".join(success[t])))
-        logger.info("----------------------------------------------")
+        logger.info("")
+
+        logger.info("***********************************************")
         logger.info("Failed Runs:")
-        logger.info("----------------------------------------------")
+        logger.info("***********************************************")
         for t in ordered_tasks:
             if not set(failure[t])^set(all_samples):
                 failure[t]=["ALL"]
             if failure[t]:
                 logger.info("%s: %s"%(t,",".join(failure[t])))
+        logger.info("")
     else:
         logger.error("wrong mode %s"%(mode))
         return os.EX_USAGE

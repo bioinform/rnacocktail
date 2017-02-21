@@ -12,17 +12,27 @@ def run_starlong(long="",
                   starlong=STARLONG, sam2psl=SAM2PSL,samtools=SAMTOOLS,
                   starlong_opts="",
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
 
     logger.info("Running long read alignment (STARlong) for %s"%sample)
     if not os.path.exists(genome_dir+"SAindex"):
         logger.error("Aborting!")
-        raise Exception("No SAindex directory in %s"%genome_dir)
+        error_msg="No SAindex directory in %s"%genome_dir
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
         
     if long:
         if not os.path.exists(long):
             logger.error("Aborting!")
-            raise Exception("No long read sequence file %s"%long)
+            error_msg="No long read sequence file %s"%long
+            if not ignore_exceptions:
+                raise Exception(error_msg)
+            else:
+                logger.error(error_msg)
+                return 1,[]
 
     work_starlong=os.path.join(workdir,"starlong",sample)
     create_dirs([work_starlong])
@@ -46,7 +56,12 @@ def run_starlong(long="",
     if ref_gtf:
         if not os.path.exists(ref_gtf):
             logger.error("Aborting!")
-            raise Exception("No reference GTF file %s"%ref_gtf)    
+            error_msg="No reference GTF file %s"%ref_gtf
+            if not ignore_exceptions:
+                raise Exception(error_msg)
+            else:
+                logger.error(error_msg)
+                return 1,[]
 
     if "--outSAMattrRGline" not in starlong_opts:
         starlong_opts += " --outSAMattrRGline ID:STARlong SM:%s"%sample
@@ -131,19 +146,24 @@ def run_starlong(long="",
         alignments_psl = "%s/Aligned.out.psl"%out_starlong
     else:            
         logger.info("STARlong was not successfull!")
-    return alignments_psl
+    return 0,[alignments_psl]
 
 def run_lr_align(long_aligner="STARlong", long="", 
                   genome_dir="", ref_gtf="",
                   starlong=STARLONG, sam2psl=SAM2PSL, samtools=SAMTOOLS,
                   starlong_opts="",
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     alignments_psl=""
     if long_aligner.upper()=="STARLONG":
-        alignments_bam=run_starlong(genome_dir=genome_dir, ref_gtf=ref_gtf,
+        retcode,res=run_starlong(genome_dir=genome_dir, ref_gtf=ref_gtf,
                       long=long, starlong=starlong, sam2psl=sam2psl, samtools=samtools,
                       starlong_opts=starlong_opts,
                       start=start, sample= sample, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout) 
+                      workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions) 
+        if retcode!=0:
+            logger.info("STARlong was not successfull!")
+            return ""
+        else:
+            alignments_psl=res[0]
     return alignments_psl

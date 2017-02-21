@@ -137,32 +137,72 @@ def run_giremi(alignment="", variant="",
                   java=JAVA, giremi_opts="", java_opts="",
                   VariantAnnotator_opts="",  
                   start=0, sample= "", nthreads=1,
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
 
 
     logger.info("Running RNA editing detection (GIREMI) for %s"%sample)
     if not os.path.exists(alignment):
         logger.error("Aborting!")
-        raise Exception("No alignment file %s"%alignment)
+        error_msg="No alignment file %s"%alignment
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
+        
     if not os.path.exists(variant):
         logger.error("Aborting!")
-        raise Exception("No variant VCF file %s"%variant)
+        error_msg="No variant VCF file %s"%variant
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
+        
     if not os.path.exists(strand_pos):
         logger.error("Aborting!")
-        raise Exception("No strand position BED file %s"%strand_pos)
+        error_msg="No strand position BED file %s"%strand_pos
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
+
     if not os.path.exists(genes_pos):
         logger.error("Aborting!")
-        raise Exception("No genes position BED file %s"%genes_pos)
+        error_msg="No genes position BED file %s"%genes_pos
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
+
     if not os.path.exists(ref_genome):
         logger.error("Aborting!")
-        raise Exception("No reference genome FASTA file %s"%ref_genome)
+        error_msg="No reference genome FASTA file %s"%ref_genome
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
+
     if not os.path.exists(knownsites):
         logger.error("Aborting!")
-        raise Exception("No VCF knownsites file %s"%knownsites)
+        error_msg="No VCF knownsites file %s"%knownsites
+        if not ignore_exceptions:
+            raise Exception(error_msg)
+        else:
+            logger.error(error_msg)
+            return 1,[]
     if giremi_dir:
         if not os.path.exists(giremi_dir):
             logger.error("Aborting!")
-            raise Exception("No GIREMI directory %s"%giremi_dir)
+            error_msg="No GIREMI directory %s"%giremi_dir
+            if not ignore_exceptions:
+                raise Exception(error_msg)
+            else:
+                logger.error(error_msg)
+                return 1,[]
 
     work_giremi=os.path.join(workdir,"giremi",sample)
     create_dirs([work_giremi])
@@ -344,7 +384,7 @@ def run_giremi(alignment="", variant="",
         edits = "%s/giremi_out.txt.res"%out_giremi   
     else:            
         logger.info("GIREMI was not successfull!")
-    return edits
+    return 0,[edits]
 
 def run_editing(editing_caller="GIREMI", alignment="", variant="", 
                   strand_pos="", genes_pos="",
@@ -354,11 +394,11 @@ def run_editing(editing_caller="GIREMI", alignment="", variant="",
                   java=JAVA, giremi_opts="", java_opts="",
                   VariantAnnotator_opts="",  
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     edits=""
 
     if editing_caller.upper()=="GIREMI":
-        variants=run_giremi(alignment=alignment, variant=variant, 
+        retcode,res=run_giremi(alignment=alignment, variant=variant, 
                   strand_pos=strand_pos, genes_pos=genes_pos,
                   ref_genome=ref_genome, knownsites=knownsites,
                   giremi_dir=giremi_dir, htslib_dir=htslib_dir, 
@@ -366,7 +406,13 @@ def run_editing(editing_caller="GIREMI", alignment="", variant="",
                   java=java, giremi_opts=giremi_opts, java_opts=java_opts,
                   VariantAnnotator_opts=VariantAnnotator_opts,  
                   start=start, sample= sample, nthreads=nthreads, 
-                  workdir=workdir, outdir=outdir, timeout=timeout)
+                  workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
+        if retcode!=0:
+            logger.info("GIREMI was not successfull!")
+            return ""
+        else:
+            edits=res[0]
+                  
     return edits
     
     
