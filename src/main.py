@@ -626,7 +626,7 @@ def run_pipeline(args,parser):
                             transcripts_lr[si][replicate],abundances_lr[si][replicate]=run_lr_reconstruct(long_reconstructor=args.long_reconstructor,
                                           alignment=alignments_bam[si][replicate], 
                                           short_junction=junctions_bed[si][replicate], 
-                                          long_alignment=corrected[si][replicate],
+                                          long_alignment=alignments_lr[si][replicate],
                                           mode_number=args.mode_number,
                                           ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
                                           read_length=args.read_length,
@@ -688,7 +688,6 @@ def run_pipeline(args,parser):
                "long-read transcriptome reconstruction"]
         success={task:[] for task in ordered_tasks}
         failure={task:[] for task in ordered_tasks}
-        print tasks
         for t,vv in tasks.iteritems():
             v=vv[0]
             if t=="Short-read alignment-free differential analysis" or t=="Short-read alignment-based differential analysis":

@@ -12,38 +12,23 @@ def run_salmon_smem(quantifier_idx=None,
                   salmon_k=SALMON_SMEM_k, libtype="",
                   salmon_smem_opts="", salmon=SALMON,
                   start=0, sample= "", nthreads=1, unzip=False,
-                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
+                  workdir=None, outdir=None, timeout=TIMEOUT):
 
     logger.info("Running quantification (Salmon-SMEM) for %s"%sample)
     if not os.path.exists(quantifier_idx):
         logger.error("Aborting!")
-        error_msg="No Salmon FMD index directory %s"%quantifier_idx
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No Salmon FMD index directory %s"%quantifier_idx)
         
     if seq_1 and seq_2:
         for s1 in seq_1.split(","):
             if not os.path.exists(s1):
                 logger.error("Aborting!")
-                error_msg="No Mate 1 sequence file %s"%s1
-                if not ignore_exceptions:
-                    raise Exception(error_msg)
-                else:
-                    logger.error(error_msg)
-                    return 1,[]
+                raise Exception("No Mate 1 sequence file %s"%s1)
                                
         for s2 in seq_2.split(","):
             if not os.path.exists(s2):
                 logger.error("Aborting!")
-                error_msg="No Mate 2 sequence file %s"%s2
-                if not ignore_exceptions:
-                    raise Exception(error_msg)
-                else:
-                    logger.error(error_msg)
-                    return 1,[]
+                raise Exception("No Mate 2 sequence file %s"%s2)
 
         if unzip:
             seq_argument="-1 <(gunzip -c %s) -2 <(gunzip -c %s)"%(" ".join(seq_1.split(","))," ".join(seq_2.split(",")))
@@ -63,12 +48,7 @@ def run_salmon_smem(quantifier_idx=None,
         for su in seq_u.split(","):
             if not os.path.exists(su):
                 logger.error("Aborting!")
-                error_msg="No unpaired sequence file %s"%su
-                if not ignore_exceptions:
-                    raise Exception(error_msg)
-                else:
-                    logger.error(error_msg)
-                    return 1,[]
+                raise Exception("No unpaired sequence file %s"%su)
 
     
     work_salmon_smem=os.path.join(workdir,"salmon_smem",sample)
@@ -129,8 +109,8 @@ def run_salmon_smem(quantifier_idx=None,
         logger.info("Output expressions: %s/quant.sf"%out_salmon_smem)
         quant = "%s/quant.sf"%out_salmon_smem
     else:            
-        logger.info("Salmon-SMEM was not successfull!")
-    return 0,[quant]
+        logger.info("Salmon-SMEM failed!")
+    return quant
 
 def run_quantify(quantifier="Salmon-SMEM", quantifier_idx=None,
                   seq_1="", seq_2="", seq_u="",
@@ -140,15 +120,17 @@ def run_quantify(quantifier="Salmon-SMEM", quantifier_idx=None,
                   workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     quant=""
     if quantifier.upper()=="SALMON-SMEM":
-        retcode,res=run_salmon_smem(quantifier_idx=quantifier_idx,
-                      seq_1=seq_1, seq_2=seq_2, seq_u=seq_u,
-                      salmon_k=salmon_k, libtype=libtype,
-                      salmon_smem_opts=salmon_smem_opts, salmon=salmon,
-                      start=start, sample= sample, nthreads=nthreads, unzip=unzip,
-                      workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
-        if retcode!=0:
-            logger.info("Salmon-SMEM was not successfull!")
-            return ""
-        else:
-            quant=res[0]
+        try:
+            quant=run_salmon_smem(quantifier_idx=quantifier_idx,
+                          seq_1=seq_1, seq_2=seq_2, seq_u=seq_u,
+                          salmon_k=salmon_k, libtype=libtype,
+                          salmon_smem_opts=salmon_smem_opts, salmon=salmon,
+                          start=start, sample= sample, nthreads=nthreads, unzip=unzip,
+                          workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("Salmon-SMEM failed!")
+            if not ignore_exceptions:
+                raise Exception(excp)
+            else:
+                logger.error(excp)
     return quant

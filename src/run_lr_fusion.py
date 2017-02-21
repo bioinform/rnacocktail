@@ -54,43 +54,23 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
                   idpfusion_cfg="", idpfusion=IDPFUSION, samtools=SAMTOOLS, 
                   gmap=GMAP, gmap_idx="", star_dir=STAR_DIR, bowtie2_dir=BOWTIE2_DIR,
                   start=0, sample= "", nthreads=1,
-                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
+                  workdir=None, outdir=None, timeout=TIMEOUT):
 
     logger.info("Running long read fusion Detection (IDP-fusion) for %s"%sample)
     if not os.path.exists(alignment):
         logger.error("Aborting!")
-        error_msg="No input short read alignment BAM/SAM file %s"%alignment
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No input short read alignment BAM/SAM file %s"%alignment)
     if not os.path.exists(short_junction):
         logger.error("Aborting!")
-        error_msg="No input short read junction BED file %s"%short_junction
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]        
+        raise Exception("No input short read junction BED file %s"%short_junction)
     if not os.path.exists(long_alignment):
         logger.error("Aborting!")
-        error_msg="No input long read alignment PSL file %s"%long_alignment
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]        
+        raise Exception("No input long read alignment PSL file %s"%long_alignment)
         
     if idpfusion_cfg:
         if not os.path.exists(idpfusion_cfg):
             logger.error("Aborting!")
-            error_msg="No input .cfg file %s"%idpfusion_cfg
-            if not ignore_exceptions:
-                raise Exception(error_msg)
-            else:
-                logger.error(error_msg)
-                return 1,[]
+            raise Exception("No input .cfg file %s"%idpfusion_cfg)
         
 
     
@@ -358,8 +338,8 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
         logger.info("Output fusions: %s/fusion_report.tsv"%out_idpfusion)
         fusions = "%s/fusion_report.tsv"%out_idpfusion   
     else:            
-        logger.info("IDP-fusion was not successfull!")
-    return 0,[fusions]
+        logger.info("IDP-fusion failed!")
+    return fusions
 
 def run_lr_fusion(long_fusion_caller="IDP-fusion", alignment="",
                   short_junction="", long_alignment="", mode_number=0,
@@ -373,23 +353,24 @@ def run_lr_fusion(long_fusion_caller="IDP-fusion", alignment="",
                   workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     fusions = ""
     if long_fusion_caller.upper()=="IDP-FUSION":
-        retcode,res=run_idpfusion(alignment=alignment, 
-                      short_junction=short_junction, long_alignment=long_alignment, 
-                      mode_number=mode_number,
-                      short_fasta=short_fasta, long_fasta=long_fasta, 
-                      ref_genome=ref_genome, ref_all_gpd=ref_all_gpd, 
-                      ref_gpd=ref_gpd, uniqueness_bedgraph=uniqueness_bedgraph,
-                      genome_bowtie2_idx=genome_bowtie2_idx, transcriptome_bowtie2_idx=transcriptome_bowtie2_idx,
-                      read_length=read_length,
-                      idpfusion_cfg=idpfusion_cfg, idpfusion=idpfusion, samtools=samtools, 
-                      gmap=gmap, gmap_idx=gmap_idx, star_dir=star_dir,
-                      bowtie2_dir=bowtie2_dir,
-                      start=start, sample= sample, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
-        if retcode!=0:
-            logger.info("IDP-fusion was not successfull!")
-            return "", ""
-        else:
-            fusions=res[0]
-                      
+        try:
+            fusions=run_idpfusion(alignment=alignment, 
+                          short_junction=short_junction, long_alignment=long_alignment, 
+                          mode_number=mode_number,
+                          short_fasta=short_fasta, long_fasta=long_fasta, 
+                          ref_genome=ref_genome, ref_all_gpd=ref_all_gpd, 
+                          ref_gpd=ref_gpd, uniqueness_bedgraph=uniqueness_bedgraph,
+                          genome_bowtie2_idx=genome_bowtie2_idx, transcriptome_bowtie2_idx=transcriptome_bowtie2_idx,
+                          read_length=read_length,
+                          idpfusion_cfg=idpfusion_cfg, idpfusion=idpfusion, samtools=samtools, 
+                          gmap=gmap, gmap_idx=gmap_idx, star_dir=star_dir,
+                          bowtie2_dir=bowtie2_dir,
+                          start=start, sample= sample, nthreads=nthreads,
+                          workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("IDP-fusion failed!")
+            if not ignore_exceptions:
+                raise Exception(excp)
+            else:
+                logger.error(excp)
     return fusions

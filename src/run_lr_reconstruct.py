@@ -34,43 +34,23 @@ def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0,
                   ref_genome="", ref_all_gpd="", ref_gpd="",read_length=100,
                   idp_cfg="", idp=IDP, samtools=SAMTOOLS,
                   start=0, sample= "", nthreads=1,
-                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
+                  workdir=None, outdir=None, timeout=TIMEOUT):
 
-    logger.info("Running transcriptome lr_reconstruction (IDP) for %s"%sample)
+    logger.info("Running long-read transcriptome reconstruction (IDP) for %s"%sample)
     if not os.path.exists(alignment):
         logger.error("Aborting!")
-        error_msg="No input short read alignment BAM/SAM file %s"%alignment
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No input short read alignment BAM/SAM file %s"%alignment)
     if not os.path.exists(short_junction):
         logger.error("Aborting!")
-        error_msg="No input short read junction BED file %s"%short_junction
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No input short read junction BED file %s"%short_junction)
     if not os.path.exists(long_alignment):
         logger.error("Aborting!")
-        error_msg="No input long read alignment PSL file %s"%long_alignment
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No input long read alignment PSL file %s"%long_alignment)
         
     if idp_cfg:
         if not os.path.exists(idp_cfg):
             logger.error("Aborting!")
-            error_msg="No input .cfg file %s"%idp_cfg
-            if not ignore_exceptions:
-                raise Exception(error_msg)
-            else:
-                logger.error(error_msg)
-                return 1,[]
+            raise Exception("No input .cfg file %s"%idp_cfg)
         
 
     
@@ -235,8 +215,8 @@ def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0,
         transcripts = "%s/isoform.gtf"%out_idp   
         abundances = "%s/isoform.exp"%out_idp   
     else:            
-        logger.info("IDP was not successfull!")
-    return 0,[transcripts,abundances]
+        logger.info("IDP failed!")
+    return transcripts,abundances
 
 def run_lr_reconstruct(long_reconstructor="IDP", alignment="",
                   short_junction="", long_alignment="", mode_number=0,
@@ -247,18 +227,19 @@ def run_lr_reconstruct(long_reconstructor="IDP", alignment="",
     transcripts = ""
     abundances = ""
     if long_reconstructor.upper()=="IDP":
-        retcode,res=run_idp(alignment=alignment, 
+        try:
+            transcripts,abundances=run_idp(alignment=alignment, 
                       short_junction=short_junction, long_alignment=long_alignment, 
                       mode_number=mode_number,
                       ref_genome=ref_genome, ref_all_gpd=ref_all_gpd, ref_gpd=ref_gpd,
                       read_length=read_length,
                       idp_cfg=idp_cfg, idp=idp, samtools=samtools,
                       start=start, sample= sample, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
-        if retcode!=0:
-            logger.info("IDP was not successfull!")
-            return "", ""
-        else:
-            transcripts,abundances=res
-                      
+                      workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("IDP failed!")
+            if not ignore_exceptions:
+                raise Exception(excp)
+            else:
+                logger.error(excp)
     return transcripts,abundances

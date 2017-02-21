@@ -11,18 +11,13 @@ logger = logging.getLogger(__name__)
 def run_fusioncatcher(data_dir="", input="",  start=0, 
                   fusioncatcher=FUSIONCATCHER, fusioncatcher_opts="",  
                   sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
+                  workdir=None, outdir=None, timeout=TIMEOUT):
 
 
     logger.info("Running RNA fusion detection (FusionCatcher) for %s"%sample)
     if not os.path.exists(data_dir):
         logger.error("Aborting!")
-        error_msg="No data directory %s"%data_dir
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No data directory %s"%data_dir)
 
 
     work_fusioncatcher=os.path.join(workdir,"fusioncatcher",sample)
@@ -55,8 +50,8 @@ def run_fusioncatcher(data_dir="", input="",  start=0,
         logger.info("Output fusions: %s/final-list_candidate-fusion-genes.txt"%out_fusioncatcher)
         fusions = "%s/final-list_candidate-fusion-genes.txt"%out_fusioncatcher
     else:            
-        logger.info("FusionCatcher was not successfull!")
-    return 0,[fusions]
+        logger.info("FusionCatcher failed!")
+    return fusions
     
 
 def run_fusion(fusion_caller="FusionCatcher",
@@ -66,16 +61,17 @@ def run_fusion(fusion_caller="FusionCatcher",
                   workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     fusions=""
     if fusion_caller.upper()=="FUSIONCATCHER":
-        retcode,res=run_fusioncatcher(data_dir=data_dir, input=input, start=start, 
-                  fusioncatcher=fusioncatcher, fusioncatcher_opts=fusioncatcher_opts,  
-                  sample= sample, nthreads=nthreads, 
-                  workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
-        if retcode!=0:
-            logger.info("FusionCatcher was not successfull!")
-            return ""
-        else:
-            fusions=res[0]
-                  
+        try:
+            fusions=run_fusioncatcher(data_dir=data_dir, input=input, start=start, 
+                      fusioncatcher=fusioncatcher, fusioncatcher_opts=fusioncatcher_opts,  
+                      sample= sample, nthreads=nthreads, 
+                      workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("FusionCatcher failed!")
+            if not ignore_exceptions:
+                raise Exception(excp)
+            else:
+                logger.error(excp)
     return fusions
     
     

@@ -11,26 +11,16 @@ def run_lordec(kmer=23,
                   solid=3, long="", short="",
                   lordec=LORDEC, lordec_opts="",
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
+                  workdir=None, outdir=None, timeout=TIMEOUT):
 
     logger.info("Running long read error correction (LoRDEC) for %s"%sample)
     if not os.path.exists(long):
         logger.error("Aborting!")
-        error_msg="No long read sequence file %s"%long
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No long read sequence file %s"%long)
 
     if not os.path.exists(short):
         logger.error("Aborting!")
-        error_msg="No short read sequence file %s"%short
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No short read sequence file %s"%short)
 
     work_lordec=os.path.join(workdir,"lordec",sample)
     create_dirs([work_lordec])
@@ -87,8 +77,8 @@ def run_lordec(kmer=23,
         logger.info("Output corrected reads: %s/long_corrected.fa"%out_lordec)
         corrected = "%s/long_corrected.fa"%out_lordec
     else:            
-        logger.info("LoRDEC was not successfull!")
-    return 0,[corrected]
+        logger.info("LoRDEC failed!")
+    return corrected
 
 def run_lr_correct(long_corrector="LoRDEC", kmer=23,
                   solid=3, long="", short="",
@@ -97,14 +87,15 @@ def run_lr_correct(long_corrector="LoRDEC", kmer=23,
                   workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     corrected=""
     if long_corrector.upper()=="LORDEC":
-        retcode,res=run_lordec(kmer=kmer, solid=solid, long=long, short=short,
-                  lordec=lordec, lordec_opts=lordec_opts,
-                  start=start, sample= sample, nthreads=nthreads,
-                  workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
-        if retcode!=0:
-            logger.info("LoRDEC was not successfull!")
-            return ""
-        else:
-            corrected=res[0]
-            
+        try:
+            corrected=run_lordec(kmer=kmer, solid=solid, long=long, short=short,
+                      lordec=lordec, lordec_opts=lordec_opts,
+                      start=start, sample= sample, nthreads=nthreads,
+                      workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("LoRDEC failed!")
+            if not ignore_exceptions:
+                raise Exception(excp)
+            else:
+                logger.error(excp)
     return corrected

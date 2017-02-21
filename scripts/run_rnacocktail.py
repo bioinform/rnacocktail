@@ -715,6 +715,8 @@ if __name__ == "__main__":
         all_parser.add_argument("--star_genome_dir", metavar="genome_dir",
                                   help="Specifies path to the genome directory where STAR genome indices where generated. \
                                   (Required for long-read transcriptome reconstruction.)", default="")
+        all_parser.add_argument("--read_length", type=int, metavar="read_length",
+                                  help="The short-read length.", default=100)
         all_parser.add_argument("--mode_number", type=int, metavar="--mode_number",
                                   help="You can run IDP in two steps. If for a reason IDP finished \
                                   isoform candidate construction step but was terminated in candidate selection \

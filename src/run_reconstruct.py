@@ -10,17 +10,12 @@ logger = logging.getLogger(__name__)
 def run_stringtie(alignment_bam="",ref_gtf="", 
                   stringtie_opts="", stringtie=STRINGTIE,
                   start=0, sample= "", nthreads=1,
-                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
+                  workdir=None, outdir=None, timeout=TIMEOUT):
 
     logger.info("Running transcriptome reconstruction (StringTie) for %s"%sample)
     if not os.path.exists(alignment_bam):
         logger.error("Aborting!")
-        error_msg="No input alignment BAM file %s"%alignment_bam
-        if not ignore_exceptions:
-            raise Exception(error_msg)
-        else:
-            logger.error(error_msg)
-            return 1,[]
+        raise Exception("No input alignment BAM file %s"%alignment_bam)
         
     work_stringtie="%s/stringtie/%s/"%(workdir,sample)
     create_dirs([work_stringtie])
@@ -40,12 +35,7 @@ def run_stringtie(alignment_bam="",ref_gtf="",
     if ref_gtf:
         if not os.path.exists(ref_gtf):
             logger.error("Aborting!")
-            error_msg="No reference GTF file %s"%ref_gtf
-            if not ignore_exceptions:
-                raise Exception(error_msg)
-            else:
-                logger.error(error_msg)
-                return 1,[]
+            raise Exception("No reference GTF file %s"%ref_gtf)
 
     if ref_gtf:
         stringtie_opts += " -G %s"%ref_gtf
@@ -58,11 +48,8 @@ def run_stringtie(alignment_bam="",ref_gtf="",
         command="%s %s %s -o %s/transcripts.gtf -A %s/gene_abund.tab -v" % (
             stringtie, alignment_bam, stringtie_opts, work_stringtie, work_stringtie)
         command="bash -c \"%s\""%command
-        cmd = TimedExternalCmd(command, logger, raise_exception=not ignore_exceptions)
-        retcode = cmd.run(cmd_log_fd_out=stringtie_log_fd, cmd_log=stringtie_log, msg=msg, timeout=timeout)  
-        if retcode!=0:
-            logger.error("Failed %s. Log file: %s"%(msg,stringtie_log))
-            return 1,[]
+        cmd = TimedExternalCmd(command, logger, raise_exception=True)
+        retcode = cmd.run(cmd_log_fd_out=stringtie_log_fd, cmd_log=stringtie_log, msg=msg, timeout=timeout)   
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
@@ -76,19 +63,13 @@ def run_stringtie(alignment_bam="",ref_gtf="",
            os.path.exists("%s/gene_abund.tab"%work_stringtie):
             command = "cp %s/transcripts.gtf %s/transcripts.gtf"%(
                        work_stringtie, out_stringtie)
-            cmd = TimedExternalCmd(command, logger, raise_exception=not ignore_exceptions)
+            cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=stringtie_log_fd, cmd_log=stringtie_log, msg=msg, timeout=timeout)   
-            if retcode!=0:
-                logger.error("Failed %s. Log file: %s"%(msg,stringtie_log))
-                return 1,[]
-
+            
             command = "cp %s/gene_abund.tab %s/gene_abund.tab"%(
                        work_stringtie, out_stringtie)
-            cmd = TimedExternalCmd(command, logger, raise_exception=not ignore_exceptions)
+            cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=stringtie_log_fd, cmd_log=stringtie_log, msg=msg, timeout=timeout)   
-            if retcode!=0:
-                logger.error("Failed %s. Log file: %s"%(msg,stringtie_log))
-                return 1,[]
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
@@ -104,8 +85,8 @@ def run_stringtie(alignment_bam="",ref_gtf="",
         transcripts = "%s/transcripts.gtf"%out_stringtie   
         abundances = "%s/gene_abund.tab"%out_stringtie   
     else:            
-        logger.info("StringTie was not successfull!")
-    return 0,[transcripts,abundances]
+        logger.info("StringTie failed!")
+    return transcripts,abundances
 
 def run_reconstruct(reconstructor="StringTie", alignment_bam="",
                   ref_gtf="", 
@@ -115,16 +96,16 @@ def run_reconstruct(reconstructor="StringTie", alignment_bam="",
     transcripts = ""
     abundances = ""
     if reconstructor.upper()=="STRINGTIE":
-        retcode,res=run_stringtie(alignment_bam=alignment_bam,
-                      ref_gtf=ref_gtf, 
-                      stringtie_opts=stringtie_opts, stringtie=stringtie,
-                      start=start, sample= sample, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout, ignore_exceptions=ignore_exceptions)
-                      
-        if retcode!=0:
-            logger.info("StringTie was not successfull!")
-            return "", ""
-        else:
-            transcripts,abundances=res
-
+        try:
+            transcripts,abundances=run_stringtie(alignment_bam=alignment_bam,
+                          ref_gtf=ref_gtf, 
+                          stringtie_opts=stringtie_opts, stringtie=stringtie,
+                          start=start, sample= sample, nthreads=nthreads,
+                          workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("StringTie failed!")
+            if not ignore_exceptions:
+                raise Exception(excp)
+            else:
+                logger.error(excp)
     return transcripts,abundances
