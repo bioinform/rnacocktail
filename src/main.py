@@ -190,7 +190,7 @@ def run_pipeline(args,parser):
                       genome_bowtie2_idx=args.genome_bowtie2_idx, transcriptome_bowtie2_idx=args.transcriptome_bowtie2_idx,
                       read_length=args.read_length,
                       samtools=args.samtools, idpfusion=args.idpfusion, idpfusion_cfg=args.idpfusion_cfg, 
-                      star_dir=args.star_dir, bowtie2_dir=args.bowtie2_dir,
+                      gmap=args.gmap, gmap_idx=args.gmap_idx, star_dir=args.star_dir, bowtie2_dir=args.bowtie2_dir,
                       start=args.start, sample= args.sample, nthreads=args.threads,
                       workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
     elif mode=="variant":
@@ -246,7 +246,7 @@ def run_pipeline(args,parser):
                       fusioncatcher=args.fusioncatcher, fusioncatcher_opts=args.fusioncatcher_opts, 
                       sample= args.sample, nthreads=args.threads,
                       workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
-    elif mode=="pipeline":
+    elif mode=="all":
         if not args.sr_aligner.upper()=="HISAT2":
             logger.error("%s is not supported. \
             \nThe supported short read aligner(s) are: %s."%(args.sr_aligner,SR_ALIGNERS))
@@ -297,17 +297,21 @@ def run_pipeline(args,parser):
             return os.EX_USAGE
 
 
+        do_short = True
         if (vars(args)["1"]=="" or vars(args)["2"]=="") and args.U=="":
             parser.print_help()
-            logger.error("Input sequence file(s) are missing.")
-            return os.EX_USAGE
+            logger.info("Input short-read sequence file(s) are missing. Will skipp short-read steps")
+            do_short = False
+            
         if (vars(args)["1"]=="" and vars(args)["2"]=="") and (args.U==""):
             parser.print_help()
-            logger.error("In pipeline mode, only one input type is possible: paired-end (--1 and --2) or unpaired (--U)")
+            logger.error("In pipeline mode, only one input short-read type is possible: paired-end (--1 and --2) or unpaired (--U)")
             return os.EX_USAGE
         
-        do_long=True
-#         if args.long == ""
+        do_long = args.long != ""
+        if not do_long:
+            logger.info("Input long-read sequence file(s) are missing. Will skipp long-read steps")
+ 
 
 
 #         elif mode=="diff":
@@ -330,188 +334,397 @@ def run_pipeline(args,parser):
         input_sr={}
         if (vars(args)["1"] and vars(args)["2"]):
             logger.info("Inputs are paired-end reads.")
-            input_sr["1"]=vars(args)["1"].split(";")
-            input_sr["2"]=vars(args)["2"].split(";")
+            input_sr["1"] = [j for i in vars(args)["1"] for j in i.split(",")]
+            input_sr["2"] = [j for i in vars(args)["2"] for j in i.split(",")]
             if len(input_sr["1"])!=n_samples or len(input_sr["2"])!=n_samples:
                 parser.print_help()
                 logger.error("Number of short paired-end input sequences does not match number of samples.")
                 return os.EX_USAGE
             input_mode="paired"
-            input_sr["1"]={samples[i]:j for i,j in enumerate(vars(args)["1"].split(";"))}
-            input_sr["2"]={samples[i]:j for i,j in enumerate(vars(args)["2"].split(";"))}
-            input_sr["U"]={samples[i]:"" for i,j in enumerate(vars(args)["1"].split(";"))}
+            input_sr["1"]={all_samples[i]:j for i,j in enumerate(input_sr["1"])}
+            input_sr["2"]={all_samples[i]:j for i,j in enumerate(input_sr["2"])}
+            input_sr["U"]={all_samples[i]:"" for i,j in enumerate(input_sr["1"])}
         else:
             logger.info("Inputs are unpaired reads.")
-            input_sr["U"]=args.U.split(";")
+            input_sr["U"] = [j for i in args.U for j in i.split(",")]
             if len(input_sr["U"])!=n_samples:
                 parser.print_help()
                 logger.error("Number of short unpiared input sequences does not match number of samples.")
                 return os.EX_USAGE
             input_mode="un-paired"
-            input_sr["U"]={samples[i]:j for i,j in enumerate(args.U.split(";"))}
-            input_sr["1"]={samples[i]:"" for i,j in enumerate(args.U.split(";"))}
-            input_sr["2"]={samples[i]:"" for i,j in enumerate(args.U.split(";"))}
+            input_sr["U"]={all_samples[i]:j for i,j in enumerate(input_sr["U"])}
+            input_sr["1"]={all_samples[i]:"" for i,j in enumerate(input_sr["U"])}
+            input_sr["2"]={all_samples[i]:"" for i,j in enumerate(input_sr["U"])}
         
         input_lr={}
-        if args.long:
-            input_lr=args.long.split(";")
+        if do_long:
+            input_lr = [j for i in args.long for j in i.split(",")]
             if len(input_lr)!=n_samples:
                 parser.print_help()
                 logger.error("Number of long input sequences does not match number of samples.")
                 return os.EX_USAGE
-            input_lr={samples[i]:j for i,j in enumerate(args.long.split(";"))}
+            input_lr={all_samples[i]:j for i,j in enumerate(input_lr)}
 
         alignments_bam={}
+        junctions_tab={}
+        junctions_bed={}
         transcripts={}
         abundances={}
         quant={}
+        diff_af=""
+        diff_al=""
         variants={}
-        junctions_tab={}
-        junctions_bed={}
-        for si,sample in enumarate(samples):
-            alignments_bam[sample]={}
-            junctions_tab[sample]={}
-            junctions_bed[sample]={}
-            transcripts[sample]={}
-            abundances[sample]={}
-            quant[sample]={}
-            transcripts_dnv[sample]={}
-            for ri,[replicate] in enumerate(sample):
-                logger.info("Assigned sample ID for replicate-%d in sample-%d: %s"%(ri+1,si+1,replicate))
-                logger.info("Running align step using %s for %s"%(args.sr_aligner,replicate))
-                alignments_bam[sample][replicate],junctions_tab[sample][replicate],junctions_bed[sample][replicate]=run_sr_align(sr_aligner=args.sr_aligner, 
-                              align_idx=args.align_idx,
-                              seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
-                              seq_u=input_sr["U"][replicate],
-                              seq_sra="", ref_gtf=args.ref_gtf, 
-                              hisat2_opts=args.hisat2_opts, hisat2=args.hisat2, 
-                              hisat2_sps=args.hisat2_sps, samtools=args.samtools,
-                              start=0, sample=replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+        transcripts_dnv={}
+        edits={}
+        fusions={}
+        corrected={}
+        alignments_lr={}
+        transcripts_lr={}
+        abundances_lr={}
+        
+        if do_short:
+            for si,sample in enumerate(samples):
+                alignments_bam[si]={}
+                junctions_tab[si]={}
+                junctions_bed[si]={}
+                transcripts[si]={}
+                abundances[si]={}
+                quant[si]={}
+                transcripts_dnv[si]={}
+                for ri,replicate in enumerate(sample):
+                    logger.info("Assigned sample ID for replicate-%d in sample-%d: %s"%(ri+1,si+1,replicate))
 
-                logger.info("Running reconstruct step using %s for %s"%(args.reconstructor,replicate))
-                transcripts[sample][replicate],abundances[sample][replicate]=run_reconstruct(reconstructor=args.reconstructor, alignment_bam=alignments_bam,
-                              ref_gtf=args.ref_gtf, 
-                              stringtie_opts=args.stringtie_opts, stringtie=args.stringtie,
-                              start=0, sample= replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
-                logger.info("Running quantification step using %s for %s"%(args.quantifier,replicate))
-                quant[sample][replicate]=run_quantify(quantifier=args.quantifier, quantifier_idx=args.quantifier_idx,
-                              seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
-                              seq_u=input_sr["U"][replicate],
-                              salmon_k=args.salmon_k, libtype=args.libtype,                      
-                              salmon_smem_opts=args.salmon_smem_opts, salmon=args.salmon,
-                              start=0, sample=replicate, nthreads=args.threads, unzip=args.unzip,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
-                logger.info("Running de novo assembly step using %s for %s"%(args.assembler,replicate))
-                run_dnv_assemebly(assembler=args.assembler, 
-                               assmebly_hash=args.assmebly_hash,
-                              seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
-                              seq_u=input_sr["U"][replicate], seq_i="",
-                              file_format=args.file_format, read_type=args.read_type, 
-                              oases=args.oases, velvetg=args.velvetg, velveth=args.velveth,
-                              oases_opts=args.oases_opts, velvetg_opts=args.velvetg_opts, 
-                              velveth_opts=args.velveth_opts,
-                              start=0, sample= replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    if "align" not in args.exclude:
+                        logger.info("******************************************************************************")
+                        logger.info("Running align step using %s for %s"%(args.sr_aligner,replicate))
+                        logger.info("******************************************************************************")
+                        alignments_bam[si][replicate],junctions_tab[si][replicate],junctions_bed[si][replicate]=run_sr_align(sr_aligner=args.sr_aligner, 
+                                      align_idx=args.align_idx,
+                                      seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
+                                      seq_u=input_sr["U"][replicate],
+                                      seq_sra="", ref_gtf=args.ref_gtf, 
+                                      hisat2_opts=args.hisat2_opts, hisat2=args.hisat2, 
+                                      hisat2_sps=args.hisat2_sps, samtools=args.samtools,
+                                      start=0, sample=replicate, nthreads=args.threads,
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    else:
+                        logger.info("******************************************************************************")
+                        logger.info("Excluding align step using %s for %s"%(args.sr_aligner,replicate))
+                        logger.info("******************************************************************************")
+                        alignments_bam[si][replicate],junctions_tab[si][replicate],junctions_bed[si][replicate]=["","",""]
+                        
+                    if "reconstruct" not in args.exclude:
+                        logger.info("******************************************************************************")
+                        logger.info("Running reconstruct step using %s for %s"%(args.reconstructor,replicate))
+                        logger.info("******************************************************************************")
+                        transcripts[si][replicate],abundances[si][replicate]=run_reconstruct(reconstructor=args.reconstructor,
+                                      alignment_bam=alignments_bam[si][replicate],
+                                      ref_gtf=args.ref_gtf, 
+                                      stringtie_opts=args.stringtie_opts, stringtie=args.stringtie,
+                                      start=0, sample=replicate, nthreads=args.threads,
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    else:
+                        logger.info("******************************************************************************")
+                        logger.info("Excluding reconstruct step using %s for %s"%(args.reconstructor,replicate))
+                        logger.info("******************************************************************************")
+                        transcripts[si][replicate],abundances[si][replicate]=["",""]
 
-        logger.info("Running differential analysis step (based on alignment-free quantification results) using %s for %s"%(args.difftool,args.sample))
-        run_diff(difftool=args.difftool, quant_files=[",".join(quant[sample]) for sample in samples],
-                     alignments="",
-                      transcripts_gtfs="",
-                      ref_gtf=args.ref_gtf,
-                      featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
-                      stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
-                      mincount=args.mincount, alpha=args.alpha, 
-                      R=args.R, start=0, samples=args.sample, nthreads=args.threads,
-                      workdir=os.path.join(args.workdir, "diff-quant"), 
-                      outdir=os.path.join(args.workdir, "diff-quant"), timeout=args.timeout)
-        logger.info("Running differential analysis step (based on alignment results) using %s for %s"%(args.difftool,args.sample))
-#         if use_tgtf
-        run_diff(difftool=args.difftool, quant_files="",
-                     alignments=[",".join(alignments_bam[sample]) for sample in samples],
-                      transcripts_gtfs=[",".join(transcripts[sample]) for sample in samples],
-                      ref_gtf=args.ref_gtf,
-                      featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
-                      stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
-                      mincount=args.mincount, alpha=args.alpha, 
-                      R=args.R, start=0, samples=args.sample, nthreads=args.threads,
-                      workdir=os.path.join(args.workdir, "diff-alignment"), 
-                      outdir=os.path.join(args.workdir, "diff-alignment"), timeout=args.timeout)
+                    if "quantify" not in args.exclude:
+                        logger.info("******************************************************************************")
+                        logger.info("Running quantification step using %s for %s"%(args.quantifier,replicate))
+                        logger.info("******************************************************************************")
+                        quant[si][replicate]=run_quantify(quantifier=args.quantifier, quantifier_idx=args.quantifier_idx,
+                                      seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
+                                      seq_u=input_sr["U"][replicate],
+                                      salmon_k=args.salmon_k, libtype=args.libtype,                      
+                                      salmon_smem_opts=args.salmon_smem_opts, salmon=args.salmon,
+                                      start=0, sample=replicate, nthreads=args.threads, unzip=args.unzip,
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    else:
+                        logger.info("******************************************************************************")
+                        logger.info("Excluding quantification step using %s for %s"%(args.quantifier,replicate))
+                        logger.info("******************************************************************************")
+                        quant[si][replicate]=""
+
+                    if "denovo" not in args.exclude:
+                        logger.info("******************************************************************************")
+                        logger.info("Running de novo assembly step using %s for %s"%(args.assembler,replicate))
+                        logger.info("******************************************************************************")
+                        transcripts_dnv[si][replicate]=run_dnv_assemebly(assembler=args.assembler, 
+                                       assmebly_hash=args.assmebly_hash,
+                                      seq_1=input_sr["1"][replicate], seq_2=input_sr["2"][replicate], 
+                                      seq_u=input_sr["U"][replicate], seq_i="",
+                                      file_format=args.file_format, read_type=args.read_type, 
+                                      oases=args.oases, velvetg=args.velvetg, velveth=args.velveth,
+                                      oases_opts=args.oases_opts, velvetg_opts=args.velvetg_opts, 
+                                      velveth_opts=args.velveth_opts,
+                                      start=0, sample= replicate, nthreads=args.threads,
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    else:
+                        logger.info("******************************************************************************")
+                        logger.info("Excluding de novo assembly step using %s for %s"%(args.assembler,replicate))
+                        logger.info("******************************************************************************")
+                        transcripts_dnv[si][replicate]=""
+
+            if "diff" not in args.exclude:
+                logger.info("******************************************************************************")
+                logger.info("Running differential analysis step (based on alignment-free quantification results) using %s for %s"%(args.difftool,samples))
+                logger.info("******************************************************************************")
+                diff_af=run_diff(difftool=args.difftool, quant_files=[",".join([quant[si][replicate] for replicate in sample]) for si,sample in enumerate(samples)],
+                             alignments="",
+                              transcripts_gtfs="",
+                              ref_gtf=args.ref_gtf,
+                              featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
+                              stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
+                              mincount=args.mincount, alpha=args.alpha, 
+                              R=args.R, start=0, samples=args.sample, nthreads=args.threads,
+                              workdir=os.path.join(args.workdir, "diff-quant"), 
+                              outdir=os.path.join(args.outdir, "diff-quant"), timeout=args.timeout)
+
+                logger.info("******************************************************************************")
+                logger.info("Running differential analysis step (based on alignment results) using %s for %s"%(args.difftool,samples))
+                logger.info("******************************************************************************")
+        #         if use_tgtf
+                diff_al=run_diff(difftool=args.difftool, quant_files="",
+                             alignments=[",".join([alignments_bam[si][replicate] for replicate in sample]) for si,sample in enumerate(samples)],
+                              transcripts_gtfs=[",".join([transcripts[si][replicate] for replicate in sample]) for si,sample in enumerate(samples)],
+                              ref_gtf=args.ref_gtf,
+                              featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
+                              stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
+                              mincount=args.mincount, alpha=args.alpha, 
+                              R=args.R, start=0, samples=args.sample, nthreads=args.threads,
+                              workdir=os.path.join(args.workdir, "diff-alignment"), 
+                              outdir=os.path.join(args.outdir, "diff-alignment"), timeout=args.timeout)
+            else:
+                logger.info("******************************************************************************")
+                logger.info("Excluding differential analysis step (based on alignment-free quantification results) using %s for %s"%(args.difftool,samples))
+                logger.info("******************************************************************************")
+                diff_af=""
+                logger.info("******************************************************************************")
+                logger.info("Excluding differential analysis step (based on alignment results) using %s for %s"%(args.difftool,samples))
+                logger.info("******************************************************************************")
+                diff_al=""
 
 
-        for si,sample in enumarate(samples):
-            variants[sample]={}
-            for ri,[replicate] in enumerate(sample):
-                logger.info("Running variant calling step using %s for %"%(args.variant_caller,replicate))
-                variants[sample][replicate]=run_variant(variant_caller=args.variant_caller,
-                              alignment=alignments_bam[sample][replicate], ref_genome=args.ref_genome, 
-                              knownsites=args.knownsites,
-                              picard=args.picard, gatk=args.gatk, 
-                              java=args.java, java_opts=args.java_opts,
-                              CleanSam=args.CleanSam, IndelRealignment=args.IndelRealignment,
-                              no_BaseRecalibrator=args.no_BaseRecalibrator,
-                              AddOrReplaceReadGroups_opts=args.AddOrReplaceReadGroups_opts,
-                              MarkDuplicates_opts=args.MarkDuplicates_opts, 
-                              SplitNCigarReads_opts=args.SplitNCigarReads_opts, 
-                              RealignerTargetCreator_opts=args.RealignerTargetCreator_opts, 
-                              IndelRealigner_opts=args.IndelRealigner_opts, 
-                              BaseRecalibrator_opts=args.BaseRecalibrator_opts, 
-                              PrintReads_opts=args.PrintReads_opts, 
-                              HaplotypeCaller_opts=args.HaplotypeCaller_opts, 
-                              VariantFiltration_opts=args.VariantFiltration_opts, 
-                              start=0, sample=replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
-                logger.info("Running RNA editing calling step using %s for %s"%(args.editing_caller,replicate))
-                run_editing(editing_caller=args.editing_caller,
-                              alignment=alignments_bam[sample][replicate], variant=variants[sample][replicate], 
-                              strand_pos=args.strand_pos, genes_pos=args.genes_pos,
-                              ref_genome=args.ref_genome, knownsites=args.knownsites,
-                              giremi_dir=args.giremi_dir, htslib_dir=args.htslib_dir, 
-                              samtools=args.samtools, gatk=args.gatk, 
-                              java=args.java, giremi_opts=args.giremi_opts,java_opts=args.java_opts,
-                              VariantAnnotator_opts=args.VariantAnnotator_opts, 
-                              start=0, sample= replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+            for si,sample in enumerate(samples):
+                variants[si]={}
+                edits[si]={}
+                fusions[si]={}
+                for ri,replicate in enumerate(sample):
+                    if "variant" not in args.exclude:
+                        logger.info("******************************************************************************")
+                        logger.info("Running variant calling step using %s for %s"%(args.variant_caller,replicate))
+                        logger.info("******************************************************************************")
+                        variants[si][replicate]=run_variant(variant_caller=args.variant_caller,
+                                      alignment=alignments_bam[si][replicate], ref_genome=args.ref_genome, 
+                                      knownsites=args.knownsites,
+                                      picard=args.picard, gatk=args.gatk, 
+                                      java=args.java, java_opts=args.java_opts,
+                                      CleanSam=args.CleanSam, IndelRealignment=args.IndelRealignment,
+                                      no_BaseRecalibrator=args.no_BaseRecalibrator,
+                                      AddOrReplaceReadGroups_opts=args.AddOrReplaceReadGroups_opts,
+                                      MarkDuplicates_opts=args.MarkDuplicates_opts, 
+                                      SplitNCigarReads_opts=args.SplitNCigarReads_opts, 
+                                      RealignerTargetCreator_opts=args.RealignerTargetCreator_opts, 
+                                      IndelRealigner_opts=args.IndelRealigner_opts, 
+                                      BaseRecalibrator_opts=args.BaseRecalibrator_opts, 
+                                      PrintReads_opts=args.PrintReads_opts, 
+                                      HaplotypeCaller_opts=args.HaplotypeCaller_opts, 
+                                      VariantFiltration_opts=args.VariantFiltration_opts, 
+                                      start=0, sample=replicate, nthreads=args.threads,
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    else:
+                        logger.info("******************************************************************************")
+                        logger.info("Excluding variant calling step using %s for %s"%(args.variant_caller,replicate))
+                        logger.info("******************************************************************************")
+                        variants[si][replicate]=""
+                
+                    if "editing" not in args.exclude:
+                        logger.info("******************************************************************************")
+                        logger.info("Running RNA editing calling step using %s for %s"%(args.editing_caller,replicate))
+                        logger.info("******************************************************************************")
+                        edits[si][replicate]=run_editing(editing_caller=args.editing_caller,
+                                      alignment=alignments_bam[si][replicate], variant=variants[si][replicate], 
+                                      strand_pos=args.strand_pos, genes_pos=args.genes_pos,
+                                      ref_genome=args.ref_genome, knownsites=args.knownsites,
+                                      giremi_dir=args.giremi_dir, htslib_dir=args.htslib_dir, 
+                                      samtools=args.samtools, gatk=args.gatk, 
+                                      java=args.java, giremi_opts=args.giremi_opts,java_opts=args.java_opts,
+                                      VariantAnnotator_opts=args.VariantAnnotator_opts, 
+                                      start=0, sample= replicate, nthreads=args.threads,
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    else:
+                        logger.info("******************************************************************************")
+                        logger.info("Excluding RNA editing calling step using %s for %s"%(args.editing_caller,replicate))
+                        logger.info("******************************************************************************")
+                        edits[si][replicate]=""
 
-                logger.info("Running Fusion prediction step using %s for %s"%(args.fusion_caller,replicate))
-                run_fusion(fusion_caller=args.fusion_caller,
-                              data_dir=args.data_dir, input="%s,%s"%(input_sr["1"][replicate],
-                              input_sr["2"][replicate]) if input_mode=="paired" else input_sr["U"][replicate], 
-                              start=0, 
-                              fusioncatcher=args.fusioncatcher, fusioncatcher_opts=args.fusioncatcher_opts, 
-                              sample= replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    if "fusion" not in args.exclude:
+                        logger.info("******************************************************************************")
+                        logger.info("Running Fusion prediction step using %s for %s"%(args.fusion_caller,replicate))
+                        logger.info("******************************************************************************")
+                        fusions[si][replicate]=run_fusion(fusion_caller=args.fusion_caller,
+                                      data_dir=args.data_dir, input="%s,%s"%(input_sr["1"][replicate],
+                                      input_sr["2"][replicate]) if input_mode=="paired" else input_sr["U"][replicate], 
+                                      start=0, 
+                                      fusioncatcher=args.fusioncatcher, fusioncatcher_opts=args.fusioncatcher_opts, 
+                                      sample= replicate, nthreads=args.threads,
+                                      workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                    else:
+                        logger.info("******************************************************************************")
+                        logger.info("Excluding RNA editing calling step using %s for %s"%(args.editing_caller,replicate))
+                        logger.info("******************************************************************************")
+                        fusions[si][replicate]=""
 
-        for si,sample in enumarate(samples):
-            corrected[sample]={}
-            for ri,[replicate] in enumerate(sample):
-                logger.info("Running long read error correction step using %s for %s"%(args.long_corrector,replicate))
-                corrected[sample][replicate]=run_lr_correct(long_corrector=args.long_corrector, kmer=args.kmer,
-                              solid=args.kmer,long=input_lr[replicate], short="%s,%s"%(input_sr["1"][replicate],
-                              input_sr["2"][replicate]) if input_mode=="paired" else input_sr["U"][replicate], 
-                              lordec=args.lordec, lordec_opts=args.lordec_opts,
-                              start=0, sample= replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+        if do_long:
+            if do_short:
+                for si,sample in enumerate(samples):
+                    corrected[si]={}
+                    alignments_lr[si]={}
+                    transcripts_lr[si]={}
+                    abundances_lr[si]={}
+                    for ri,replicate in enumerate(sample):
+                    
+                        if "long_correct" not in args.exclude:
+                            logger.info("******************************************************************************")
+                            logger.info("Running long read error correction step using %s for %s"%(args.long_corrector,replicate))
+                            logger.info("******************************************************************************")
+                            corrected[si][replicate]=run_lr_correct(long_corrector=args.long_corrector, kmer=args.kmer,
+                                          solid=args.kmer,long=input_lr[replicate], short="%s,%s"%(input_sr["1"][replicate],
+                                          input_sr["2"][replicate]) if input_mode=="paired" else input_sr["U"][replicate], 
+                                          lordec=args.lordec, lordec_opts=args.lordec_opts,
+                                          start=0, sample= replicate, nthreads=args.threads,
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                        else:
+                            logger.info("******************************************************************************")
+                            logger.info("Excluding long read error correction step using %s for %s"%(args.long_corrector,replicate))
+                            logger.info("******************************************************************************")
+                            corrected[si][replicate]=""
+                    
+                    
+                    
+                        if "long_align" not in args.exclude:
+                            logger.info("******************************************************************************")
+                            logger.info("Running long read alignment step on corrected long-reads using %s for %s"%(args.long_aligner,replicate))
+                            logger.info("******************************************************************************")
+                            alignments_lr[si][replicate]=run_lr_align(long_aligner=args.long_aligner,long=corrected[si][replicate],
+                                          genome_dir=args.star_genome_dir, ref_gtf=args.ref_gtf,
+                                          starlong=args.starlong, starlong_opts=args.starlong_opts, 
+                                          sam2psl=args.sam2psl, samtools=args.samtools,
+                                          start=0, sample= replicate, nthreads=args.threads,
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                        else:
+                            logger.info("******************************************************************************")
+                            logger.info("Excluding long read alignment step on corrected long-reads using %s for %s"%(args.long_aligner,replicate))
+                            logger.info("******************************************************************************")
+                            alignments_lr[si][replicate]=""
 
-                logger.info("Running long read alignment step using %s for %s"%(args.long_aligner,replicate))
-                run_lr_align(long_aligner=args.long_aligner,long=corrected[sample][replicate],
-                              genome_dir=args.star_genome_dir, ref_gtf=args.ref_gtf,
-                              starlong=args.starlong, starlong_opts=args.starlong_opts, 
-                              sam2psl=args.sam2psl, samtools=args.samtools,
-                              start=0, sample= replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
-                logger.info("Running long read transcriptome reconstruction step using %s for %s"%(args.long_reconstructor,replicate))
-                run_lr_reconstruct(long_reconstructor=args.long_reconstructor,
-                              alignment=alignments_bam[sample][replicate], 
-                              short_junction=junctions_bed[sample][replicate], 
-                              long_alignment=corrected[sample][replicate],
-                              mode_number=args.mode_number,
-                              ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
-                              read_length=args.read_length,
-                              samtools=args.samtools, idp=args.idp, idp_cfg=args.idp_cfg, 
-                              start=0, sample= replicate, nthreads=args.threads,
-                              workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                        if "long_reconstruct" not in args.exclude:
+                            logger.info("******************************************************************************")
+                            logger.info("Running long read transcriptome reconstruction step using %s for %s"%(args.long_reconstructor,replicate))
+                            logger.info("******************************************************************************")
+                            transcripts_lr[si][replicate],abundances_lr[si][replicate]=run_lr_reconstruct(long_reconstructor=args.long_reconstructor,
+                                          alignment=alignments_bam[si][replicate], 
+                                          short_junction=junctions_bed[si][replicate], 
+                                          long_alignment=corrected[si][replicate],
+                                          mode_number=args.mode_number,
+                                          ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
+                                          read_length=args.read_length,
+                                          samtools=args.samtools, idp=args.idp, idp_cfg=args.idp_cfg, 
+                                          start=0, sample= replicate, nthreads=args.threads,
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                        else:
+                            logger.info("******************************************************************************")
+                            logger.info("Excluding long read transcriptome reconstruction step using %s for %s"%(args.long_reconstructor,replicate))
+                            logger.info("******************************************************************************")
+                            transcripts_lr[si][replicate],abundances_lr[si][replicate]=["",""]
+                        
+            else:
+                for si,sample in enumerate(samples):
+                    corrected[si]={}
+                    for ri,replicate in enumerate(sample):
+                        if "long_align" not in args.exclude:
+                            logger.info("******************************************************************************")
+                            logger.info("Running long read alignment step on original long-reads using %s for %s"%(args.long_aligner,replicate))
+                            logger.info("******************************************************************************")
+                            alignments_lr[si][replicate]=run_lr_align(long_aligner=args.long_aligner,long=input_lr[replicate],
+                                          genome_dir=args.star_genome_dir, ref_gtf=args.ref_gtf,
+                                          starlong=args.starlong, starlong_opts=args.starlong_opts, 
+                                          sam2psl=args.sam2psl, samtools=args.samtools,
+                                          start=0, sample= replicate, nthreads=args.threads,
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
+                        else:
+                            logger.info("******************************************************************************")
+                            logger.info("Excluding long read alignment step on original long-reads using %s for %s"%(args.long_aligner,replicate))
+                            logger.info("******************************************************************************")
+                            alignments_lr[si][replicate]=""
+
+                    
+                                      
+        tasks={"Short-read alignment":[alignments_bam,junctions_tab,junctions_bed],
+               "Short-read transcriptome reconstruction":[transcripts,abundances],
+               "Short-read alignment-free quantification":[quant],
+               "Short-read alignment-free differential analysis":[diff_af],
+               "Short-read alignment-based differential analysis":[diff_al],
+               "Short-read de novo assembly":[transcripts_dnv],
+               "Short-read variant calling":[variants],
+               "Short-read rna editing detection":[edits],
+               "Short-read fusion detection":[fusions],
+               "Long-read error correction":[corrected],
+               "Long-read alignment":[alignments_lr],
+               "long-read transcriptome reconstruction":[transcripts_lr,abundances_lr],
+        }
+        ordered_tasks={"Short-read alignment",
+               "Short-read transcriptome reconstruction",
+               "Short-read alignment-free quantification",
+               "Short-read alignment-free differential analysis",
+               "Short-read alignment-based differential analysis",
+               "Short-read de novo assembly",
+               "Short-read variant calling",
+               "Short-read rna editing detection",
+               "Short-read fusion detection",
+               "Long-read error correction",
+               "Long-read alignment",
+               "long-read transcriptome reconstruction",
+        }
+        success={task:[] for task in ordered_tasks}
+        failure={task:[] for task in ordered_tasks}
+        for t,vv in tasks.iteritems():
+            v=vv[0]
+            if t=="Short-read alignment-free differential analysis" or t=="Short-read alignment-based differential analysis":
+                if v:
+                    success[t].append("ALL")
+                else:
+                    failure[t].append("ALL")
+            else:
+                if v:
+                    for si,sample in enumarate(v):
+                        for replicate in sample:
+                            if v[si][replicate]:
+                                success[t].append(replicate)
+                            else:
+                                failure[t].append(replicate)
+                else:
+                    failure[t].append("ALL")
+        
+            
+        
+        logger.info("----------------------------------------------")
+        logger.info("Successfull Runs:")
+        logger.info("----------------------------------------------")
+        for t in ordered_tasks:
+            if not set(success[t])^set(all_samples):
+                success[t]=["ALL"]
+            if success[t]:
+                logger.info("%s: %s"%(t,",".join(success[t])))
+        logger.info("----------------------------------------------")
+        logger.info("Failed Runs:")
+        logger.info("----------------------------------------------")
+        for t in ordered_tasks:
+            if not set(failure[t])^set(all_samples):
+                failure[t]=["ALL"]
+            if failure[t]:
+                logger.info("%s: %s"%(t,",".join(failure[t])))
     else:
         logger.error("wrong mode %s"%(mode))
         return os.EX_USAGE

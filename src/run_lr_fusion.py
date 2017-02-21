@@ -3,6 +3,7 @@ from external_cmd import TimedExternalCmd
 from defaults import *
 from utils import *
 import csv
+import re
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
 logging.basicConfig(level=logging.INFO, format=FORMAT)
@@ -29,13 +30,29 @@ def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+
             spamwriter.writerows(sorted_rows)
 
 
+
+CIGAR_MATCH = 0
+CIGAR_INS = 1
+CIGAR_DEL = 2
+CIGAR_SOFTCLIP = 4
+CIGAR_EQUAL = 7
+CIGAR_DIFF = 8
+CIGAR_PATTERN = re.compile(r'([0-9]+)([MIDNSHPX=])')
+CIGAR_OP_DICT = {op: index for index, op in enumerate("MIDNSHP=X")}
+CIGAR_OP_DICT_rev = {index: op for index, op in enumerate("MIDNSHP=X")}
+CIGAR_REFERENCE_OPS = [CIGAR_MATCH, CIGAR_DEL, CIGAR_EQUAL, CIGAR_DIFF]
+
+def cigarstring_to_tuple(cigarstring):
+    return tuple((CIGAR_OP_DICT[op], int(length)) for length, op in CIGAR_PATTERN.findall(cigarstring))
+
+
 def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number=0, 
                     short_fasta="", long_fasta="", 
                   ref_genome="", ref_all_gpd="", ref_gpd="", uniqueness_bedgraph="",
                   genome_bowtie2_idx="", transcriptome_bowtie2_idx="",
                   read_length=100,
                   idpfusion_cfg="", idpfusion=IDPFUSION, samtools=SAMTOOLS, 
-                  star_dir=STAR_DIR, bowtie2_dir=BOWTIE2_DIR,
+                  gmap=GMAP, gmap_idx="", star_dir=STAR_DIR, bowtie2_dir=BOWTIE2_DIR,
                   start=0, sample= "", nthreads=1,
                   workdir=None, outdir=None, timeout=TIMEOUT):
 
@@ -87,7 +104,66 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
             command="bash -c \"%s\""%command       
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=idpfusion_log_fd, cmd_log=idpfusion_log, msg=msg, timeout=timeout)
-            alignment =  "%s/alignments.sam"%(work_idpfusion)
+            alignment = "%s/alignments.sam"%(work_idpfusion)
+    else:
+        logger.info("Skipping step %d: %s"%(step,msg))
+    step+=1
+
+
+    msg = "Fix soft-clipped reads in SAM for %s"%sample
+    logger.info("--------------------------STEP %s--------------------------"%step)
+    if start<=step:
+        logger.info("Task :%s"%msg)
+        corrected_alignment = "%s/alignments_corrected.sam"%(work_idpfusion)
+        with open(alignment,"r") as csv_file_i:
+            with open(corrected_alignment,"w") as csv_file_o:
+                spamreader = csv.reader(csv_file_i, delimiter='\t', quotechar='|')
+                spamwriter = csv.writer(csv_file_o, delimiter='\t',
+                                        quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                for row in spamreader:
+                    if row[0][0]=="@":
+                        spamwriter.writerow(row)
+                        continue
+                    if row[5]=="*":
+                        continue
+                    if "S" in row[5]:
+                        cigartuple=cigarstring_to_tuple(row[5])
+                        if cigartuple[0][0]==4:
+                            row[9]=row[9][cigartuple[0][1]:]
+                            row[10]=row[10][cigartuple[0][1]:]
+                            cigartuple=cigartuple[1:]
+                        if cigartuple[-1][0]==4:
+                            row[9]=row[9][:-cigartuple[-1][1]]
+                            row[10]=row[10][:-cigartuple[-1][1]]
+                            cigartuple=cigartuple[:-1]
+                        row[5]="".join(["%d%s"%(x[1],CIGAR_OP_DICT_rev[x[0]]) for x in cigartuple])
+                    spamwriter.writerow(row)
+        alignment=corrected_alignment
+    else:
+        logger.info("Skipping step %d: %s"%(step,msg))
+    step+=1
+
+
+    msg = "Fix junction bed for %s"%sample
+    logger.info("--------------------------STEP %s--------------------------"%step)
+    if start<=step:
+        logger.info("Task :%s"%msg)
+        corrected_junction = "%s/splicesites_corrected.bed"%(work_idpfusion)
+        with open(short_junction,"r") as csv_file_i:
+            with open(corrected_junction,"w") as csv_file_o:
+                spamreader = csv.reader(csv_file_i, delimiter='\t', quotechar='|')
+                spamwriter = csv.writer(csv_file_o, delimiter='\t',
+                                        quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                for row in spamreader:
+                    if len(row)<4:
+                        spamwriter.writerow(row)                        
+                        continue
+                    if "]" in row[3]:
+                        spamwriter.writerow(row)
+                        continue
+                    row[3]="(2)[2_2](2/0)"
+                    spamwriter.writerow(row)
+        short_junction=corrected_junction
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
@@ -96,6 +172,7 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
     msg = "Preparing run.cfg for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
+        logger.info("Task :%s"%msg)
         if idpfusion_cfg:
             msg = "copy IDP-fusion .cfg file for %s"%sample
             command="cp  %s %s/run.cfg" % (
@@ -143,6 +220,10 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
                 cfg_file.write("SR_aligner_choice = STAR \n")
             if "star_path" not in cgf_dict:       
                 cfg_file.write("star_path = %s \n"%star_dir)
+            if "gmap_executable_pathfilename" not in cgf_dict:       
+                cfg_file.write("gmap_executable_pathfilename = %s \n"%gmap)
+            if "gmap_index_pathfoldername" not in cgf_dict:       
+                cfg_file.write("gmap_index_pathfoldername = %s \n"%gmap_idx)
             if "genome_bowtie2_index_pathfilename" not in cgf_dict:       
                 cfg_file.write("genome_bowtie2_index_pathfilename = %s \n"%genome_bowtie2_idx)
             if "transcriptome_bowtie2_index_pathfilename" not in cgf_dict:       
@@ -156,7 +237,7 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
             if "estimator_choice" not in cgf_dict:       
                 cfg_file.write("estimator_choice = MAP \n")
             if "FPR" not in cgf_dict:       
-                cfg_file.write("FPR = 0.05 \n")
+                cfg_file.write("FPR = 0.1 \n")
             if "Njun_limit" not in cgf_dict:       
                 cfg_file.write("Njun_limit = 10 \n")
             if "Niso_limit" not in cgf_dict:       
@@ -166,19 +247,19 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
             if "L_min_intron" not in cgf_dict:       
                 cfg_file.write("L_min_intron = 68 \n")
             if "Bfile_Npt" not in cgf_dict:       
-                cfg_file.write("Bfile_Npt = 500 \n")
+                cfg_file.write("Bfile_Npt = 50 \n")
             if "Bfile_Nbin" not in cgf_dict:       
                 cfg_file.write("Bfile_Nbin = 5 \n")
             if "min_LR_overlap_len" not in cgf_dict:       
                 cfg_file.write("min_LR_overlap_len = 100 \n")
             if "LR_fusion_point_err_margin" not in cgf_dict:       
-                cfg_file.write("LR_fusion_point_err_margin = 20 \n")
+                cfg_file.write("LR_fusion_point_err_margin = 100 \n")
             if "min_LR_fusion_point_search_distance" not in cgf_dict:       
                 cfg_file.write("min_LR_fusion_point_search_distance = 20 \n")
             if "uniq_LR_alignment_margin_perc" not in cgf_dict:       
                 cfg_file.write("uniq_LR_alignment_margin_perc = 20 \n")
             if "Niso_fusion_limit" not in cgf_dict:       
-                cfg_file.write("Niso_fusion_limit = 20 \n")
+                cfg_file.write("Niso_fusion_limit = 1000 \n")
             if "psl_type" not in cgf_dict:       
                 cfg_file.write("psl_type = 0 \n")
             if "read_length" not in cgf_dict:       
@@ -277,7 +358,7 @@ def run_lr_fusion(long_fusion_caller="IDP-fusion", alignment="",
                   genome_bowtie2_idx="", transcriptome_bowtie2_idx="",
                   read_length=100,
                   idpfusion_cfg="", idpfusion=IDPFUSION, samtools=SAMTOOLS, 
-                  star_dir=STAR_DIR, bowtie2_dir=BOWTIE2_DIR,
+                  gmap=GMAP, gmap_idx="", star_dir=STAR_DIR, bowtie2_dir=BOWTIE2_DIR,
                   start=0, sample= "", nthreads=1, 
                   workdir=None, outdir=None, timeout=TIMEOUT):
     transcripts = ""
@@ -292,7 +373,7 @@ def run_lr_fusion(long_fusion_caller="IDP-fusion", alignment="",
                       genome_bowtie2_idx=genome_bowtie2_idx, transcriptome_bowtie2_idx=transcriptome_bowtie2_idx,
                       read_length=read_length,
                       idpfusion_cfg=idpfusion_cfg, idpfusion=idpfusion, samtools=samtools, 
-                      star_dir=star_dir,
+                      gmap=gmap, gmap_idx=gmap_idx, star_dir=star_dir,
                       bowtie2_dir=bowtie2_dir,
                       start=start, sample= sample, nthreads=nthreads,
                       workdir=workdir, outdir=outdir, timeout=timeout)

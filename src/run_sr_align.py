@@ -200,15 +200,15 @@ def run_sr_align(sr_aligner="HISAT2", align_idx=None,
                   samtools=SAMTOOLS,
                   start=0, sample= "", nthreads=1, 
                   workdir=None, outdir=None, timeout=TIMEOUT):
-    alignments_bam=""
+    alignments_bam = ""
     junctions_tab = ""
     junctions_bed = ""
     if sr_aligner.upper()=="HISAT2":
-        alignments_bam=run_hisat2(align_idx=align_idx,
+        alignments_bam, junctions_tab, junctions_bed=run_hisat2(align_idx=align_idx,
                       seq_1=seq_1, seq_2=seq_2, seq_u=seq_u,
                       seq_sra=seq_sra, ref_gtf=ref_gtf, 
                       hisat2_opts=hisat2_opts, hisat2=hisat2, hisat2_sps=hisat2_sps,
                       samtools=samtools,
                       start=start, sample= sample, nthreads=nthreads,
                       workdir=workdir, outdir=outdir, timeout=timeout)
-    return alignments_bam,junctions_tab,junctions_bed
+    return alignments_bam, junctions_tab, junctions_bed

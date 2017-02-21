@@ -119,7 +119,7 @@ if __name__ == "__main__":
         quantifier_parser.add_argument("--libtype", metavar="libtype",
                                   help="Format string describing the library type. (For Salmon \
                                   check http://salmon.readthedocs.io/en/latest/library_type.html#fraglibtype)." 
-                                  , required=True)
+                                  , default=SALMON_LIBTYPE)
         quantifier_parser.add_argument("--unzip", action="store_true",
                                   help="The sequence files are zipped. So unzip them first.")
         quantifier_parser.add_argument("--start", metavar="start", type=int,
@@ -342,10 +342,10 @@ if __name__ == "__main__":
                                   splicing data from multiple sources including ESTs and \
                                   reference genome databases. For hg19 you may use \
                                   the full genome example at \
-                                  http://www.stanford.edu/group/wonglab/SpliceMap/hg19.all.gene_est.refFlat.txt.", required=True)
+                                  http://www.stanford.edu/group/wonglab/SpliceMap/hg19.all.gene_est.refFlat.txt.")
         long_reconstructor_parser.add_argument("--ref_gpd", metavar="ref_gpd",
                                   help="The reference transcriptome annotation file \
-                                  (in GPD format) to guide the analysis.", required=True)
+                                  (in GPD format) to guide the analysis.")
         long_reconstructor_parser.add_argument("--read_length", type=int, metavar="read_length",
                                   help="The short-read length.", default=100)
         long_reconstructor_parser.add_argument("--start", metavar="start", type=int,
@@ -429,6 +429,9 @@ if __name__ == "__main__":
         long_fusion_parser.add_argument("--samtools", help="Path to samtools executable", default=SAMTOOLS)
         long_fusion_parser.add_argument("--star_dir", help="Path to the directory with STAR executable", default=STAR_DIR)
         long_fusion_parser.add_argument("--bowtie2_dir", help="Path to the directory with bowtie2 executable", default=BOWTIE2_DIR)
+        long_fusion_parser.add_argument("--gmap", help="Path to GMAP executable", default=GMAP)
+        long_fusion_parser.add_argument("--gmap_idx", metavar="align_idx",
+                                  help="Path to the directory with GMAP index for the reference genome", required=True)
         long_fusion_parser.add_argument("--idpfusion", help="Path to runIDP.py script in IDP-fusion package", default=IDPFUSION)
         long_fusion_parser.add_argument("--idpfusion_cfg", metavar="idp_cfg",
                                   help="the .cfg file that include other options used for IDP \
@@ -608,107 +611,111 @@ if __name__ == "__main__":
                                    https://github.com/ndaniel/fusioncatcher/blob/master/doc/manual.md)."
                                    , default="")
 
-    elif mode == "pipeline":
-        pipeline_parser = parser.add_argument_group("RNA fusion prediction options")
-        pipeline_parser = parser.add_argument_group("Pipeline options")
-        pipeline_parser.add_argument("--1", metavar="seq_1",
-                                  help="Comma-separated list of files containing mate 1s (filename usually includes _1),\
-                                   e.g. --1 A_1.fq,B_1.fq.", default="")
-        pipeline_parser.add_argument("--2", metavar="seq_2",
-                                  help="Comma-separated list of files containing mate 2s (filename usually includes _2),\
-                                   e.g. --2 A_2.fq,B_2.fq.", default="")
-        pipeline_parser.add_argument("--U", metavar="seq_u",
-                                  help="Comma-separated list of files containing unpaired reads to be aligned,\
-                                   e.g. --U A.fq,B.fq.", default="")
-        pipeline_parser.add_argument("--sample", metavar="Sample", help="Sample name", required=True)                             
-        pipeline_parser.add_argument("--long", metavar="seq_l",
-                                  help="The FASTA file containing long reads ", default="")
-        pipeline_parser.add_argument("--exclude", metavar="excluded_steps",
+    elif mode == "all":
+        all_parser = parser.add_argument_group("Run all pipeline options")
+        all_parser.add_argument("--1", nargs="*", metavar="seq_1",
+                                  help="List of files containing mate 1s (filename usually includes _1).\
+                                   Replicates in same sample should be listed comma-separated :\
+                                   e.g. --1 A1_1.fq,A2_1.fq B1_1.fq,B2_1.fq.", default="")
+        all_parser.add_argument("--2", nargs="*", metavar="seq_2",
+                                  help="List of files containing mate 2s (filename usually includes _2).\
+                                   Replicates in same sample should be listed comma-separated :\
+                                   e.g. --2 A1_2.fq,A2_2.fq B1_2.fq,B2_2.fq.", default="")
+        all_parser.add_argument("--U", nargs="*", metavar="seq_u",
+                                  help="List of files containing unpaired reads to be aligned.\
+                                   Replicates in same sample should be listed comma-separated :\
+                                   e.g. --U A1.fq,A2.fq B1.fq,B2.fq.", default="")
+        all_parser.add_argument("--long", nargs="*", metavar="seq_l",
+                                  help="List of FASTA files containing long reads.\
+                                   Replicates in same sample should be listed comma-separated :\
+                                   e.g. --long A1.fasta,A2.fasta B1.fasta,B2.fasta.", default="")
+        all_parser.add_argument("--sample", nargs="*", metavar="Sample", help="Sample name", required=True)                             
+        all_parser.add_argument("--exclude", nargs="*", metavar="excluded_steps",
                                   help="List of exlcluded steps",choices=MODES-set(["pipeline"]),default="")
-        pipeline_parser.add_argument("--ref_gtf", metavar="ref_gtf",
+        all_parser.add_argument("--ref_gtf", metavar="ref_gtf",
                                   help="The reference transcriptome annotation file \
                                   (in GTF or GFF3 format) to guide the analysis. \
                                   ( --known-splicesite-infile option for HISAT will be created based on this file)", default="")
-        pipeline_parser.add_argument("--ref_genome", metavar="ref_genome",
+        all_parser.add_argument("--ref_genome", metavar="ref_genome",
                                   help="The reference genome FASTA file",  default="")
-        pipeline_parser.add_argument("--ref_all_gpd", metavar="ref_genome",
+        all_parser.add_argument("--ref_all_gpd", metavar="ref_genome",
                                   help="GPD format annotation file for the whole genome \
                                   splicing data from multiple sources including ESTs and \
                                   reference genome databases. (Required for long-read transcriptome reconstruction).\
                                   For hg19 you may use the full genome example at \
                                   http://www.stanford.edu/group/wonglab/SpliceMap/hg19.all.gene_est.refFlat.txt.", default="")
-        pipeline_parser.add_argument("--ref_gpd", metavar="ref_gpd",
+        all_parser.add_argument("--ref_gpd", metavar="ref_gpd",
                                   help="The reference transcriptome annotation file \
                                   (in GPD format) to guide the analysis. \
                                   (Required for long-read transcriptome reconstruction).", default="")
-        pipeline_parser.add_argument("--knownsites", metavar="knownsites",
+        all_parser.add_argument("--knownsites", metavar="knownsites",
                                   help="A database of known polymorphic sites (e.g. dbSNP). Used \
                                   in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step \
                                   knownsites should be provided.", default="")
-        pipeline_parser.add_argument("--strand_pos", metavar="strand_pos",
+        all_parser.add_argument("--strand_pos", metavar="strand_pos",
                                   help="A BED file which specifies the strand of the genes/transcripts. \
                                   Each row should have 5 columns: chromosome,start,end,name,score(can be .),strand (+ or -). \
                                   Examples for Human on GRCh37 can be found in test directory. \
                                   You can generate this file using reference transcript annotations.\
                                   (Required for RNA editing detection).", default="")
-        pipeline_parser.add_argument("--genes_pos", metavar="genes_pos",
+        all_parser.add_argument("--genes_pos", metavar="genes_pos",
                                   help="A BED file which specifies the positions in the genome that genes reside. \
                                   Each row should have 3 columns: chromosome,start,end,name. \
                                   Examples for Human on GRCh37 can be found in test directory. \
                                   You can generate this file using reference transcript annotations.", default="")
-        pipeline_parser.add_argument("--data_dir", metavar="alignment",
+        all_parser.add_argument("--data_dir", metavar="alignment",
                                   help="The data directory where all the annotations files \
                                   from Ensembl database are placed. This \
                                   directory should be built using 'fusioncatcher-build'.\
                                   (Required for RNA fusion detection).", default="")
-        pipeline_parser.add_argument("--align_idx", metavar="align_idx",
+        all_parser.add_argument("--align_idx", metavar="align_idx",
                                   help="The basename of the index generated by the alignment tool for the reference genome.\
                                   (Required for short-read alignment)", default="")
-        pipeline_parser.add_argument("--quantifier_idx", metavar="quantifier_idx",
+        all_parser.add_argument("--quantifier_idx", metavar="quantifier_idx",
                                   help="The index generated for the reference transcriptome  \
                                   (FMD-based index for Salmon-SMEM). \
                                   (Required for short-read alignment-free quantification)", default="")
-        pipeline_parser.add_argument("--salmon_k", type=int, metavar="salmon_k",
+        all_parser.add_argument("--salmon_k", type=int, metavar="salmon_k",
                                   help="SMEM's smaller than this size will not be considered by Salmon." 
                                   , default=SALMON_SMEM_k)
-        pipeline_parser.add_argument("--libtype", metavar="libtype",
+        all_parser.add_argument("--libtype", metavar="libtype",
                                   help="Format string describing the library type. (For Salmon \
                                   check http://salmon.readthedocs.io/en/latest/library_type.html#fraglibtype). \
-                                  (Required for short-read alignment-free quantification)", default="")
-        pipeline_parser.add_argument("--unzip", action="store_true",
+                                  (Required for short-read alignment-free quantification)", default=SALMON_LIBTYPE)
+        all_parser.add_argument("--unzip", action="store_true",
                                   help="The sequence files are zipped. So unzip them first.")
-        pipeline_parser.add_argument("--use_transcripts_for_diff", action="store_true",
+        all_parser.add_argument("--use_transcripts_for_diff", action="store_true",
                                   help="Use the reconstructed transcript GTF files \
                                   instead of reference GTF for differential analysis.")
-        pipeline_parser.add_argument("--mincount", type=int, metavar="mincount",
+        all_parser.add_argument("--mincount", type=int, metavar="mincount",
                                   help="Minimum read counts per transcripts. Differential analysis \
                                   pre-filtering step removes transcripts that have less than this number of reads.", 
                                   default=2)
-        pipeline_parser.add_argument("--alpha", type=float, metavar="alpha",
+        all_parser.add_argument("--alpha", type=float, metavar="alpha",
                                   help="Adjusted p-value significance level for differential analysis", 
                                   default=0.05)
-        pipeline_parser.add_argument("--assmebly_hash", type=int ,metavar="assmebly_hash",
+        all_parser.add_argument("--assmebly_hash", type=int ,metavar="assmebly_hash",
                                   help="Odd integer, or a comma separated list of odd integers that specify the assembly \
                                   has length (for Oases/Velvet)." 
                                   , default=DNV_HASH)
-        pipeline_parser.add_argument("--file_format", metavar="file_format",
+        all_parser.add_argument("--file_format", metavar="file_format",
                                   help="Input file format for de novo assembly Options: fasta, fastq, raw, \
                                   fasta.gz, fastq.gz, raw.gz, sam, bam, fmtAuto." 
                                   , default=DNV_FORMAT)
-        pipeline_parser.add_argument("--read_type", metavar="file_format",
+        all_parser.add_argument("--read_type", metavar="file_format",
                                   help="Input sequence read type for de novo assembly Options: short, shortPaired, \
                                   short2, shortPaired2, long, longPaired, reference.\
                                    (Check https://www.ebi.ac.uk/~zerbino/velvet/Manual.pdf for description)", 
                                    default=DNV_READTYPE)
-        pipeline_parser.add_argument("--kmer", type=int, metavar="kmer",
+        all_parser.add_argument("--kmer", type=int, metavar="kmer",
                                   help="LoRDEC k-mer length. (Required for long-read error correction.)", default=23)
-        pipeline_parser.add_argument("--solid", type=int, metavar="kmer",
+        all_parser.add_argument("--solid", type=int, metavar="kmer",
                                   help="LoRDEC solidity abundance threshold for k-mers.\
                                   (Required for long-read error correction.)", default=3)
-        pipeline_parser.add_argument("--star_genome_dir", metavar="genome_dir",
+        all_parser.add_argument("--star_genome_dir", metavar="genome_dir",
                                   help="Specifies path to the genome directory where STAR genome indices where generated. \
                                   (Required for long-read transcriptome reconstruction.)", default="")
-        pipeline_parser.add_argument("--mode_number", type=int, metavar="--mode_number",
+        all_parser.add_argument("--mode_number", type=int, metavar="--mode_number",
                                   help="You can run IDP in two steps. If for a reason IDP finished \
                                   isoform candidate construction step but was terminated in candidate selection \
                                   step, you can restart the candidate selection step without re-running \
@@ -718,173 +725,175 @@ if __name__ == "__main__":
                                   Note: make sure isoform candidate pool (file: isoform_construction.NisoXX.gpd) \
                                   file is already generated in temp folder."
                                                                     , default=0)
-        pipeline_parser.add_argument("--CleanSam", action="store_true",
+        all_parser.add_argument("--CleanSam", action="store_true",
                                   help="Use Picard's CleanSam command to clean the input alignment.")
-        pipeline_parser.add_argument("--IndelRealignment", action="store_true",
+        all_parser.add_argument("--IndelRealignment", action="store_true",
                                   help="Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).")
-        pipeline_parser.add_argument("--no_BaseRecalibrator", action="store_true",
+        all_parser.add_argument("--no_BaseRecalibrator", action="store_true",
                                   help="Don't run BaseRecalibrator step.")
-        pipeline_parser.add_argument("--sr_aligner", metavar="sr_aligner",
+        all_parser.add_argument("--sr_aligner", metavar="sr_aligner",
                                   help="The short-read alignment tool to use.", default="HISAT2")
-        pipeline_parser.add_argument("--reconstructor", metavar="reconstructor",
+        all_parser.add_argument("--reconstructor", metavar="reconstructor",
                                   help="The transcriptome reconstruction tool to use.", default="StringTie")
-        pipeline_parser.add_argument("--quantifier", metavar="quantifier",
+        all_parser.add_argument("--quantifier", metavar="quantifier",
                                   help="The quantification tool to use.", default="Salmon-SMEM")
-        pipeline_parser.add_argument("--difftool", metavar="difftool",
+        all_parser.add_argument("--difftool", metavar="difftool",
                                   help="The differential analysis tool to use.", default="DESeq2")
-        pipeline_parser.add_argument("--assembler", metavar="assembler",
+        all_parser.add_argument("--assembler", metavar="assembler",
                                   help="The de novo assembler to use.", default="Oases")
-        pipeline_parser.add_argument("--long_aligner", metavar="long_aligner",
+        all_parser.add_argument("--long_corrector", metavar="long_corrector",
+                                  help="The long-read error correction tool to use.", default="LoRDEC")
+        all_parser.add_argument("--long_aligner", metavar="long_aligner",
                                   help="The long-read error correction tool to use.", default="STARlong")
-        pipeline_parser.add_argument("--long_reconstructor", metavar="long_reconstructor",
+        all_parser.add_argument("--long_reconstructor", metavar="long_reconstructor",
                                   help="The long-read transcriptome reconstruction tool to use.", default="IDP")
-        pipeline_parser.add_argument("--variant_caller", metavar="variant_caller",
+        all_parser.add_argument("--variant_caller", metavar="variant_caller",
                                   help="The variant caller to use. For GATK's general approach used for calling variants in RNAseq check \
                                   https://software.broadinstitute.org/gatk/guide/article?id=3891 ", default="GATK")
-        pipeline_parser.add_argument("--editing_caller", metavar="editing_caller",
+        all_parser.add_argument("--editing_caller", metavar="editing_caller",
                                   help="The RNA Editing caller to use.", default="GIREMI")
-        pipeline_parser.add_argument("--fusion_caller", metavar="fusion_caller",
+        all_parser.add_argument("--fusion_caller", metavar="fusion_caller",
                                   help="The RNA fusion caller to use.", default="FusionCatcher")
-        pipeline_parser.add_argument("--samtools", help="Path to samtools executable", default=SAMTOOLS)
-        pipeline_parser.add_argument("--hisat2", help="Path to HISAT2 executable", default=HISAT2)
-        pipeline_parser.add_argument("--hisat2_sps", help="Path to hisat2_extract_splice_sites.py script \
+        all_parser.add_argument("--samtools", help="Path to samtools executable", default=SAMTOOLS)
+        all_parser.add_argument("--hisat2", help="Path to HISAT2 executable", default=HISAT2)
+        all_parser.add_argument("--hisat2_sps", help="Path to hisat2_extract_splice_sites.py script \
                                     Can be found in HISAT2 package.", default=HISAT2_SPS)
-        pipeline_parser.add_argument("--hisat2_opts", metavar="hisat2_opts",
+        all_parser.add_argument("--hisat2_opts", metavar="hisat2_opts",
                                   help="Other options used for HISAT2 aligner. \
                                   (should be put between \" \") \
                                    (For HISAT2 check http://ccb.jhu.edu/software/hisat2/manual.shtml).", default="")
-        pipeline_parser.add_argument("--stringtie", help="Path to StringTie executable", default=STRINGTIE)
-        pipeline_parser.add_argument("--stringtie_opts", metavar="stringtie_opts",
+        all_parser.add_argument("--stringtie", help="Path to StringTie executable", default=STRINGTIE)
+        all_parser.add_argument("--stringtie_opts", metavar="stringtie_opts",
                                   help="Other options used for StringTie transcriptome reconstruction. \
                                   (should be put between \" \") \
                                   (For StringTie check https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual).", default="")
-        pipeline_parser.add_argument("--salmon", help="Path to Salmon executable", default=SALMON)
-        pipeline_parser.add_argument("--salmon_smem_opts", metavar="salmon_smem_opts",
+        all_parser.add_argument("--salmon", help="Path to Salmon executable", default=SALMON)
+        all_parser.add_argument("--salmon_smem_opts", metavar="salmon_smem_opts",
                                   help="Other options used for Salmon-SMEM quantifications. \
                                   (should be put between \" \") \
                                   (For Salmon check http://salmon.readthedocs.io/en/latest/salmon.html#using-salmon).", 
                                   default="")
-        pipeline_parser.add_argument("--quant_files", nargs="*", metavar="quant_files",
+        all_parser.add_argument("--quant_files", nargs="*", metavar="quant_files",
                                   help="Quantification files for each sample (e.g. Salmon's quant.sf outputs). \
                                   Replicates in same sample should be listed comma separated. \
                                   e.g --quant_files A1/quant.sf,A2/quant.sf B1/quant.sf,B2/quant.sf" 
                                   , default=[])
-        pipeline_parser.add_argument("--featureCounts_opts", metavar="featureCounts_opts",
+        all_parser.add_argument("--featureCounts_opts", metavar="featureCounts_opts",
                                   help="Other options used for featureCounts. \
                                   (should be put between \" \") \
                                   (For options check http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf).", 
                                   default="")
-        pipeline_parser.add_argument("--stringtie_merge_opts", metavar="stringtie_merge_opts",
+        all_parser.add_argument("--stringtie_merge_opts", metavar="stringtie_merge_opts",
                                   help="Other options used for StringTie merge. Can be set when the reconstructed transcript GTFs are used.\
                                   (should be put between \" \") \
                                   (For StringTie check https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual).", default="")
-        pipeline_parser.add_argument("--R", help="Path to R executable (DESeq2, readr, tximport \
+        all_parser.add_argument("--R", help="Path to R executable (DESeq2, readr, tximport \
                                  should have been installed in R)", default=R_CMD)
-        pipeline_parser.add_argument("--featureCounts", help="Path to featureCounts executable", default=FEATURECOUNTS)
-        pipeline_parser.add_argument("--oases", help="Path to oases executable", default=OASES)
-        pipeline_parser.add_argument("--velvetg", help="Path to velvetg executable", default=VELVETG)
-        pipeline_parser.add_argument("--velveth", help="Path to velveth executable", default=VELVETH)
-        pipeline_parser.add_argument("--velveth_opts", metavar="velveth_opts",
+        all_parser.add_argument("--featureCounts", help="Path to featureCounts executable", default=FEATURECOUNTS)
+        all_parser.add_argument("--oases", help="Path to oases executable", default=OASES)
+        all_parser.add_argument("--velvetg", help="Path to velvetg executable", default=VELVETG)
+        all_parser.add_argument("--velveth", help="Path to velveth executable", default=VELVETH)
+        all_parser.add_argument("--velveth_opts", metavar="velveth_opts",
                                   help="Other options used for assembly by velveth. \
                                   (For velvet options check https://github.com/dzerbino/velvet/blob/master/Manual.pdf).", 
                                   default="")
-        pipeline_parser.add_argument("--velvetg_opts", metavar="velvetg_opts",
+        all_parser.add_argument("--velvetg_opts", metavar="velvetg_opts",
                                   help="Other options used for assembly by velvetg. \
                                   (should be put between \" \") \
                                   (For velvet options check https://github.com/dzerbino/velvet/blob/master/Manual.pdf).", 
                                   default="")
-        pipeline_parser.add_argument("--oases_opts", metavar="oases_opts",
+        all_parser.add_argument("--oases_opts", metavar="oases_opts",
                                   help="Other options used for assembly by Oases. \
                                   (should be put between \" \") \
                                   (For Oases options check https://github.com/dzerbino/oases).", 
                                   default="")
-        pipeline_parser.add_argument("--lordec", help="Path to LoRDEC executable", default=LORDEC)
-        pipeline_parser.add_argument("--lordec_opts", metavar="lordec_opts",
+        all_parser.add_argument("--lordec", help="Path to LoRDEC executable", default=LORDEC)
+        all_parser.add_argument("--lordec_opts", metavar="lordec_opts",
                                   help="Other options used for LoRDEC. \
                                   (should be put between \" \") \
                                    (For LoRDEC check http://www.atgc-montpellier.fr/lordec/README.html).", default="")
-        pipeline_parser.add_argument("--starlong", help="Path to STARlong executable (version 2.5.0a or later)", default=STARLONG)
-        pipeline_parser.add_argument("--sam2psl", help="Path to the sam2psl.py script \
+        all_parser.add_argument("--starlong", help="Path to STARlong executable (version 2.5.0a or later)", default=STARLONG)
+        all_parser.add_argument("--sam2psl", help="Path to the sam2psl.py script \
                                     Can be found in FusionCatcher package.", default=SAM2PSL)
-        pipeline_parser.add_argument("--starlong_opts", metavar="starlong_opts",
+        all_parser.add_argument("--starlong_opts", metavar="starlong_opts",
                                   help="Other options used for LoRDEC. \
                                   (should be put between \" \") \
                                    (For LoRDEC check http://www.atgc-montpellier.fr/lordec/README.html).\
                                    As the default we use the following options as advised in \
                                    https://github.com/PacificBiosciences/cDNA_primer/wiki/Bioinfx-study:-Optimizing-STAR-aligner-for-Iso-Seq-data\
                                    %s"%STARLONG_DEFAULTS, default="")
-        pipeline_parser.add_argument("--idp", help="Path to runIDP.py script", default=IDP)
-        pipeline_parser.add_argument("--idp_cfg", metavar="idp_cfg",
+        all_parser.add_argument("--idp", help="Path to runIDP.py script", default=IDP)
+        all_parser.add_argument("--idp_cfg", metavar="idp_cfg",
                                   help="the .cfg file that include other options used for IDP \
                                   long read transcriptome reconstruction. \
                                   (For IDP http://www.healthcare.uiowa.edu/labs/au/IDP/IDP_tutorial.asp) \
                                   These options will be used to generate the .cfg file.", default="")
-        pipeline_parser.add_argument("--picard", help="Path to picard executable", default=PICARD)
-        pipeline_parser.add_argument("--gatk", help="Path to GATK executable", default=GATK)
-        pipeline_parser.add_argument("--java", help="Path to JAVA executable", default=JAVA)
-        pipeline_parser.add_argument("--java_opts", metavar="java_opts",
+        all_parser.add_argument("--picard", help="Path to picard executable", default=PICARD)
+        all_parser.add_argument("--gatk", help="Path to GATK executable", default=GATK)
+        all_parser.add_argument("--java", help="Path to JAVA executable", default=JAVA)
+        all_parser.add_argument("--java_opts", metavar="java_opts",
                                   help="Java options used for picard and GATK commands. \
                                   (should be put between \" \") ", default=JAVA_OPT)
-        pipeline_parser.add_argument("--AddOrReplaceReadGroups_opts", metavar="AddOrReplaceReadGroups_opts",
+        all_parser.add_argument("--AddOrReplaceReadGroups_opts", metavar="AddOrReplaceReadGroups_opts",
                                   help="Other options used for picard AddOrReplaceReadGroups command. \
                                   (should be put between \" \") \
                                    (For Picard check https://broadinstitute.github.io/picard/command-line-overview.html).", default="SO=coordinate RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=sample")
-        pipeline_parser.add_argument("--MarkDuplicates_opts", metavar="MarkDuplicates_opts",
+        all_parser.add_argument("--MarkDuplicates_opts", metavar="MarkDuplicates_opts",
                                   help="Other options used for picard MarkDuplicates command. \
                                   (should be put between \" \") \
                                    (For Picard check https://broadinstitute.github.io/picard/command-line-overview.html).", default="CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT")
-        pipeline_parser.add_argument("--SplitNCigarReads_opts", metavar="SplitNCigarReads_opts",
+        all_parser.add_argument("--SplitNCigarReads_opts", metavar="SplitNCigarReads_opts",
                                   help="Other options used for GATK SplitNCigarReads command. \
                                   (should be put between \" \") \
                                    (For GATK SplitNCigarReads check \
                                    https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
-        pipeline_parser.add_argument("--RealignerTargetCreator_opts", metavar="RealignerTargetCreator_opts",
+        all_parser.add_argument("--RealignerTargetCreator_opts", metavar="RealignerTargetCreator_opts",
                                   help="Other options used for GATK RealignerTargetCreator command. \
                                   (should be put between \" \") \
                                    (For GATK RealignerTargetCreator check \
                                    https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php).", default="")
-        pipeline_parser.add_argument("--IndelRealigner_opts", metavar="IndelRealigner_opts",
+        all_parser.add_argument("--IndelRealigner_opts", metavar="IndelRealigner_opts",
                                   help="Other options used for GATK IndelRealigner command. \
                                   (should be put between \" \") \
                                    (For GATK IndelRealigner check \
                                    https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php).", default="")
-        pipeline_parser.add_argument("--BaseRecalibrator_opts", metavar="BaseRecalibrator_opts",
+        all_parser.add_argument("--BaseRecalibrator_opts", metavar="BaseRecalibrator_opts",
                                   help="Other options used for GATK BaseRecalibrator command. \
                                   (should be put between \" \") \
                                    (For GATK BaseRecalibrator check \
                                    https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
-        pipeline_parser.add_argument("--PrintReads_opts", metavar="PrintReads_opts",
+        all_parser.add_argument("--PrintReads_opts", metavar="PrintReads_opts",
                                   help="Other options used for GATK PrintReads command. \
                                   (should be put between \" \") \
                                    (For GATK PrintReads check \
                                    https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php).", default="")
-        pipeline_parser.add_argument("--HaplotypeCaller_opts", metavar="HaplotypeCaller_opts",
+        all_parser.add_argument("--HaplotypeCaller_opts", metavar="HaplotypeCaller_opts",
                                   help="Other options used for GATK HaplotypeCaller command. \
                                   (should be put between \" \") \
                                    (For GATK HaplotypeCaller check \
                                    https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
-        pipeline_parser.add_argument("--VariantFiltration_opts", metavar="VariantFiltration_opts",
+        all_parser.add_argument("--VariantFiltration_opts", metavar="VariantFiltration_opts",
                                   help="Other options used for GATK VariantFiltration command. \
                                   (should be put between \" \") \
                                    (For GATK VariantFiltration check \
                                    https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
-        pipeline_parser.add_argument("--giremi_dir", help="Path to giremi directory that include  \
+        all_parser.add_argument("--giremi_dir", help="Path to giremi directory that include  \
                                   giremi executable and giremi.r R script. \
                                   (required for RNA editing detection.)", default="")
-        pipeline_parser.add_argument("--htslib_dir", help="Path to HTSlib library directory", default=HTSLIB)
-        pipeline_parser.add_argument("--giremi_opts", metavar="java_opts",
+        all_parser.add_argument("--htslib_dir", help="Path to HTSlib library directory", default=HTSLIB)
+        all_parser.add_argument("--giremi_opts", metavar="java_opts",
                                   help="Other options used for GIREMI. \
                                   (should be put between \" \") \
                                    (For GIREMI check \
                                    https://github.com/zhqingit/giremi)", default="")
-        pipeline_parser.add_argument("--VariantAnnotator_opts", metavar="VariantAnnotator_opts",
+        all_parser.add_argument("--VariantAnnotator_opts", metavar="VariantAnnotator_opts",
                                   help="Other options used for GATK VariantAnnotator command. \
                                   (should be put between \" \") \
                                    (For GATK VariantAnnotator check \
                                    https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php)."
                                    , default="")
-        pipeline_parser.add_argument("--fusioncatcher", help="Path to FusionCatcher executable", default=FUSIONCATCHER)
-        pipeline_parser.add_argument("--fusioncatcher_opts", metavar="fusioncatcher_opts",
+        all_parser.add_argument("--fusioncatcher", help="Path to FusionCatcher executable", default=FUSIONCATCHER)
+        all_parser.add_argument("--fusioncatcher_opts", metavar="fusioncatcher_opts",
                                   help="Other options used for FusionCatcher. \
                                   (should be put between \" \") \
                                    (For FusionCatcher check \

@@ -48,6 +48,7 @@ def run_deseq2(quant_files="", alignments="",
     n_replicates=map(len,samples)
     use_quant=True
     use_refgtf=False
+    print quant_files
     if quant_files and ref_gtf:
         if len(quant_files) != n_samples:
             logger.error("Aborting!")
