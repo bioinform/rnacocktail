@@ -63,9 +63,6 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
     if not os.path.exists(short_junction):
         logger.error("Aborting!")
         raise Exception("No input short read junction BED file %s"%short_junction)
-    if not os.path.exists(long_alignment):
-        logger.error("Aborting!")
-        raise Exception("No input long read alignment PSL file %s"%long_alignment)
         
     if idpfusion_cfg:
         if not os.path.exists(idpfusion_cfg):
@@ -207,7 +204,8 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
             if "Nthread" not in cgf_dict:
                 cfg_file.write("Nthread = %d \n"%nthreads)
             if "LR_psl_pathfilename" not in cgf_dict:
-                cfg_file.write("LR_psl_pathfilename = %s \n"%long_alignment)
+                if long_alignment and os.path.exists(long_alignment):
+                    cfg_file.write("LR_psl_pathfilename = %s \n"%long_alignment)
             if "LR_pathfilename" not in cgf_dict:
                 cfg_file.write("LR_pathfilename = %s \n"%long_fasta)
             if "SR_sam_pathfilename" not in cgf_dict:

@@ -380,8 +380,7 @@ if __name__ == "__main__":
                                   , required=True)
         long_fusion_parser.add_argument("--long_alignment", metavar="--long_alignment",
                                   help="A PSL file with long RNA-Seq read mappings (e.g. \
-                                  The output PSL file generated in long_align mode)." 
-                                  , required=True)
+                                  The output PSL file generated in long_align mode).")
         long_fusion_parser.add_argument("--long_fasta", metavar="seq_l",
                                   help="The FASTA file containing long reads ", required=True)
         long_fusion_parser.add_argument("--short_fasta", metavar="seq_s",
