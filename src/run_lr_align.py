@@ -3,12 +3,7 @@ from external_cmd import TimedExternalCmd
 from defaults import *
 from utils import *
 
-FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger.addHandler(consoleHandler)
 
 def run_starlong(long="", 
                   genome_dir="", ref_gtf="",
@@ -152,8 +147,7 @@ def run_lr_align(long_aligner="STARlong", long="",
                           workdir=workdir, outdir=outdir, timeout=timeout) 
         except Exception as excp:
             logger.info("STARlong failed!")
+            logger.error(excp)
             if not ignore_exceptions:
                 raise Exception(excp)
-            else:
-                logger.error(excp)
     return alignments_psl

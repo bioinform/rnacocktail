@@ -5,12 +5,7 @@ from utils import *
 import csv
 import re
 
-FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger.addHandler(consoleHandler)
 
 
 def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+[("MT",23),("X",24),("Y",25)]+[
@@ -369,8 +364,7 @@ def run_lr_fusion(long_fusion_caller="IDP-fusion", alignment="",
                           workdir=workdir, outdir=outdir, timeout=timeout)
         except Exception as excp:
             logger.info("IDP-fusion failed!")
+            logger.error(excp)
             if not ignore_exceptions:
                 raise Exception(excp)
-            else:
-                logger.error(excp)
     return fusions

@@ -4,12 +4,7 @@ from defaults import *
 from utils import *
 import csv
 
-FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger.addHandler(consoleHandler)
 
 
 
@@ -241,8 +236,7 @@ def run_lr_reconstruct(long_reconstructor="IDP", alignment="",
                       workdir=workdir, outdir=outdir, timeout=timeout)
         except Exception as excp:
             logger.info("IDP failed!")
+            logger.error(excp)
             if not ignore_exceptions:
                 raise Exception(excp)
-            else:
-                logger.error(excp)
     return transcripts,abundances

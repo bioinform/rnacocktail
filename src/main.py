@@ -19,15 +19,19 @@ from run_fusion import run_fusion
 from _version import __version__
 
 from utils import *
-FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logFormatter = logging.Formatter(FORMAT)
-logger = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger.addHandler(consoleHandler)
+import logging
 
 
 def run_pipeline(args,parser):
+    create_dirs([args.workdir, args.outdir,os.path.join(args.workdir,"logs")])
+    log_file=os.path.join(args.workdir,"logs","run-%s.log"%time.strftime("%Y%m%d-%H%M%S"))
+    FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
+    logging.basicConfig(level=logging.INFO, format=FORMAT, filename=log_file, filemode="w")
+    logFormatter = logging.Formatter(FORMAT)
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setFormatter(logFormatter)
+    logger.addHandler(consoleHandler)
+
     logger.info("Running RNASeqPipeline %s" % __version__)
     logger.info("Command-line %s" % (" ".join(sys.argv)))
     logger.info("Arguments are " + str(args))
@@ -67,8 +71,6 @@ def run_pipeline(args,parser):
 
 
 
-#     Create the directories for working
-    create_dirs([args.workdir, args.outdir])
     if mode=="align":
         if not args.sr_aligner.upper()=="HISAT2":
             logger.error("%s is not supported. \

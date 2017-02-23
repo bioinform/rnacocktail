@@ -3,12 +3,7 @@ from external_cmd import TimedExternalCmd
 from defaults import *
 from utils import *
 
-FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger.addHandler(consoleHandler)
 
 
 def run_fusioncatcher(data_dir="", input="",  start=0, 
@@ -71,10 +66,9 @@ def run_fusion(fusion_caller="FusionCatcher",
                       workdir=workdir, outdir=outdir, timeout=timeout)
         except Exception as excp:
             logger.info("FusionCatcher failed!")
+            logger.error(excp)
             if not ignore_exceptions:
                 raise Exception(excp)
-            else:
-                logger.error(excp)
     return fusions
     
     

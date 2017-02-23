@@ -4,13 +4,7 @@ from defaults import *
 from utils import *
 import csv
 
-FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger.addHandler(consoleHandler)
-
 
 def tx2gene_map(ref_gtf_file,tx2gene_file):
     tx2gene={}
@@ -343,9 +337,8 @@ def run_diff(difftool="DESeq2", quant_files="", alignments="",
                           workdir=workdir, outdir=outdir, timeout=timeout)
         except Exception as excp:
             logger.info("DESeq2 failed!")
+            logger.error(excp)
             if not ignore_exceptions:
                 raise Exception(excp)
-            else:
-                logger.error(excp)
         
     return diff

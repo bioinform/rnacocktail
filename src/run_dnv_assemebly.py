@@ -3,12 +3,7 @@ from external_cmd import TimedExternalCmd
 from defaults import *
 from utils import *
 
-FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger.addHandler(consoleHandler)
 
 def run_oases(assmebly_hash=DNV_HASH,
                 seq_1="", seq_2="", seq_u="", seq_i="",
@@ -144,10 +139,7 @@ def run_dnv_assemebly(assembler="Oases", assmebly_hash=DNV_HASH,
                           workdir=workdir, outdir=outdir, timeout=timeout)
         except Exception as excp:
             logger.info("Oases failed!")
+            logger.error(excp)
             if not ignore_exceptions:
                 raise Exception(excp)
-            else:
-                logger.error(excp)
-        
-                      
     return transcripts

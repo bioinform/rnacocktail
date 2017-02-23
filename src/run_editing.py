@@ -7,13 +7,7 @@ import sys
 import csv
 import pybedtools
 
-FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-logger.addHandler(consoleHandler)
-
 
 def filter_multi_chr_alignments(in_file,out_file):
     curren_read=""
@@ -368,10 +362,9 @@ def run_editing(editing_caller="GIREMI", alignment="", variant="",
                       workdir=workdir, outdir=outdir, timeout=timeout)
         except Exception as excp:
             logger.info("GIREMI failed!")
+            logger.error(excp)
             if not ignore_exceptions:
                 raise Exception(excp)
-            else:
-                logger.error(excp)
 
     return edits
     

@@ -10,7 +10,6 @@ import shlex
 import subprocess
 from threading import Timer
 import unittest
-# import logging
 import os
 from utils import *
 
@@ -26,7 +25,6 @@ class TimedExternalCmd:
         self.p.terminate()
         self.did_timeout = True
     def run(self, cmd_log_fd_out=None, cmd_log_fd_err=None,  cmd_log="", msg="", timeout=None):
-#         self.logger.info("Running %s with arguments %s" % (self.cmd[0].upper(), str(self.cmd[1::])))
         self.logger.info("Task: %s " % (msg))
         self.logger.info("Running \"%s\" " % (" ".join(self.cmd)))
         cmd_log_fd_err = cmd_log_fd_err or cmd_log_fd_out
@@ -101,7 +99,5 @@ class TestTimedExternalCmd(unittest.TestCase):
 
 
 if __name__ == '__main__':
-#     FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-#     logging.basicConfig(level=logging.INFO, format=FORMAT)
     TestTimedExternalCmd.logger = logging.getLogger(__name__)
     unittest.main()
