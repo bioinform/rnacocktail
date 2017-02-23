@@ -3,7 +3,12 @@ from external_cmd import TimedExternalCmd
 from defaults import *
 from utils import *
 
+FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def run_salmon_smem(quantifier_idx=None,
                   seq_1="", seq_2="", seq_u="",

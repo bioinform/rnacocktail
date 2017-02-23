@@ -3,7 +3,12 @@ from external_cmd import TimedExternalCmd
 from defaults import *
 from utils import *
 
+FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 
 def run_hisat2(align_idx=None,
@@ -149,16 +154,16 @@ def run_hisat2(align_idx=None,
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
 
-#     msg = "Clean temp alignment files for %s"%sample
-#     if start<=step:
-#         logger.info("--------------------------STEP %s--------------------------"%step)
-#         command="rm %s/alignments.sam %s/alignments.bam" % (work_hisat2, work_hisat2)
-#         command="bash -c \"%s\""%command    
-#         cmd = TimedExternalCmd(command, logger, raise_exception=True)
-#         retcode = cmd.run(cmd_log_fd_out=hisat2_log_fd, cmd_log=hisat2_log, msg=msg, timeout=timeout)
-#     else:
-#         logger.info("Skipping step %d: %s"%(step,msg))
-#     step+=1
+    msg = "Clean temp alignment files for %s"%sample
+    if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
+        command="rm %s/alignments.sam %s/alignments.bam" % (work_hisat2, work_hisat2)
+        command="bash -c \"%s\""%command    
+        cmd = TimedExternalCmd(command, logger, raise_exception=True)
+        retcode = cmd.run(cmd_log_fd_out=hisat2_log_fd, cmd_log=hisat2_log, msg=msg, timeout=timeout)
+    else:
+        logger.info("Skipping step %d: %s"%(step,msg))
+    step+=1
 
 
     out_hisat2=os.path.join(outdir,"hisat2",sample)

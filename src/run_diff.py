@@ -4,7 +4,12 @@ from defaults import *
 from utils import *
 import csv
 
+FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def tx2gene_map(ref_gtf_file,tx2gene_file):
     tx2gene={}
