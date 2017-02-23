@@ -102,7 +102,6 @@ def find_SNV_strands(strand_pos_bed,genes_pos_bed,input_annotated_vcf,output_ann
         else:
             SNV_good=SNV_good.cat(SNV_good_,postmerge=False).sort()
             SNV_no=SNV_no.cat(SNV_bad_,postmerge=False).sort()
-    print len(SNV_good),len(SNV_no),len(SNV_bad)
 
 
     SNV_annotated=[]
@@ -110,9 +109,6 @@ def find_SNV_strands(strand_pos_bed,genes_pos_bed,input_annotated_vcf,output_ann
     for i in SNV_good:
         name=list(set(i.name.split(","))-set(["SNV"]))[0]
         strand=list(set(i.strand.split(","))-set(["."]))
-        if not len(strand)==1:
-            print "Error",i
-            break
         strand=strand[0]
         SNV_annotated.append(pybedtools.Interval(chrom=i.chrom,start=i.start,end=i.end,name=name,
                                                  score=i.score,strand=strand))
@@ -263,7 +259,7 @@ def run_giremi(alignment="", variant="",
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
         command="cd %s && %s %s -f %s -l %s/SNV_annotated.bed -o %s/giremi_out.txt %s/alignments.pos_sorted.bam" % (
-            giremi_dir,GIREMI, giremi_opts, ref_genome, work_giremi, work_giremi,work_giremi)
+            giremi_dir,GIREMI, giremi_opts, os.path.abspath(ref_genome), os.path.abspath(work_giremi), os.path.abspath(work_giremi),os.path.abspath(work_giremi))
         command="bash -c \"%s\""%command        
         cmd = TimedExternalCmd(command, logger, raise_exception=False)
         retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)
@@ -307,8 +303,7 @@ def run_giremi(alignment="", variant="",
                 logger.info("--------------------------STEP %s--------------------------"%step)
                 if os.path.exists("%s/SNV_annotated_filtered.bed"%work_giremi):
                     command="cd %s && %s %s -f %s -l %s/SNV_annotated_filtered.bed -o %s/giremi_out.txt %s/alignments.pos_sorted.bam" % (
-                        giremi_dir,GIREMI, giremi_opts, ref_genome, work_giremi, work_giremi,work_giremi)
-                    print command
+                        giremi_dir,GIREMI, giremi_opts, os.path.abspath(ref_genome), os.path.abspath(work_giremi), os.path.abspath(work_giremi),os.path.abspath(work_giremi))
                     command="bash -c \"%s\""%command        
                     cmd = TimedExternalCmd(command, logger, raise_exception=True)
                     retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)

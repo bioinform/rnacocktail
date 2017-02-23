@@ -118,7 +118,7 @@ def run_pipeline(args,parser):
                       featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
                       stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
                       mincount=args.mincount, alpha=args.alpha, 
-                      R=args.R, start=args.start, samples=args.sample, nthreads=args.threads,
+                      R=args.R, start=args.start, samples=args.samples, nthreads=args.threads,
                       workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
 
     elif mode=="denovo":
