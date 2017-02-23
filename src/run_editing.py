@@ -215,18 +215,6 @@ def run_giremi(alignment="", variant="",
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
 
-    msg = "GATK VariantAnnotator for %s"%sample
-    if start<=step:
-        logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T VariantAnnotator -R %s -V %s -L %s -o %s/annotated.vcf --dbsnp %s %s" % (
-            java, java_opts, gatk, ref_genome,variant,variant,work_giremi,knownsites,VariantAnnotator_opts)
-        command="bash -c \"%s\""%command      
-        cmd = TimedExternalCmd(command, logger, raise_exception=True)
-        retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)   
-    else:
-        logger.info("Skipping step %d: %s"%(step,msg))
-    step+=1
-
     msg = "Sort BAM by pos for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
@@ -235,6 +223,18 @@ def run_giremi(alignment="", variant="",
         command="bash -c \"%s\""%command        
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
         retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)
+    else:
+        logger.info("Skipping step %d: %s"%(step,msg))
+    step+=1
+
+    msg = "GATK VariantAnnotator for %s"%sample
+    if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
+        command="%s %s -jar %s -T VariantAnnotator -R %s -V %s -L %s -o %s/annotated.vcf --dbsnp %s %s" % (
+            java, java_opts, gatk, ref_genome,variant,variant,work_giremi,knownsites,VariantAnnotator_opts)
+        command="bash -c \"%s\""%command      
+        cmd = TimedExternalCmd(command, logger, raise_exception=True)
+        retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)   
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
