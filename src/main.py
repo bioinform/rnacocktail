@@ -697,7 +697,7 @@ def run_pipeline(args,parser):
                "Long-read error correction":[corrected],
                "Long-read alignment":[alignments_lr],
                "long-read transcriptome reconstruction":[transcripts_lr,abundances_lr],
-               "long-read fusion detection":[lr_fusions],
+               "long-read fusion detection":[fusions_lr],
         }
         ordered_tasks=["Short-read alignment",
                "Short-read transcriptome reconstruction",
@@ -710,7 +710,8 @@ def run_pipeline(args,parser):
                "Short-read fusion detection",
                "Long-read error correction",
                "Long-read alignment",
-               "long-read transcriptome reconstruction"]
+               "long-read transcriptome reconstruction",
+               "long-read fusion detection"]
         success={task:[] for task in ordered_tasks}
         failure={task:[] for task in ordered_tasks}
         for t,vv in tasks.iteritems():
