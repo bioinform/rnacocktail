@@ -4,8 +4,11 @@ from defaults import *
 from utils import *
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def run_lordec(kmer=23,
                   solid=3, long="", short="",

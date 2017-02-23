@@ -10,8 +10,9 @@ import shlex
 import subprocess
 from threading import Timer
 import unittest
-import logging
+# import logging
 import os
+from utils import *
 
 class TimedExternalCmd:
     def __init__(self, cmd, logger, raise_exception=False, env_dict={}):
@@ -100,7 +101,7 @@ class TestTimedExternalCmd(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-    logging.basicConfig(level=logging.INFO, format=FORMAT)
+#     FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
+#     logging.basicConfig(level=logging.INFO, format=FORMAT)
     TestTimedExternalCmd.logger = logging.getLogger(__name__)
     unittest.main()

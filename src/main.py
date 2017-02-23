@@ -1,10 +1,8 @@
 from collections import defaultdict
 import sys
-import logging
 import os
 
 from defaults import *
-from utils import *
 from run_sr_align import run_sr_align
 from run_sr_align import run_sr_align
 from run_reconstruct import run_reconstruct
@@ -20,10 +18,13 @@ from run_editing import run_editing
 from run_fusion import run_fusion
 from _version import __version__
 
+from utils import *
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 
 def run_pipeline(args,parser):
@@ -295,6 +296,11 @@ def run_pipeline(args,parser):
             \nThe supported fusion predictor(s) are: %s."%(args.fusion_caller,
             fusion_caller))
             return os.EX_USAGE
+        if not args.long_fusion_caller.upper()=="IDP-FUSION":
+            logger.error("%s is not supported. \
+            \nThe supported long read fusion detection tool(s)  are: %s."%(args.long_fusion_caller,
+            LR_FUSION))
+            return os.EX_USAGE
 
 
         do_short = True
@@ -311,22 +317,7 @@ def run_pipeline(args,parser):
         do_long = args.long != ""
         if not do_long:
             logger.info("Input long-read sequence file(s) are missing. Will skipp long-read steps")
- 
 
-
-#         elif mode=="diff":
-#             if (not args.quant_files or not args.ref_gtf) and \
-#                (not args.alignments or (not args.transcripts_gtfs and not args.ref_gtf)):
-#                 parser.print_help()
-#                 logger.error("\n\tYou should either provode {the quantification files and a refrence GTF}, \n\
-#     \tOR {the alignment files and a (reference or assembled) GTF files}.")
-#                 return os.EX_USAGE
-#         elif mode=="variant":
-#             if args.no_BaseRecalibrator==False and args.knownsites=="":
-#                 parser.print_help()
-#                 logger.error("\n\tTo run BaseRecalibrator step, knownsites should provide. \n\
-#     \tIf you don't have knownsites, please use --no_BaseRecalibrator option.")
-#                 return os.EX_USAGE
 
         samples=[[replicate for replicate in sample.split(",")] for sample  in args.sample]
         all_samples=[replicate for sample  in samples for replicate in sample]
@@ -381,7 +372,7 @@ def run_pipeline(args,parser):
         alignments_lr={}
         transcripts_lr={}
         abundances_lr={}
-        
+        fusions_lr={}
         if do_short:
             for si,sample in enumerate(samples):
                 alignments_bam[si]={}
@@ -583,6 +574,7 @@ def run_pipeline(args,parser):
                     alignments_lr[si]={}
                     transcripts_lr[si]={}
                     abundances_lr[si]={}
+                    fusions_lr[si]={}
                     for ri,replicate in enumerate(sample):
                     
                         if "long_correct" not in args.exclude:
@@ -639,6 +631,38 @@ def run_pipeline(args,parser):
                             logger.info("******************************************************************************")
                             transcripts_lr[si][replicate],abundances_lr[si][replicate]=["",""]
                         
+                        if "long_fusion" not in args.exclude:
+                            logger.info("******************************************************************************")
+                            logger.info("Running long read fusion detection step using %s for %s"%(args.long_reconstructor,replicate))
+                            logger.info("******************************************************************************")
+                            transcripts_lr[si][replicate],abundances_lr[si][replicate]=run_lr_reconstruct(long_reconstructor=args.long_reconstructor,
+                                          alignment=alignments_bam[si][replicate], 
+                                          short_junction=junctions_bed[si][replicate], 
+                                          long_alignment=alignments_lr[si][replicate],
+                                          mode_number=args.mode_number,
+                                          ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
+                                          read_length=args.read_length,
+                                          samtools=args.samtools, idp=args.idp, idp_cfg=args.idp_cfg, 
+                                          start=0, sample= replicate, nthreads=args.threads,
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
+                            fusions_lr[si][replicate]=run_lr_fusion(long_fusion_caller=args.long_fusion_caller,
+                                          alignment=alignments_bam[si][replicate], 
+                                          short_junction=junctions_bed[si][replicate], 
+                                          short_fasta=input_sr["U"][replicate], long_fasta=corrected[si][replicate], 
+                                          mode_number=args.mode_number,
+                                          ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
+                                          uniqueness_bedgraph=args.uniqueness_bedgraph,
+                                          genome_bowtie2_idx=args.genome_bowtie2_idx, transcriptome_bowtie2_idx=args.transcriptome_bowtie2_idx,
+                                          read_length=args.read_length,
+                                          samtools=args.samtools, idpfusion=args.idpfusion, idpfusion_cfg=args.idpfusion_cfg, 
+                                          gmap=args.gmap, gmap_idx=args.gmap_idx, star_dir=args.star_dir, bowtie2_dir=args.bowtie2_dir,
+                                          start=args.start, sample= args.sample, nthreads=args.threads,
+                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout,ignore_exceptions=True)
+                        else:
+                            logger.info("******************************************************************************")
+                            logger.info("Excluding long read transcriptome reconstruction step using %s for %s"%(args.long_reconstructor,replicate))
+                            logger.info("******************************************************************************")
+                            transcripts_lr[si][replicate],abundances_lr[si][replicate]=["",""]
             else:
                 for si,sample in enumerate(samples):
                     corrected[si]={}
@@ -673,6 +697,7 @@ def run_pipeline(args,parser):
                "Long-read error correction":[corrected],
                "Long-read alignment":[alignments_lr],
                "long-read transcriptome reconstruction":[transcripts_lr,abundances_lr],
+               "long-read fusion detection":[lr_fusions],
         }
         ordered_tasks=["Short-read alignment",
                "Short-read transcriptome reconstruction",

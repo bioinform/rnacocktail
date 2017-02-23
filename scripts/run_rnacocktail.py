@@ -726,6 +726,16 @@ if __name__ == "__main__":
                                   Note: make sure isoform candidate pool (file: isoform_construction.NisoXX.gpd) \
                                   file is already generated in temp folder."
                                                                     , default=0)
+        all_parser.add_argument("--uniqueness_bedgraph", metavar="uniqueness_bedgraph",
+                                  help="File with the uniqueness scores in bedgraph format (used for IDP-fusion). \
+                                  Used to annotate the uniqueness of regions flanking fusions sites. \
+                                  Duke Uniqueness track from UCSC genome browser in bedGraph format can be used")
+        all_parser.add_argument("--genome_bowtie2_idx", metavar="genome_bowtie2_idx",
+                                  help="The reference genome bowtie2 index file(used for IDP-fusion).")
+        all_parser.add_argument("--transcriptome_bowtie2_idx", metavar="transcriptome_bowtie2_idx",
+                                  help="The reference transcriptome bowtie2 index file (used for IDP-fusion).")
+        all_parser.add_argument("--gmap_idx", metavar="align_idx",
+                                  help="Path to the directory with GMAP index for the reference genome (used for IDP-fusion)")
         all_parser.add_argument("--CleanSam", action="store_true",
                                   help="Use Picard's CleanSam command to clean the input alignment.")
         all_parser.add_argument("--IndelRealignment", action="store_true",
@@ -755,6 +765,8 @@ if __name__ == "__main__":
                                   help="The RNA Editing caller to use.", default="GIREMI")
         all_parser.add_argument("--fusion_caller", metavar="fusion_caller",
                                   help="The RNA fusion caller to use.", default="FusionCatcher")
+        all_parser.add_argument("--long_fusion_caller", metavar="long_fusion_caller",
+                                  help="The long-read fusion detection tool to use.", default="IDP-fusion")
         all_parser.add_argument("--samtools", help="Path to samtools executable", default=SAMTOOLS)
         all_parser.add_argument("--hisat2", help="Path to HISAT2 executable", default=HISAT2)
         all_parser.add_argument("--hisat2_sps", help="Path to hisat2_extract_splice_sites.py script \
@@ -829,6 +841,15 @@ if __name__ == "__main__":
                                   long read transcriptome reconstruction. \
                                   (For IDP http://www.healthcare.uiowa.edu/labs/au/IDP/IDP_tutorial.asp) \
                                   These options will be used to generate the .cfg file.", default="")
+        all_parser.add_argument("--star_dir", help="Path to the directory with STAR executable", default=STAR_DIR)
+        all_parser.add_argument("--bowtie2_dir", help="Path to the directory with bowtie2 executable", default=BOWTIE2_DIR)
+        all_parser.add_argument("--gmap", help="Path to GMAP executable", default=GMAP)
+        all_parser.add_argument("--idpfusion", help="Path to runIDP.py script in IDP-fusion package", default=IDPFUSION)
+        all_parser.add_argument("--idpfusion_cfg", metavar="idp_cfg",
+                                  help="the .cfg file that include other options used for IDP \
+                                  long read transcriptome reconstruction. \
+                                  (For IDP-fusion check https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/IDP-fusion_tutorial.asp) \
+                                  These options will be used to generate the .cfg file.", default="")
         all_parser.add_argument("--picard", help="Path to picard executable", default=PICARD)
         all_parser.add_argument("--gatk", help="Path to GATK executable", default=GATK)
         all_parser.add_argument("--java", help="Path to JAVA executable", default=JAVA)
@@ -900,6 +921,9 @@ if __name__ == "__main__":
                                    (For FusionCatcher check \
                                    https://github.com/ndaniel/fusioncatcher/blob/master/doc/manual.md)."
                                    , default="")
+
+
+
 
     args = parser.parse_args()
     sys.exit(run_pipeline(args,parser))
