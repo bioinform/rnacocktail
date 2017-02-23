@@ -35,6 +35,7 @@ def run_pipeline(args,parser):
     logger.info("Running RNASeqPipeline %s" % __version__)
     logger.info("Command-line %s" % (" ".join(sys.argv)))
     logger.info("Arguments are " + str(args))
+    logger.info("Run log will be saved in " + log_file)
     mode = args.mode
     logger.info("Run in mode: " + mode)
 
