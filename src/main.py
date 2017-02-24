@@ -659,7 +659,7 @@ def run_pipeline(args,parser):
                                           read_length=args.read_length,
                                           samtools=args.samtools, idpfusion=args.idpfusion, idpfusion_cfg=args.idpfusion_cfg, 
                                           gmap=args.gmap, gmap_idx=args.gmap_idx, star_dir=args.star_dir, bowtie2_dir=args.bowtie2_dir,
-                                          start=args.start, sample= args.sample, nthreads=args.threads,
+                                          start=0, sample= args.sample, nthreads=args.threads,
                                           workdir=args.workdir, outdir=args.outdir, timeout=args.timeout,ignore_exceptions=True)
                         else:
                             logger.info("******************************************************************************")
