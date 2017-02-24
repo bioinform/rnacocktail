@@ -168,11 +168,11 @@ if __name__ == "__main__":
                                         the beginning the entire pipeline. 0 is for restarting \
                                         automatically and 1 is the first step. Default is '0'."
                                   , default=0)
-        diff_parser.add_argument("--samples",nargs="*", metavar="Sample", help="Sample names. \
+        diff_parser.add_argument("--sample",nargs="*", metavar="Sample", help="Sample names. \
                                         Number of samples and replicates should match the \
                                         input quantification (--quant_files) or alignemnt (--alignments).\
                                            Replicates in same sample should be listed comma separated. \
-                                        e.g --samples A1,A2 B1,B2", required=True)                             
+                                        e.g --sample A1,A2 B1,B2", required=True)                             
         diff_parser.add_argument("--mincount", type=int, metavar="mincount",
                                   help="Minimum read counts per transcripts. Differential analysis \
                                   pre-filtering step removes transcripts that have less than this number of reads.", 

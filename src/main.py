@@ -24,7 +24,7 @@ import logging
 
 def run_pipeline(args,parser):
     create_dirs([args.workdir, args.outdir,os.path.join(args.workdir,"logs")])
-    log_file=os.path.join(args.workdir,"logs","run-%s.log"%time.strftime("%Y%m%d-%H%M%S"))
+    log_file=os.path.join(args.workdir,"logs","run-%s-sample-%s.log"%time.strftime("%Y%m%d-%H%M%S"))
     FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
     logging.basicConfig(level=logging.INFO, format=FORMAT, filename=log_file, filemode="w")
     logFormatter = logging.Formatter(FORMAT)
@@ -122,7 +122,7 @@ def run_pipeline(args,parser):
                       featureCounts_opts=args.featureCounts_opts, featureCounts=args.featureCounts,
                       stringtie=args.stringtie, stringtie_merge_opts=args.stringtie_merge_opts,                  
                       mincount=args.mincount, alpha=args.alpha, 
-                      R=args.R, start=args.start, samples=args.samples, nthreads=args.threads,
+                      R=args.R, start=args.start, samples=args.sample, nthreads=args.threads,
                       workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
 
     elif mode=="denovo":
