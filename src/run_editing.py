@@ -307,7 +307,7 @@ def run_giremi(alignment="", variant="",
                     command="cd %s && %s %s -f %s -l %s/SNV_annotated_filtered.bed -o %s/giremi_out.txt %s/alignments.pos_sorted.bam" % (
                         giremi_dir,GIREMI, giremi_opts, os.path.abspath(ref_genome), os.path.abspath(work_giremi), os.path.abspath(work_giremi),os.path.abspath(work_giremi))
                     command="bash -c \"%s\""%command        
-                    cmd = TimedExternalCmd(command, logger, raise_exception=True)
+                    cmd = TimedExternalCmd(command, logger, raise_exception=False)
                     retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)
                 else:
                     logger.info("No file %s/SNV_annotated_filtered.bed"%work_giremi)
