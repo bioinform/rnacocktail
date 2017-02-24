@@ -29,10 +29,7 @@ echo "Index genome with HISAT2"
 ./hisat2-2.0.4/hisat2-build Homo_sapiens.GRCh37.75.dna.chromosome.21.fa Homo_sapiens.GRCh37.75.dna.chromosome.21.HISAT2
 
 echo "Test alignment step using HISAT2"
-run_rnacocktail.py align --align_idx Homo_sapiens.GRCh37.75.dna.chromosome.21.HISAT2 --outdir out --workdir work --ref_gtf Homo_sapiens.GRCh37.75.chromosome.21.gtf --1 ../seq_1.fq.gz  --2 ../seq_2.fq.gz --hisat2 hisat2-2.0.4/hisat2 --hisat2_sps hisat2-2.0.4/hisat2_extract_splice_sites.py  --samtools samtools --sample A
-
-echo "Test alignment step using HISAT2"
-run_rnacocktail.py align --align_idx Homo_sapiens.GRCh37.75.dna.chromosome.21.HISAT2 --outdir out --workdir work --ref_gtf Homo_sapiens.GRCh37.75.chromosome.21.gtf --1 ../seq_1.fq.gz  --2 ../seq_2.fq.gz --hisat2 hisat2-2.0.4/hisat2 --hisat2_sps hisat2-2.0.4/hisat2_extract_splice_sites.py  --samtools samtools --sample A
+run_rnacocktail.py align --align_idx Homo_sapiens.GRCh37.75.dna.chromosome.21.HISAT2 --outdir out --workdir work --ref_gtf Homo_sapiens.GRCh37.75.chromosome.21.gtf --1 ../A1_1.fq.gz  --2 ../A1_2.fq.gz --hisat2 hisat2-2.0.4/hisat2 --hisat2_sps hisat2-2.0.4/hisat2_extract_splice_sites.py  --samtools samtools --sample A
 
 echo "Download StringTie binaries"
 wget http://ccb.jhu.edu/software/stringtie/dl/stringtie-1.2.4.Linux_x86_64.tar.gz

@@ -47,7 +47,7 @@ ADD https://github.com/gpertea/stringtie/archive/v${STRINGTIE_VERSION}.tar.gz /o
 RUN cd /opt && tar -zxvf stringtie-${STRINGTIE_VERSION}.Linux_x86_64.tar.gz && cd stringtie-${STRINGTIE_VERSION} && make && cp -p /opt/stringtie-${STRINGTIE_VERSION}/stringtie /usr/local/bin && cd /opt && rm -rf stringtie*
 
 ADD https://github.com/COMBINE-lab/salmon/releases/download/v${SALMON_VERSION}/Salmon-${SALMON_VERSION}_linux_x86_64.tar.gz /opt/Salmon-${SALMON_VERSION}_linux_x86_64.tar.gz
-RUN cd /opt && tar -zxvf Salmon-${SALMON_VERSION}_linux_x86_64.tar.gz && cp -p /opt/Salmon-${SALMON_VERSION}_linux_x86_64/bin/salmon /usr/local/bin && cp -p /opt/Salmon-${SALMON_VERSION}_linux_x86_64/lib/* /usr/local/lib && cd /opt && rm -rf Salmon*
+RUN cd /opt && tar -zxvf Salmon-${SALMON_VERSION}_linux_x86_64.tar.gz && cp -p /opt/Salmon-*/bin/salmon /usr/local/bin && cp -p /opt/Salmon-*/lib/* /usr/local/lib && cd /opt && rm -rf Salmon*
 
 ADD https://github.com/dzerbino/oases/archive/${OASES_VERSION}.tar.gz /opt/${OASES_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf ${OASES_VERSION}.tar.gz && rm -rf /opt/oases-${OASES_VERSION}/velvet /opt/${OASES_VERSION}.tar.gz
@@ -130,6 +130,7 @@ RUN rm -rf /usr/local/bin/IDP* && cd /opt && unzip IDP-master.zip && rm -rf /opt
 ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_${IDPFUSION_VERSION}.tar.gz /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
+RUN cd /opt
 RUN pip install https://github.com/bioinform/rnacocktail/archive/fix_examples.zip
 
 VOLUME /work_dir
