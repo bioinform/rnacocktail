@@ -128,6 +128,7 @@ echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Index genome with STAR"
 mkdir STAR_genome_index_21/
+chmod -R 777 STAR_genome_index_21/
 docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 STAR --runMode genomeGenerate --genomeDir /work_dir/example/STAR_genome_index_21/ --genomeFastaFiles /work_dir/example/Homo_sapiens.GRCh37.75.dna.chromosome.21.fa --runThreadN 4
 docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py long_align --long /work_dir/example/work/lordec/C/long_corrected.fa --threads 4 --outdir /work_dir/example/out --workdir /work_dir/example/work --sample C --genome_dir /work_dir/example/STAR_genome_index_21/
 

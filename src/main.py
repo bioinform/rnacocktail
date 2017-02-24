@@ -638,16 +638,6 @@ def run_pipeline(args,parser):
                             logger.info("******************************************************************************")
                             logger.info("Running long read fusion detection step using %s for %s"%(args.long_reconstructor,replicate))
                             logger.info("******************************************************************************")
-                            transcripts_lr[si][replicate],abundances_lr[si][replicate]=run_lr_reconstruct(long_reconstructor=args.long_reconstructor,
-                                          alignment=alignments_bam[si][replicate], 
-                                          short_junction=junctions_bed[si][replicate], 
-                                          long_alignment=alignments_lr[si][replicate],
-                                          mode_number=args.mode_number,
-                                          ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
-                                          read_length=args.read_length,
-                                          samtools=args.samtools, idp=args.idp, idp_cfg=args.idp_cfg, 
-                                          start=0, sample= replicate, nthreads=args.threads,
-                                          workdir=args.workdir, outdir=args.outdir, timeout=args.timeout, ignore_exceptions=True)
                             fusions_lr[si][replicate]=run_lr_fusion(long_fusion_caller=args.long_fusion_caller,
                                           alignment=alignments_bam[si][replicate], 
                                           short_junction=junctions_bed[si][replicate], 
@@ -659,13 +649,13 @@ def run_pipeline(args,parser):
                                           read_length=args.read_length,
                                           samtools=args.samtools, idpfusion=args.idpfusion, idpfusion_cfg=args.idpfusion_cfg, 
                                           gmap=args.gmap, gmap_idx=args.gmap_idx, star_dir=args.star_dir, bowtie2_dir=args.bowtie2_dir,
-                                          start=0, sample= args.sample, nthreads=args.threads,
+                                          start=0, sample= replicate, nthreads=args.threads,
                                           workdir=args.workdir, outdir=args.outdir, timeout=args.timeout,ignore_exceptions=True)
                         else:
                             logger.info("******************************************************************************")
                             logger.info("Excluding long read transcriptome reconstruction step using %s for %s"%(args.long_reconstructor,replicate))
                             logger.info("******************************************************************************")
-                            transcripts_lr[si][replicate],abundances_lr[si][replicate]=["",""]
+                            fusions_lr[si][replicate]=""
             else:
                 for si,sample in enumerate(samples):
                     corrected[si]={}
