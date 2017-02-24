@@ -1,8 +1,7 @@
 #!/bin/bash
 
-
-mkdir example
-cd example
+mkdir small_example
+cd small_example
 
 echo "Download reference genome (chromosome 1) FASTA file"
 wget ftp://ftp.ensembl.org/pub/release-75//fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.chromosome.1.fa.gz
