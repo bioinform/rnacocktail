@@ -1,6 +1,7 @@
 #!/bin/bash
 
 mkdir example
+chmod -R 777 example/
 cd example
 
 echo "--------------------------------------------------------"

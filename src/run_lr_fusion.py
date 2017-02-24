@@ -111,7 +111,7 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
     msg = "Fix soft-clipped reads in SAM for %s"%sample
     logger.info("--------------------------STEP %s--------------------------"%step)
     if start<=step:
-        logger.info("Task :%s"%msg)
+        logger.info("Task: %s"%msg)
         corrected_alignment = "%s/alignments_corrected.sam"%(work_idpfusion)
         with open(alignment,"r") as csv_file_i:
             with open(corrected_alignment,"w") as csv_file_o:
@@ -145,7 +145,7 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
     msg = "Fix junction bed for %s"%sample
     logger.info("--------------------------STEP %s--------------------------"%step)
     if start<=step:
-        logger.info("Task :%s"%msg)
+        logger.info("Task: %s"%msg)
         corrected_junction = "%s/splicesites_corrected.bed"%(work_idpfusion)
         with open(short_junction,"r") as csv_file_i:
             with open(corrected_junction,"w") as csv_file_o:
@@ -170,7 +170,7 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
     msg = "Preparing run.cfg for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        logger.info("Task :%s"%msg)
+        logger.info("Task: %s"%msg)
         if idpfusion_cfg:
             msg = "copy IDP-fusion .cfg file for %s"%sample
             command="cp  %s %s/run.cfg" % (
@@ -279,6 +279,12 @@ def run_idpfusion(alignment="", short_junction="", long_alignment="",mode_number
                 cfg_file.write("exon_construction_junction_span = 1 \n")
             if "aligner_choice" not in cgf_dict:       
                 cfg_file.write("aligner_choice = gmap \n")
+            if "aligner_choice" not in cgf_dict:       
+                cfg_file.write("aligner_choice = gmap \n")
+            if "three_primer" not in cgf_dict:       
+                cfg_file.write("three_primer =  \n")
+            if "five_primer" not in cgf_dict:       
+                cfg_file.write("five_primer =  \n")
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1

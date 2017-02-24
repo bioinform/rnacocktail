@@ -602,7 +602,8 @@ def run_pipeline(args,parser):
                             logger.info("******************************************************************************")
                             logger.info("Running long read alignment step on corrected long-reads using %s for %s"%(args.long_aligner,replicate))
                             logger.info("******************************************************************************")
-                            alignments_lr[si][replicate]=run_lr_align(long_aligner=args.long_aligner,long=corrected[si][replicate],
+                            alignments_lr[si][replicate]=run_lr_align(long_aligner=args.long_aligner,
+                                          long=corrected[si][replicate] if corrected[si][replicate] else input_lr[replicate],
                                           genome_dir=args.star_genome_dir, ref_gtf=args.ref_gtf,
                                           starlong=args.starlong, starlong_opts=args.starlong_opts, 
                                           sam2psl=args.sam2psl, samtools=args.samtools,
@@ -641,7 +642,8 @@ def run_pipeline(args,parser):
                             fusions_lr[si][replicate]=run_lr_fusion(long_fusion_caller=args.long_fusion_caller,
                                           alignment=alignments_bam[si][replicate], 
                                           short_junction=junctions_bed[si][replicate], 
-                                          short_fasta=input_sr["U"][replicate], long_fasta=corrected[si][replicate], 
+                                          short_fasta=input_sr["U"][replicate], 
+                                          long_fasta=corrected[si][replicate] if corrected[si][replicate] else input_lr[replicate], 
                                           mode_number=args.mode_number,
                                           ref_genome=args.ref_genome, ref_all_gpd=args.ref_all_gpd, ref_gpd=args.ref_gpd,
                                           uniqueness_bedgraph=args.uniqueness_bedgraph,
