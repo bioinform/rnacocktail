@@ -5,8 +5,8 @@ ENV SAMTOOLS_VERSION 1.2
 ENV BEDTOOLS2_VERSION 2.24.0
 ENV PYBEDTOOLS_VERSION 0.7.7
 ENV PYSAM_VERSION 0.9.0
-ENV HISAT2_VERSION 2.0.4
-ENV STRINGTIE_VERSION 1.2.1
+ENV HISAT2_VERSION 2.0.5
+ENV STRINGTIE_VERSION 1.3.3
 ENV OASES_VERSION 0.2.09
 ENV VELVET_VERSION 1.2.10
 ENV STAR_VERSION 2.5.2b
@@ -14,6 +14,15 @@ ENV PICARD_VERSION 2.2.2
 ENV HTSLIB_VERSION 1.3
 ENV GIREMI_VERSION 0.2.1
 ENV FUSIONCATCHER_VERSION 0.99.7a
+ENV SALMON_VERSION 0.8.0
+ENV BOWTIE_VERSION 1.1.2
+ENV BOWTIE2_VERSION 2.2.9
+ENV BWA_VERSION 0.7.15
+ENV SRA_VERSION 2.8.1
+ENV COREUTILS_VERSION 8.25
+ENV PIGZ_VERSION 2.3.1
+ENV GMAP_VERSION 2017-02-15
+ENV IDPFUSION_VERSION 1.1.1
 
 RUN apt-get update && \
     apt-get install -y --fix-missing build-essential zlib1g-dev unzip libncurses5-dev curl wget r-base r-base-dev python python-pip python-dev cmake libboost-all-dev  libxml2-dev libcurl4-gnutls-dev software-properties-common apt-transport-https default-jre default-jdk less vim
@@ -37,8 +46,8 @@ RUN wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-${HISAT2_VER
 ADD https://github.com/gpertea/stringtie/archive/v${STRINGTIE_VERSION}.tar.gz /opt/stringtie-${STRINGTIE_VERSION}.Linux_x86_64.tar.gz
 RUN cd /opt && tar -zxvf stringtie-${STRINGTIE_VERSION}.Linux_x86_64.tar.gz && cd stringtie-${STRINGTIE_VERSION} && make && cp -p /opt/stringtie-${STRINGTIE_VERSION}/stringtie /usr/local/bin && cd /opt && rm -rf stringtie*
 
-ADD https://github.com/COMBINE-lab/salmon/releases/download/v0.7.2/Salmon-0.7.2_linux_x86_64.tar.gz /opt/Salmon-0.7.2_linux_x86_64.tar.gz
-RUN cd /opt && tar -zxvf Salmon-0.7.2_linux_x86_64.tar.gz && cp -p /opt/Salmon-0.7.2_linux_x86_64/bin/salmon /usr/local/bin && cp -p /opt/Salmon-0.7.2_linux_x86_64/lib/* /usr/local/lib && cd /opt && rm -rf Salmon*
+ADD https://github.com/COMBINE-lab/salmon/releases/download/v${SALMON_VERSION}/Salmon-${SALMON_VERSION}_linux_x86_64.tar.gz /opt/Salmon-${SALMON_VERSION}_linux_x86_64.tar.gz
+RUN cd /opt && tar -zxvf Salmon-${SALMON_VERSION}_linux_x86_64.tar.gz && cp -p /opt/Salmon-${SALMON_VERSION}_linux_x86_64/bin/salmon /usr/local/bin && cp -p /opt/Salmon-${SALMON_VERSION}_linux_x86_64/lib/* /usr/local/lib && cd /opt && rm -rf Salmon*
 
 ADD https://github.com/dzerbino/oases/archive/${OASES_VERSION}.tar.gz /opt/${OASES_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf ${OASES_VERSION}.tar.gz && rm -rf /opt/oases-${OASES_VERSION}/velvet /opt/${OASES_VERSION}.tar.gz
@@ -71,14 +80,14 @@ RUN cd /opt && tar -zxvf giremi-${GIREMI_VERSION}.tar.gz && cp -p giremi-${GIREM
 RUN pip install --upgrade pip
 RUN pip install pybedtools==${PYBEDTOOLS_VERSION} pysam==${PYSAM_VERSION} biopython==1.66 openpyxl==1.5.6 xlrd==0.6.1 numpy pandas
 
-RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.1.2/bowtie-1.1.2-linux-x86_64.zip/download -O /opt/bowtie-1.1.2-linux-x86_64.zip
-RUN cd /opt && unzip bowtie-1.1.2-linux-x86_64.zip && cp -p /opt/bowtie-1.1.2/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
+RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/${BOWTIE_VERSION}/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip/download -O /opt/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip
+RUN cd /opt && unzip bowtie-${BOWTIE_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie-${BOWTIE_VERSION}/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
 
-RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.9/bowtie2-2.2.9-linux-x86_64.zip/download -O /opt/bowtie2-2.2.9-linux-x86_64.zip 
-RUN cd /opt && unzip bowtie2-2.2.9-linux-x86_64.zip && cp -p /opt/bowtie2-2.2.9/bowtie2* /usr/local/bin && cd /opt && rm -rf bowtie2*
+RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip/download -O /opt/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip 
+RUN cd /opt && unzip bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie2-${BOWTIE2_VERSION}/bowtie2* /usr/local/bin && cd /opt && rm -rf bowtie2*
 
-RUN wget https://sourceforge.net/projects/bio-bwa/files/bwa-0.7.12.tar.bz2/download -O /opt/bwa-0.7.12.tar.bz2 
-RUN cd /opt && tar xjf bwa-0.7.12.tar.bz2 && cd bwa-0.7.12 && make && cp -p /opt/bwa-0.7.12/bwa /usr/local/bin && cd /opt && rm -rf bwa*
+RUN wget https://sourceforge.net/projects/bio-bwa/files/bwa-${BWA_VERSION}.tar.bz2/download -O /opt/bwa-${BWA_VERSION}.tar.bz2 
+RUN cd /opt && tar xjf bwa-${BWA_VERSION}.tar.bz2 && cd bwa-${BWA_VERSION} && make && cp -p /opt/bwa-${BWA_VERSION}/bwa /usr/local/bin && cd /opt && rm -rf bwa*
 
 ADD https://github.com/ndaniel/seqtk/archive/1.0-r82b.tar.gz /opt/seqtk-1.0-r82b.tar.gz
 RUN cd /opt && tar -zxvf /opt/seqtk-1.0-r82b.tar.gz && cd seqtk-1.0-r82b && make  && cp -p /opt/seqtk-1.0-r82b/seqtk /usr/local/bin && cd /opt && rm -rf seqtk*
@@ -95,19 +104,19 @@ RUN chmod 755 /usr/local/bin/liftOver
 
 
 
-ADD https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.8.1/sratoolkit.2.8.1-ubuntu64.tar.gz /opt/sratoolkit.2.8.1-ubuntu64.tar.gz
-RUN cd /opt && tar -zxvf sratoolkit.2.8.1-ubuntu64.tar.gz && cp -Rp /opt/sratoolkit.2.8.1-ubuntu64/bin/* /usr/local/bin/ && cd /opt && rm -rf sratoolkit*
+ADD https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz /opt/sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz
+RUN cd /opt && tar -zxvf sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz && cp -Rp /opt/sratoolkit.${SRA_VERSION}-ubuntu64/bin/* /usr/local/bin/ && cd /opt && rm -rf sratoolkit*
 
-ADD http://ftp.gnu.org/gnu/coreutils/coreutils-8.25.tar.xz /opt/coreutils-8.25.tar.xz 
-RUN cd /opt && tar -xJf coreutils-8.25.tar.xz && cd coreutils-8.25 && ./configure FORCE_UNSAFE_CONFIGURE=1 && make && make install && cd /opt && rm -rf coreutils*
+ADD http://ftp.gnu.org/gnu/coreutils/coreutils-${COREUTILS_VERSION}.tar.xz /opt/coreutils-${COREUTILS_VERSION}.tar.xz 
+RUN cd /opt && tar -xJf coreutils-${COREUTILS_VERSION}.tar.xz && cd coreutils-${COREUTILS_VERSION} && ./configure FORCE_UNSAFE_CONFIGURE=1 && make && make install && cd /opt && rm -rf coreutils*
 
-ADD http://pkgs.fedoraproject.org/repo/pkgs/pigz/pigz-2.3.1.tar.gz/e803f8bc0770c7a5e96dccb1d2dd2aab/pigz-2.3.1.tar.gz /opt/pigz-2.3.1.tar.gz
-RUN cd /opt && tar -zxvf pigz-2.3.1.tar.gz && cd pigz-2.3.1 && make && cp -p /opt/pigz-2.3.1/pigz /usr/local/bin && cd /opt && rm -rf pigz*
+ADD http://pkgs.fedoraproject.org/repo/pkgs/pigz/pigz-${PIGZ_VERSION}.tar.gz/e803f8bc0770c7a5e96dccb1d2dd2aab/pigz-${PIGZ_VERSION}.tar.gz /opt/pigz-${PIGZ_VERSION}.tar.gz
+RUN cd /opt && tar -zxvf pigz-${PIGZ_VERSION}.tar.gz && cd pigz-${PIGZ_VERSION} && make && cp -p /opt/pigz-${PIGZ_VERSION}/pigz /usr/local/bin && cd /opt && rm -rf pigz*
 
 RUN wget http://sourceforge.net/projects/samtools/files/samtools/0.1.19/samtools-0.1.19.tar.bz2 -O /opt/samtools-0.1.19.tar.bz2 && cd /opt && tar -xjvf samtools-0.1.19.tar.bz2 && cd samtools-0.1.19 && make && rm -rf /opt/samtools-0.1.19.tar.bz2
 
-ADD http://research-pub.gene.com/gmap/src/gmap-gsnap-2017-02-15.tar.gz /opt/gmap-gsnap-2017-02-15.tar.gz
-RUN cd /opt && tar -zxvf gmap-gsnap-2017-02-15.tar.gz && cd gmap-2017-02-15 && ./configure && make && make install && cd /opt && rm -rf gmap*
+ADD http://research-pub.gene.com/gmap/src/gmap-gsnap-${GMAP_VERSION}.tar.gz /opt/gmap-gsnap-${GMAP_VERSION}.tar.gz
+RUN cd /opt && tar -zxvf gmap-gsnap-${GMAP_VERSION}.tar.gz && cd gmap-${GMAP_VERSION} && ./configure && make && make install && cd /opt && rm -rf gmap*
 
 RUN wget https://sourceforge.net/projects/fusioncatcher/files/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip -O /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip && cd /opt && unzip fusioncatcher_v${FUSIONCATCHER_VERSION}.zip  && cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/sam2psl.py /usr/local/bin
 ENV PATH $PATH:/opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/
@@ -118,11 +127,9 @@ RUN rm -rf /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip
 ADD https://github.com/bioinform/IDP/archive/master.zip /opt/IDP-master.zip
 RUN rm -rf /usr/local/bin/IDP* && cd /opt && unzip IDP-master.zip && rm -rf /opt/IDP-master.zip
 
-ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_1.1.1.tar.gz /opt/IDP-fusion_1.1.1.tar.gz
-RUN cd /opt && tar -xzvf IDP-fusion_1.1.1.tar.gz && rm -rf /opt/IDP-fusion_1.1.1.tar.gz
+ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_${IDPFUSION_VERSION}.tar.gz /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
+RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
-RUN cd /opt
-RUN cd /opt
 RUN pip install https://github.com/bioinform/rnacocktail/archive/fix_examples.zip
 
 VOLUME /work_dir

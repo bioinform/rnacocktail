@@ -24,7 +24,7 @@ import logging
 
 def run_pipeline(args,parser):
     create_dirs([args.workdir, args.outdir,os.path.join(args.workdir,"logs")])
-    log_file=os.path.join(args.workdir,"logs","run-%s-sample-%s.log"%time.strftime("%Y%m%d-%H%M%S",args.sample))
+    log_file=os.path.join(args.workdir,"logs","run-%s-sample-%s.log"%(time.strftime("%Y%m%d-%H%M%S"),args.sample))
     FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
     logging.basicConfig(level=logging.INFO, format=FORMAT, filename=log_file, filemode="w")
     logFormatter = logging.Formatter(FORMAT)
