@@ -133,6 +133,7 @@ RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/I
 
 RUN pip install scipy
 
+RUN cd /opt
 RUN pip install https://github.com/bioinform/rnacocktail/archive/fix_examples.zip
 
 VOLUME /work_dir
