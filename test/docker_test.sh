@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 mkdir example
 chmod -R 777 example/
@@ -99,16 +99,18 @@ docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py denovo -
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Test short-read fusion detection (FusionCatcher)"
+echo "Note: downloading FusionCatcher necessary data may take 1-2 hours"
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 mkdir fusioncatcher_data
 cd fusioncatcher_data
-wget http://sourceforge.net/projects/fusioncatcher/files/data/ensembl_v86.tar.gz.aa
-wget http://sourceforge.net/projects/fusioncatcher/files/data/ensembl_v86.tar.gz.ab
-wget http://sourceforge.net/projects/fusioncatcher/files/data/ensembl_v86.tar.gz.ac
-wget http://sourceforge.net/projects/fusioncatcher/files/data/ensembl_v86.tar.gz.ad
+wget http://sourceforge.net/projects/fusioncatcher/files/data/ensembl_v86.tar.gz.aa &
+wget http://sourceforge.net/projects/fusioncatcher/files/data/ensembl_v86.tar.gz.ab &
+wget http://sourceforge.net/projects/fusioncatcher/files/data/ensembl_v86.tar.gz.ac &
+wget http://sourceforge.net/projects/fusioncatcher/files/data/ensembl_v86.tar.gz.ad 
 cat ensembl_v86.tar.gz.* | tar xz
 rm -rf ensembl_v86.tar.gz.a*
+
 wget http://sourceforge.net/projects/fusioncatcher/files/test/reads_1.fq.gz
 wget http://sourceforge.net/projects/fusioncatcher/files/test/reads_2.fq.gz
 cd ..
@@ -156,6 +158,7 @@ echo "--------------------------------------------------------"
 wget https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/MCF7_chr17q23-25chr20q13_Example.zip
 unzip MCF7_chr17q23-25chr20q13_Example.zip
 rm MCF7_chr17q23-25chr20q13_Example.zip
+chmod 777 -R MCF7_chr17q23-25chr20q13_Example
 echo "Restrict GTF to chromosome 17 and 20"
 less Homo_sapiens.GRCh37.75.gtf |awk '{if ($1==20 || $1==17) print}'|sed 's/^/chr/' > Homo_sapiens.GRCh37.75.chromosome.17_20.gtf
 echo "Index genome (chromosome 17 and 20) with HISAT2"
@@ -168,7 +171,7 @@ echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Test variant calling (GATK)"
 echo "Note: the test on variant calling and RNA editing detection may take several hours"
-echo "Note: GATK .jar file (GenomeAnalysisTK.jar) should be available in the example folder."
+echo "Note: GATK .jar file (GenomeAnalysisTK.jar) should be available in the test folder."
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Download reference genome FASTA file"
@@ -187,18 +190,21 @@ wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR896/SRR896663/SRR896663_1.fastq.gz &
 wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR896/SRR896663/SRR896663_2.fastq.gz 
 
 docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py align --align_idx /work_dir/example/human_g1k_v37.HISAT2 --outdir /work_dir/example/out --workdir /work_dir/example/work --ref_gtf /work_dir/example/Homo_sapiens.GRCh37.75.gtf --1 /work_dir/example/SRR896663_1.fastq.gz  --2 /work_dir/example/SRR896663_2.fastq.gz --sample E --threads 10
-docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py variant --alignment /work_dir/example/work/hisat2/E/alignments.sorted.bam --outdir /work_dir/example/out --workdir /work_dir/example/work --picard /usr/local/bin/picard.jar --gatk /work_dir/example/GenomeAnalysisTK.jar --threads 10 --sample E --ref_genome /work_dir/example/human_g1k_v37.fasta --IndelRealignment --CleanSam --knownsites /work_dir/example/All_20161122.vcf --gatk /work_dir/example/GenomeAnalysisTK.jar --picard /usr/local/bin/picard.jar
+docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py variant --alignment /work_dir/example/work/hisat2/E/alignments.sorted.bam --outdir /work_dir/example/out --workdir /work_dir/example/work --picard /usr/local/bin/picard.jar --gatk /work_dir/GenomeAnalysisTK.jar --threads 10 --sample E --ref_genome /work_dir/example/human_g1k_v37.fasta --IndelRealignment --CleanSam --knownsites /work_dir/example/All_20161122.vcf --picard /usr/local/bin/picard.jar
 
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Test RNA editing detection (GIREMI)"
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
-docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py editing --alignment /work_dir/example/work/gatk/E/bsqr.bam --variant /work_dir/example/work/gatk/E/variants_filtered.vcf --strand_pos /work_dir/example/GRCh37_strand_pos.bed --genes_pos /work_dir/example/GRCh37_genes_pos.bed --outdir /work_dir/example/out --workdir /work_dir/example/work --giremi_dir /usr/local/bin/ --gatk /work_dir/example/GenomeAnalysisTK.jar --htslib_dir /opt/htslib-1.3/ --threads 10 --sample E --ref_genome /work_dir/example/human_g1k_v37.fasta --knownsites /work_dir/example/All_20161122.vcf
+docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py editing --alignment /work_dir/example/work/gatk/E/bsqr.bam --variant /work_dir/example/work/gatk/E/variants_filtered.vcf --strand_pos /work_dir/example/GRCh37_strand_pos.bed --genes_pos /work_dir/example/GRCh37_genes_pos.bed --outdir /work_dir/example/out --workdir /work_dir/example/work --giremi_dir /usr/local/bin/ --gatk /work_dir/GenomeAnalysisTK.jar --htslib_dir /opt/htslib-1.3/ --threads 10 --sample E --ref_genome /work_dir/example/human_g1k_v37.fasta --knownsites /work_dir/example/All_20161122.vcf
 
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Test run all pipeline (Short-read example)"
+echo "This example should successfully run for short-read alignment," 
+echo "reconstruction, quantification, differential expression,"
+echo "denovo assembly, variant calling, and fusion detection."
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 cat <(less All_20161122.vcf |head -10000|grep "#") <(less All_20161122.vcf |awk '{if ($1==21) print}') > variants_21.vcf
@@ -211,7 +217,13 @@ docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py all --ou
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Test run all pipeline (Long-read example)"
+echo "Thid example should successfully run for short-read alignment, 
+echo "reconstruction, denovo assembly, quantification, "
+echo "variant calling and long-read error correction," 
+echo "alignment, and reconstruction"
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 gmap_build -d /work_dir/example/gmap_chromosome.21 /work_dir/example/Homo_sapiens.GRCh37.75.dna.chromosome.21.fa
-docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py all --outdir /work_dir/example/out --workdir /work_dir/example/work --threads 10 --data_dir /work_dir/example/fusioncatcher_data/ensembl_v86/ --U /work_dir/example/C_short.fa --long /work_dir/example/C_long.fa --sample aC --ref_genome Homo_sapiens.GRCh37.75.dna.chromosome.21.fa --star_genome_dir /work_dir/example/STAR_genome_index_21/ --align_idx /work_dir/example/Homo_sapiens.GRCh37.75.dna.chromosome.21.HISAT2 --gmap_idx /work_dir/example/gmap_chromosome.21 --ref_all_gpd /work_dir/example/hg19.known.21.gpd --ref_gpd /work_dir/example/refFlat.21.txt --file_format fasta --IndelRealignment --CleanSam --knownsites variants_21.vcf --strand_pos /work_dir/example/GRCh37_strand_pos.bed --genes_pos /work_dir/example/GRCh37_genes_pos.bed --read_length 101 --hisat2_opts \"-f\" --giremi_dir /usr/local/bin/ --gatk /work_dir/example/GenomeAnalysisTK.jar --htslib_dir /opt/htslib-1.3/ --picard /usr/local/bin/picard.jar --idp /opt/IDP-master/src/main/python/runIDP.py --idpfusion /opt/IDP-fusion_1.1.1/bin/runIDP.py
+docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 bowtie2-build /work_dir/example/Homo_sapiens.GRCh37.75.dna.chromosome.21.fa /work_dir/example/Homo_sapiens.GRCh37.75.dna.chromosome.21
+docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 bowtie2-build /work_dir/example/Homo_sapiens.GRCh37.75.cdna.21.fa /work_dir/example/Homo_sapiens.GRCh37.75.cdna.21
+docker run -v=${PWD}/../:/work_dir/  rnacocktail:0.2 run_rnacocktail.py all --outdir /work_dir/example/out --workdir /work_dir/example/work --threads 10 --data_dir /work_dir/example/fusioncatcher_data/ensembl_v86/ --U /work_dir/example/C_short.fa --long /work_dir/example/C_long.fa --sample all_C --ref_genome /work_dir/example/Homo_sapiens.GRCh37.75.dna.chromosome.21.fa --star_genome_dir /work_dir/example/STAR_genome_index_21/ --align_idx /work_dir/example/Homo_sapiens.GRCh37.75.dna.chromosome.21.HISAT2 --quantifier_idx /work_dir/example/Homo_sapiens.GRCh37.75.cdna.21.Salmon.fmd --gmap_idx /work_dir/example/gmap_chromosome.21 --genome_bowtie2_idx /work_dir/example/Homo_sapiens.GRCh37.75.dna.chromosome.21 --transcriptome_bowtie2_idx /work_dir/example/Homo_sapiens.GRCh37.75.cdna.21 --ref_all_gpd /work_dir/example/hg19.known.21.gpd --ref_gpd /work_dir/example/refFlat.21.txt --file_format fasta --IndelRealignment --CleanSam --knownsites /work_dir/example/variants_21.vcf --strand_pos /work_dir/example/GRCh37_strand_pos.bed --genes_pos /work_dir/example/GRCh37_genes_pos.bed --read_length 101 --hisat2_opts \"-f\" --giremi_dir /usr/local/bin/ --gatk /work_dir/example/GenomeAnalysisTK.jar --htslib_dir /opt/htslib-1.3/ --picard /usr/local/bin/picard.jar --idp /opt/IDP-master/src/main/python/runIDP.py --idpfusion /opt/IDP-fusion_1.1.1/bin/runIDP.py

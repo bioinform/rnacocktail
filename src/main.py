@@ -23,8 +23,12 @@ import logging
 
 
 def run_pipeline(args,parser):
+
+    mode = args.mode
     create_dirs([args.workdir, args.outdir,os.path.join(args.workdir,"logs")])
-    log_file=os.path.join(args.workdir,"logs","run-%s-sample-%s.log"%(time.strftime("%Y%m%d-%H%M%S"),"-".join(args.sample)))
+    log_file=os.path.join(args.workdir,"logs","run-sample-%s-mode-%s-%s-sample-%s.log"%(
+                          ("-".join(args.sample)) if mode in ["diff","all"] else args.sample),
+                          mode, time.strftime("%Y%m%d-%H%M%S"))
     FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
     logging.basicConfig(level=logging.INFO, format=FORMAT, filename=log_file, filemode="w")
     logFormatter = logging.Formatter(FORMAT)
@@ -36,7 +40,6 @@ def run_pipeline(args,parser):
     logger.info("Command-line %s" % (" ".join(sys.argv)))
     logger.info("Arguments are " + str(args))
     logger.info("Run log will be saved in " + log_file)
-    mode = args.mode
     logger.info("Run in mode: " + mode)
 
 #     Simple check for arguments
@@ -752,6 +755,7 @@ def run_pipeline(args,parser):
         logger.error("wrong mode %s"%(mode))
         return os.EX_USAGE
 
+    logger.info("Run log is saved in " + log_file)
     logger.info("All Done!")
 
     return os.EX_OK

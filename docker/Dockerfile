@@ -118,6 +118,7 @@ RUN wget http://sourceforge.net/projects/samtools/files/samtools/0.1.19/samtools
 ADD http://research-pub.gene.com/gmap/src/gmap-gsnap-${GMAP_VERSION}.tar.gz /opt/gmap-gsnap-${GMAP_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf gmap-gsnap-${GMAP_VERSION}.tar.gz && cd gmap-${GMAP_VERSION} && ./configure && make && make install && cd /opt && rm -rf gmap*
 
+ENV FUSIONCATCHER_VERSION 0.99.7b
 RUN wget https://sourceforge.net/projects/fusioncatcher/files/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip -O /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip && cd /opt && unzip fusioncatcher_v${FUSIONCATCHER_VERSION}.zip  && cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/sam2psl.py /usr/local/bin
 ENV PATH $PATH:/opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/
 RUN echo '[paths]' > /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/configuration.cfg
@@ -130,8 +131,8 @@ RUN rm -rf /usr/local/bin/IDP* && cd /opt && unzip IDP-master.zip && rm -rf /opt
 ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_${IDPFUSION_VERSION}.tar.gz /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
-RUN cd /opt
-RUN cd /opt
+RUN pip install scipy
+
 RUN pip install https://github.com/bioinform/rnacocktail/archive/fix_examples.zip
 
 VOLUME /work_dir

@@ -10,3 +10,5 @@
 
 /test/example*
 
+/test/*.jar
+
