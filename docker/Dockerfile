@@ -13,9 +13,7 @@ ENV STAR_VERSION 2.5.2b
 ENV PICARD_VERSION 2.2.2
 ENV HTSLIB_VERSION 1.3
 ENV GIREMI_VERSION 0.2.1
-ENV FUSIONCATCHER_VERSION 0.99.7a
 ENV SALMON_VERSION 0.8.0
-ENV BOWTIE_VERSION 1.1.2
 ENV BOWTIE2_VERSION 2.2.9
 ENV BWA_VERSION 0.7.15
 ENV SRA_VERSION 2.8.1
@@ -25,7 +23,7 @@ ENV GMAP_VERSION 2017-02-15
 ENV IDPFUSION_VERSION 1.1.1
 
 RUN apt-get update && \
-    apt-get install -y --fix-missing build-essential zlib1g-dev unzip libncurses5-dev curl wget r-base r-base-dev python python-pip python-dev cmake libboost-all-dev  libxml2-dev libcurl4-gnutls-dev software-properties-common apt-transport-https default-jre default-jdk less vim
+    apt-get install -y --fix-missing build-essential zlib1g-dev unzip libncurses5-dev curl wget r-base r-base-dev python python-pip python-dev cmake libboost-all-dev  libxml2-dev libcurl4-gnutls-dev software-properties-common apt-transport-https default-jre default-jdk less vim libtbb-dev
 
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/'
@@ -78,10 +76,11 @@ ADD https://github.com/zhqingit/giremi/archive/v${GIREMI_VERSION}.tar.gz /opt/gi
 RUN cd /opt && tar -zxvf giremi-${GIREMI_VERSION}.tar.gz && cp -p giremi-${GIREMI_VERSION}/giremi* /usr/local/bin  && cd /opt && rm -rf giremi-*
 
 RUN pip install --upgrade pip
-RUN pip install pybedtools==${PYBEDTOOLS_VERSION} pysam==${PYSAM_VERSION} biopython==1.66 openpyxl==1.5.6 xlrd==0.6.1 numpy pandas
+RUN pip install pybedtools==${PYBEDTOOLS_VERSION} pysam==${PYSAM_VERSION} biopython==1.66 openpyxl==1.5.6 xlrd==0.6.1 numpy pandas scipy
 
-RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/${BOWTIE_VERSION}/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip/download -O /opt/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip
-RUN cd /opt && unzip bowtie-${BOWTIE_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie-${BOWTIE_VERSION}/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
+RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.0/bowtie-1.2-linux-x86_64.zip -O /opt/bowtie-1.2-linux-x86_64.zip
+RUN cd /opt && unzip bowtie-1.2-linux-x86_64.zip && cp -p /opt/bowtie-1.2/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
+ENV LD_LIBRARY_PATH /usr/local/lib:$LD_LIBRARY_PATH
 
 RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip/download -O /opt/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip 
 RUN cd /opt && unzip bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie2-${BOWTIE2_VERSION}/bowtie2* /usr/local/bin && cd /opt && rm -rf bowtie2*
@@ -101,9 +100,6 @@ RUN chmod 755 /usr/local/bin/faToTwoBit
 ADD http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64.v287/liftOver /usr/local/bin/liftOver
 RUN chmod 755 /usr/local/bin/liftOver
 
-
-
-
 ADD https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz /opt/sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz
 RUN cd /opt && tar -zxvf sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz && cp -Rp /opt/sratoolkit.${SRA_VERSION}-ubuntu64/bin/* /usr/local/bin/ && cd /opt && rm -rf sratoolkit*
 
@@ -118,11 +114,8 @@ RUN wget http://sourceforge.net/projects/samtools/files/samtools/0.1.19/samtools
 ADD http://research-pub.gene.com/gmap/src/gmap-gsnap-${GMAP_VERSION}.tar.gz /opt/gmap-gsnap-${GMAP_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf gmap-gsnap-${GMAP_VERSION}.tar.gz && cd gmap-${GMAP_VERSION} && ./configure && make && make install && cd /opt && rm -rf gmap*
 
-RUN pip install scipy
-
 RUN wget https://github.com/ndaniel/fusioncatcher/archive/master.zip -O /opt/fusioncatcher-master.zip && cd /opt && unzip fusioncatcher-master.zip  && cp -p /opt/fusioncatcher-master/bin/sam2psl.py /usr/local/bin
 ENV PATH $PATH:/opt/fusioncatcher-master/bin/
-
 
 ADD https://github.com/bioinform/IDP/archive/master.zip /opt/IDP-master.zip
 RUN rm -rf /usr/local/bin/IDP* && cd /opt && unzip IDP-master.zip && rm -rf /opt/IDP-master.zip
@@ -130,14 +123,7 @@ RUN rm -rf /usr/local/bin/IDP* && cd /opt && unzip IDP-master.zip && rm -rf /opt
 ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_${IDPFUSION_VERSION}.tar.gz /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
-RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.0/bowtie-1.2-linux-x86_64.zip -O /opt/bowtie-1.2-linux-x86_64.zip
-RUN cd /opt && unzip bowtie-1.2-linux-x86_64.zip && cp -p /opt/bowtie-1.2/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
-ENV LD_LIBRARY_PATH /usr/local/lib:$LD_LIBRARY_PATH
 
-RUN cd /opt
-RUN cd /opt
-RUN cd /opt
-RUN cd /opt
 RUN pip install https://github.com/bioinform/rnacocktail/archive/fix_examples.zip
 
 VOLUME /work_dir
