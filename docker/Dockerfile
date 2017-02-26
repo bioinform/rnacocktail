@@ -118,12 +118,11 @@ RUN wget http://sourceforge.net/projects/samtools/files/samtools/0.1.19/samtools
 ADD http://research-pub.gene.com/gmap/src/gmap-gsnap-${GMAP_VERSION}.tar.gz /opt/gmap-gsnap-${GMAP_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf gmap-gsnap-${GMAP_VERSION}.tar.gz && cd gmap-${GMAP_VERSION} && ./configure && make && make install && cd /opt && rm -rf gmap*
 
-ENV FUSIONCATCHER_VERSION 0.99.7b
-RUN wget https://sourceforge.net/projects/fusioncatcher/files/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip -O /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip && cd /opt && unzip fusioncatcher_v${FUSIONCATCHER_VERSION}.zip  && cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/sam2psl.py /usr/local/bin
-ENV PATH $PATH:/opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/
-RUN echo '[paths]' > /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/configuration.cfg
-RUN echo 'samtools = /opt/samtools-0.1.19/' >> /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/configuration.cfg
-RUN rm -rf /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip 
+RUN pip install scipy
+
+RUN wget https://github.com/ndaniel/fusioncatcher/archive/master.zip -O /opt/fusioncatcher-master.zip && cd /opt && unzip fusioncatcher-master.zip  && cp -p /opt/fusioncatcher-master/bin/sam2psl.py /usr/local/bin
+ENV PATH $PATH:/opt/fusioncatcher-master/bin/
+
 
 ADD https://github.com/bioinform/IDP/archive/master.zip /opt/IDP-master.zip
 RUN rm -rf /usr/local/bin/IDP* && cd /opt && unzip IDP-master.zip && rm -rf /opt/IDP-master.zip
@@ -131,8 +130,11 @@ RUN rm -rf /usr/local/bin/IDP* && cd /opt && unzip IDP-master.zip && rm -rf /opt
 ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_${IDPFUSION_VERSION}.tar.gz /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
-RUN pip install scipy
+RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.0/bowtie-1.2-linux-x86_64.zip -O /opt/bowtie-1.2-linux-x86_64.zip
+RUN cd /opt && unzip bowtie-1.2-linux-x86_64.zip && cp -p /opt/bowtie-1.2/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
+ENV LD_LIBRARY_PATH /usr/local/lib:$LD_LIBRARY_PATH
 
+RUN cd /opt
 RUN cd /opt
 RUN cd /opt
 RUN cd /opt
