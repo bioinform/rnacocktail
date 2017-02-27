@@ -121,10 +121,9 @@ ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_${IDPFU
 RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
 
-RUN pip install https://github.com/bioinform/rnacocktail/archive/fix_examples.zip
+RUN pip install https://github.com/bioinform/RNACocktail/archive/v0.2.tar.gz
 
 VOLUME /work_dir
 
-# RUN pip install https://github.com/bioinform/RNACocktail/archive/v0.1.tar.gz
 
 
