@@ -4,8 +4,11 @@ from defaults import *
 from utils import *
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def run_stringtie(alignment_bam="",ref_gtf="", 
                   stringtie_opts="", stringtie=STRINGTIE,
@@ -85,20 +88,26 @@ def run_stringtie(alignment_bam="",ref_gtf="",
         transcripts = "%s/transcripts.gtf"%out_stringtie   
         abundances = "%s/gene_abund.tab"%out_stringtie   
     else:            
-        logger.info("StringTie was not successfull!")
+        logger.info("StringTie failed!")
     return transcripts,abundances
 
 def run_reconstruct(reconstructor="StringTie", alignment_bam="",
                   ref_gtf="", 
                   stringtie_opts="", stringtie=STRINGTIE,
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     transcripts = ""
     abundances = ""
     if reconstructor.upper()=="STRINGTIE":
-        transcripts,abundances=run_stringtie(alignment_bam=alignment_bam,
-                      ref_gtf=ref_gtf, 
-                      stringtie_opts=stringtie_opts, stringtie=stringtie,
-                      start=start, sample= sample, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout)
+        try:
+            transcripts,abundances=run_stringtie(alignment_bam=alignment_bam,
+                          ref_gtf=ref_gtf, 
+                          stringtie_opts=stringtie_opts, stringtie=stringtie,
+                          start=start, sample= sample, nthreads=nthreads,
+                          workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("StringTie failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
     return transcripts,abundances

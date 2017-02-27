@@ -5,17 +5,24 @@ from utils import *
 import csv
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
-
-
-def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+[("MT",23),("X",24),("Y",25)])):
+def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+[("MT",23),("X",24),("Y",25)]+[
+                                    ("chr%s"%k,k) for k in range(1,23)]+[("chrM",23),("chrX",24),("chrY",25)])):
     with open(in_file) as csv_file:
         spamreader = csv.reader(csv_file, delimiter='\t', quotechar='|')
         rows=[]
         for row in spamreader:
             rows.append(row)
+        others_chrs=sorted(set(map(lambda x:x[2],rows))-set(order_chrs.keys()))
+        if others_chrs:
+            max_id=max(order_chrs.values())
+            for i,c in enumerated(others_chrs):
+                order_chrs[c]=max_id+i+1
         sorted_rows=sorted(rows,key=lambda x: (order_chrs[x[2]],int(x[4])))
         with open(out_file, 'wb') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter='\t',
@@ -23,13 +30,14 @@ def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+
             spamwriter.writerows(sorted_rows)
 
 
+
 def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0, 
-                  ref_genome="", ref_all_gpd="", ref_gpd="",
+                  ref_genome="", ref_all_gpd="", ref_gpd="",read_length=100,
                   idp_cfg="", idp=IDP, samtools=SAMTOOLS,
                   start=0, sample= "", nthreads=1,
                   workdir=None, outdir=None, timeout=TIMEOUT):
 
-    logger.info("Running transcriptome lr_reconstruction (IDP) for %s"%sample)
+    logger.info("Running long-read transcriptome reconstruction (IDP) for %s"%sample)
     if not os.path.exists(alignment):
         logger.error("Aborting!")
         raise Exception("No input short read alignment BAM/SAM file %s"%alignment)
@@ -140,6 +148,10 @@ def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0,
                 cfg_file.write("Niso_limit = 100 \n")
             if "aligner_choice" not in cgf_dict:       
                 cfg_file.write("aligner_choice = gmap \n")
+            if "exon_construction_junction_span" not in cgf_dict:
+                cfg_file.write("exon_construction_junction_span = 1 \n")
+            if "read_length" not in cgf_dict:
+                cfg_file.write("read_length = %d \n"%read_length)
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
@@ -204,23 +216,30 @@ def run_idp(alignment="", short_junction="", long_alignment="",mode_number=0,
         transcripts = "%s/isoform.gtf"%out_idp   
         abundances = "%s/isoform.exp"%out_idp   
     else:            
-        logger.info("IDP was not successfull!")
+        logger.info("IDP failed!")
     return transcripts,abundances
 
 def run_lr_reconstruct(long_reconstructor="IDP", alignment="",
                   short_junction="", long_alignment="", mode_number=0,
-                  ref_genome="", ref_all_gpd="", ref_gpd="",
+                  ref_genome="", ref_all_gpd="", ref_gpd="", read_length=100,
                   idp_cfg="", idp=IDP, samtools=SAMTOOLS,
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     transcripts = ""
     abundances = ""
     if long_reconstructor.upper()=="IDP":
-        transcripts,abundances=run_idp(alignment=alignment, 
+        try:
+            transcripts,abundances=run_idp(alignment=alignment, 
                       short_junction=short_junction, long_alignment=long_alignment, 
                       mode_number=mode_number,
                       ref_genome=ref_genome, ref_all_gpd=ref_all_gpd, ref_gpd=ref_gpd,
+                      read_length=read_length,
                       idp_cfg=idp_cfg, idp=idp, samtools=samtools,
                       start=start, sample= sample, nthreads=nthreads,
                       workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("IDP failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
     return transcripts,abundances

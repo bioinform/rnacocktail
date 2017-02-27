@@ -4,9 +4,11 @@ from defaults import *
 from utils import *
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def run_fusioncatcher(data_dir="", input="",  start=0, 
                   fusioncatcher=FUSIONCATCHER, fusioncatcher_opts="",  
@@ -50,7 +52,7 @@ def run_fusioncatcher(data_dir="", input="",  start=0,
         logger.info("Output fusions: %s/final-list_candidate-fusion-genes.txt"%out_fusioncatcher)
         fusions = "%s/final-list_candidate-fusion-genes.txt"%out_fusioncatcher
     else:            
-        logger.info("FusionCatcher was not successfull!")
+        logger.info("FusionCatcher failed!")
     return fusions
     
 
@@ -58,13 +60,19 @@ def run_fusion(fusion_caller="FusionCatcher",
                   data_dir="", input="", start=0, 
                   fusioncatcher=FUSIONCATCHER, fusioncatcher_opts="",  
                   sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     fusions=""
     if fusion_caller.upper()=="FUSIONCATCHER":
-        variants=run_fusioncatcher(data_dir=data_dir, input=input, start=start, 
-                  fusioncatcher=fusioncatcher, fusioncatcher_opts=fusioncatcher_opts,  
-                  sample= sample, nthreads=nthreads, 
-                  workdir=workdir, outdir=outdir, timeout=timeout)
+        try:
+            fusions=run_fusioncatcher(data_dir=data_dir, input=input, start=start, 
+                      fusioncatcher=fusioncatcher, fusioncatcher_opts=fusioncatcher_opts,  
+                      sample= sample, nthreads=nthreads, 
+                      workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("FusionCatcher failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
     return fusions
     
     

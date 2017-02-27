@@ -4,8 +4,11 @@ from defaults import *
 from utils import *
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def run_lordec(kmer=23,
                   solid=3, long="", short="",
@@ -77,18 +80,24 @@ def run_lordec(kmer=23,
         logger.info("Output corrected reads: %s/long_corrected.fa"%out_lordec)
         corrected = "%s/long_corrected.fa"%out_lordec
     else:            
-        logger.info("LoRDEC was not successfull!")
+        logger.info("LoRDEC failed!")
     return corrected
 
 def run_lr_correct(long_corrector="LoRDEC", kmer=23,
                   solid=3, long="", short="",
                   lordec=LORDEC, lordec_opts="",
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     corrected=""
     if long_corrector.upper()=="LORDEC":
-        corrected=run_lordec(kmer=kmer, solid=solid, long=long, short=short,
-                  lordec=lordec, lordec_opts=lordec_opts,
-                  start=start, sample= sample, nthreads=nthreads,
-                  workdir=workdir, outdir=outdir, timeout=timeout)
+        try:
+            corrected=run_lordec(kmer=kmer, solid=solid, long=long, short=short,
+                      lordec=lordec, lordec_opts=lordec_opts,
+                      start=start, sample= sample, nthreads=nthreads,
+                      workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("LoRDEC failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
     return corrected

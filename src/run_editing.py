@@ -8,9 +8,11 @@ import csv
 import pybedtools
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def filter_multi_chr_alignments(in_file,out_file):
     curren_read=""
@@ -102,7 +104,6 @@ def find_SNV_strands(strand_pos_bed,genes_pos_bed,input_annotated_vcf,output_ann
         else:
             SNV_good=SNV_good.cat(SNV_good_,postmerge=False).sort()
             SNV_no=SNV_no.cat(SNV_bad_,postmerge=False).sort()
-    print len(SNV_good),len(SNV_no),len(SNV_bad)
 
 
     SNV_annotated=[]
@@ -110,9 +111,6 @@ def find_SNV_strands(strand_pos_bed,genes_pos_bed,input_annotated_vcf,output_ann
     for i in SNV_good:
         name=list(set(i.name.split(","))-set(["SNV"]))[0]
         strand=list(set(i.strand.split(","))-set(["."]))
-        if not len(strand)==1:
-            print "Error",i
-            break
         strand=strand[0]
         SNV_annotated.append(pybedtools.Interval(chrom=i.chrom,start=i.start,end=i.end,name=name,
                                                  score=i.score,strand=strand))
@@ -217,18 +215,6 @@ def run_giremi(alignment="", variant="",
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
 
-    msg = "GATK VariantAnnotator for %s"%sample
-    if start<=step:
-        logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T VariantAnnotator -R %s -V %s -L %s -o %s/annotated.vcf --dbsnp %s %s" % (
-            java, java_opts, gatk, ref_genome,variant,variant,work_giremi,knownsites,VariantAnnotator_opts)
-        command="bash -c \"%s\""%command      
-        cmd = TimedExternalCmd(command, logger, raise_exception=True)
-        retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)   
-    else:
-        logger.info("Skipping step %d: %s"%(step,msg))
-    step+=1
-
     msg = "Sort BAM by pos for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
@@ -237,6 +223,18 @@ def run_giremi(alignment="", variant="",
         command="bash -c \"%s\""%command        
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
         retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)
+    else:
+        logger.info("Skipping step %d: %s"%(step,msg))
+    step+=1
+
+    msg = "GATK VariantAnnotator for %s"%sample
+    if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
+        command="%s %s -jar %s -T VariantAnnotator -R %s -V %s -L %s -o %s/annotated.vcf --dbsnp %s %s" % (
+            java, java_opts, gatk, ref_genome,variant,variant,work_giremi,knownsites,VariantAnnotator_opts)
+        command="bash -c \"%s\""%command      
+        cmd = TimedExternalCmd(command, logger, raise_exception=True)
+        retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)   
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
@@ -263,7 +261,7 @@ def run_giremi(alignment="", variant="",
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
         command="cd %s && %s %s -f %s -l %s/SNV_annotated.bed -o %s/giremi_out.txt %s/alignments.pos_sorted.bam" % (
-            giremi_dir,GIREMI, giremi_opts, ref_genome, work_giremi, work_giremi,work_giremi)
+            giremi_dir,GIREMI, giremi_opts, os.path.abspath(ref_genome), os.path.abspath(work_giremi), os.path.abspath(work_giremi),os.path.abspath(work_giremi))
         command="bash -c \"%s\""%command        
         cmd = TimedExternalCmd(command, logger, raise_exception=False)
         retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)
@@ -307,10 +305,9 @@ def run_giremi(alignment="", variant="",
                 logger.info("--------------------------STEP %s--------------------------"%step)
                 if os.path.exists("%s/SNV_annotated_filtered.bed"%work_giremi):
                     command="cd %s && %s %s -f %s -l %s/SNV_annotated_filtered.bed -o %s/giremi_out.txt %s/alignments.pos_sorted.bam" % (
-                        giremi_dir,GIREMI, giremi_opts, ref_genome, work_giremi, work_giremi,work_giremi)
-                    print command
+                        giremi_dir,GIREMI, giremi_opts, os.path.abspath(ref_genome), os.path.abspath(work_giremi), os.path.abspath(work_giremi),os.path.abspath(work_giremi))
                     command="bash -c \"%s\""%command        
-                    cmd = TimedExternalCmd(command, logger, raise_exception=True)
+                    cmd = TimedExternalCmd(command, logger, raise_exception=False)
                     retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)
                 else:
                     logger.info("No file %s/SNV_annotated_filtered.bed"%work_giremi)
@@ -343,7 +340,7 @@ def run_giremi(alignment="", variant="",
         logger.info("Output edits: %s/giremi_out.txt.res"%out_giremi)
         edits = "%s/giremi_out.txt.res"%out_giremi   
     else:            
-        logger.info("GIREMI was not successfull!")
+        logger.info("GIREMI failed!")
     return edits
 
 def run_editing(editing_caller="GIREMI", alignment="", variant="", 
@@ -354,19 +351,26 @@ def run_editing(editing_caller="GIREMI", alignment="", variant="",
                   java=JAVA, giremi_opts="", java_opts="",
                   VariantAnnotator_opts="",  
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     edits=""
 
     if editing_caller.upper()=="GIREMI":
-        variants=run_giremi(alignment=alignment, variant=variant, 
-                  strand_pos=strand_pos, genes_pos=genes_pos,
-                  ref_genome=ref_genome, knownsites=knownsites,
-                  giremi_dir=giremi_dir, htslib_dir=htslib_dir, 
-                  samtools=samtools, gatk=gatk,                  
-                  java=java, giremi_opts=giremi_opts, java_opts=java_opts,
-                  VariantAnnotator_opts=VariantAnnotator_opts,  
-                  start=start, sample= sample, nthreads=nthreads, 
-                  workdir=workdir, outdir=outdir, timeout=timeout)
+        try:
+            edits=run_giremi(alignment=alignment, variant=variant, 
+                      strand_pos=strand_pos, genes_pos=genes_pos,
+                      ref_genome=ref_genome, knownsites=knownsites,
+                      giremi_dir=giremi_dir, htslib_dir=htslib_dir, 
+                      samtools=samtools, gatk=gatk,                  
+                      java=java, giremi_opts=giremi_opts, java_opts=java_opts,
+                      VariantAnnotator_opts=VariantAnnotator_opts,  
+                      start=start, sample= sample, nthreads=nthreads, 
+                      workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("GIREMI failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
+
     return edits
     
     

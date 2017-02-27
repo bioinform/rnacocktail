@@ -4,8 +4,12 @@ from defaults import *
 from utils import *
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
+
 
 def run_hisat2(align_idx=None,
                   seq_1="", seq_2="", seq_u="",
@@ -18,7 +22,7 @@ def run_hisat2(align_idx=None,
     logger.info("Running alignment (HISAT2) for %s"%sample)
     if not os.path.exists(align_idx+".1.ht2"):
         logger.error("Aborting!")
-        raise Exception("No HISAT directory %s"%align_idx)
+        raise Exception("No HISAT index file %s.1.ht2"%align_idx)
         
     if seq_1 and seq_2:
         for s1 in seq_1.split(","):
@@ -150,16 +154,16 @@ def run_hisat2(align_idx=None,
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
 
-#     msg = "Clean temp alignment files for %s"%sample
-#     if start<=step:
-#         logger.info("--------------------------STEP %s--------------------------"%step)
-#         command="rm %s/alignments.sam %s/alignments.bam" % (work_hisat2, work_hisat2)
-#         command="bash -c \"%s\""%command    
-#         cmd = TimedExternalCmd(command, logger, raise_exception=True)
-#         retcode = cmd.run(cmd_log_fd_out=hisat2_log_fd, cmd_log=hisat2_log, msg=msg, timeout=timeout)
-#     else:
-#         logger.info("Skipping step %d: %s"%(step,msg))
-#     step+=1
+    msg = "Clean temp alignment files for %s"%sample
+    if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
+        command="rm %s/alignments.sam %s/alignments.bam" % (work_hisat2, work_hisat2)
+        command="bash -c \"%s\""%command    
+        cmd = TimedExternalCmd(command, logger, raise_exception=True)
+        retcode = cmd.run(cmd_log_fd_out=hisat2_log_fd, cmd_log=hisat2_log, msg=msg, timeout=timeout)
+    else:
+        logger.info("Skipping step %d: %s"%(step,msg))
+    step+=1
 
 
     out_hisat2=os.path.join(outdir,"hisat2",sample)
@@ -167,8 +171,18 @@ def run_hisat2(align_idx=None,
     msg="Copy predictions to output directory for %s."%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        if os.path.exists("%s/alignments.sorted.bam"%work_hisat2):
+        if os.path.exists("%s/alignments.sorted.bam"%work_hisat2) and \
+           os.path.exists("%s/splicesites.tab"%work_hisat2) and \
+           os.path.exists("%s/splicesites.bed"%work_hisat2):
             command = "cp %s/alignments.sorted.bam %s/alignments.sorted.bam"%(
+                       work_hisat2, out_hisat2)
+            cmd = TimedExternalCmd(command, logger, raise_exception=True)
+            retcode = cmd.run(cmd_log_fd_out=hisat2_log_fd, cmd_log=hisat2_log, msg=msg, timeout=timeout)   
+            command = "cp %s/splicesites.tab %s/splicesites.tab"%(
+                       work_hisat2, out_hisat2)
+            cmd = TimedExternalCmd(command, logger, raise_exception=True)
+            retcode = cmd.run(cmd_log_fd_out=hisat2_log_fd, cmd_log=hisat2_log, msg=msg, timeout=timeout)   
+            command = "cp %s/splicesites.bed %s/splicesites.bed"%(
                        work_hisat2, out_hisat2)
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=hisat2_log_fd, cmd_log=hisat2_log, msg=msg, timeout=timeout)   
@@ -179,13 +193,19 @@ def run_hisat2(align_idx=None,
 
 
     alignments_bam = ""
+    junctions_tab = ""
+    junctions_bed = ""
     if os.path.exists("%s/alignments.sorted.bam"%out_hisat2):
         logger.info("HISAT2 was successfull!")
         logger.info("Output alignment: %s/alignments.sorted.bam"%out_hisat2)
+        logger.info("Output junction tab: %s/splicesites.tab"%out_hisat2)
+        logger.info("Output junction bed: %s/splicesites.bed"%out_hisat2)
         alignments_bam = "%s/alignments.sorted.bam"%out_hisat2   
+        junctions_tab = "%s/splicesites.tab"%out_hisat2   
+        junctions_bed = "%s/splicesites.bed"%out_hisat2   
     else:            
-        logger.info("HISAT2 was not successfull!")
-    return alignments_bam
+        logger.info("HISAT2 failed!")
+    return alignments_bam,junctions_tab,junctions_bed
 
 def run_sr_align(sr_aligner="HISAT2", align_idx=None,
                   seq_1="", seq_2="", seq_u="",
@@ -193,14 +213,23 @@ def run_sr_align(sr_aligner="HISAT2", align_idx=None,
                   hisat2_opts="", hisat2=HISAT2, hisat2_sps=HISAT2_SPS,
                   samtools=SAMTOOLS,
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
-    alignments_bam=""
+                  workdir=None, outdir=None, timeout=TIMEOUT,ignore_exceptions=False):
+    alignments_bam = ""
+    junctions_tab = ""
+    junctions_bed = ""
     if sr_aligner.upper()=="HISAT2":
-        alignments_bam=run_hisat2(align_idx=align_idx,
-                      seq_1=seq_1, seq_2=seq_2, seq_u=seq_u,
-                      seq_sra=seq_sra, ref_gtf=ref_gtf, 
-                      hisat2_opts=hisat2_opts, hisat2=hisat2, hisat2_sps=hisat2_sps,
-                      samtools=samtools,
-                      start=start, sample= sample, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout)
-    return alignments_bam
+        try :
+            alignments_bam, junctions_tab, junctions_bed=run_hisat2(align_idx=align_idx,
+                          seq_1=seq_1, seq_2=seq_2, seq_u=seq_u,
+                          seq_sra=seq_sra, ref_gtf=ref_gtf, 
+                          hisat2_opts=hisat2_opts, hisat2=hisat2, hisat2_sps=hisat2_sps,
+                          samtools=samtools,
+                          start=start, sample= sample, nthreads=nthreads,
+                          workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("HISAT2 failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
+                
+    return alignments_bam, junctions_tab, junctions_bed

@@ -1,6 +1,6 @@
 MODES = set(["align", "reconstruct", "denovo",
              "quantify", "diff", "long_correct", "long_align",
-             "long_reconstruct", "variant", "editing", "fusion"])
+             "long_reconstruct", "long_fusion", "variant", "editing", "fusion","all"])
 SR_ALIGNERS = set(["HISAT2"])
 RECONSTRUCTORS = set(["StringTie"])
 QUANTIFIERS = set(["Salmon-SMEM"])
@@ -9,12 +9,14 @@ DNV_ASSEMBLERS = set(["Oases"])
 LR_CORRECTORS = set(["LoRDEC"])
 LR_ALIGNERS= set(["STARlong"])
 LR_RECONSTRUCTORS= set(["IDP"])
+LR_FUSION= set(["IDP-fusion"])
 variant_caller= set(["GATK"])
 editing_caller= set(["GIRMI"])
 fusion_caller= set(["FusionCatcher"])
 TIMEOUT = 10000000  # in seconds
 
 
+SALMON_LIBTYPE = "IU"
 SALMON_SMEM_k = 19
 DESeq2_MINCNT = 2
 DESeq2_ALPHA = 0.05
@@ -41,8 +43,7 @@ GATK_HC_STANDCALLCONF = 20.0
 GATK_HC_STANDEMITCONF = 20.0
 GATK_HC_OPT = (("-stand_call_conf %f " % GATK_HC_STANDCALLCONF) if GATK_HC_STANDCALLCONF else "") + \
               (("-stand_emit_conf %f " % GATK_HC_STANDEMITCONF) if GATK_HC_STANDEMITCONF else "") + \
-              "-dontUseSoftClippedBases"
-
+              "-dontUseSoftClippedBases "
 
 GATK_VF_WINDOW = 35
 GATK_VF_CLUSTER = 3
@@ -72,6 +73,10 @@ LORDEC = "lordec-correct"
 STARLONG = "STARlong"
 SAM2PSL = "sam2psl.py"
 IDP = "runIDP.py"
+IDPFUSION = "runIDP.py"
+GMAP="gmap"
+STAR_DIR = "/us/local/bin"
+BOWTIE2_DIR = "/us/local/bin"
 PICARD = "picard.jar"
 GATK = "GenomeAnalysisTK.jar"
 JAVA = "java"

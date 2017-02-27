@@ -4,8 +4,11 @@ from defaults import *
 from utils import *
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def run_gatk(alignment="", ref_genome="", knownsites="",
                   picard=PICARD, gatk=GATK,                  
@@ -131,6 +134,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
 
     msg = "picard AddOrReplaceReadGroups for %s"%sample
     if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
         command="%s %s -cp %s picard.cmdline.PicardCommandLine AddOrReplaceReadGroups I=%s O=%s/rg_added_sorted.bam %s" % (
             java, java_opts, picard, alignment,work_gatk,AddOrReplaceReadGroups_opts)
         command="bash -c \"%s\""%command      
@@ -143,6 +147,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
 
     msg = "picard MarkDuplicates for %s"%sample
     if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
         command="%s %s -cp %s picard.cmdline.PicardCommandLine MarkDuplicates I=%s/rg_added_sorted.bam O=%s/dedupped.bam %s M=%s/output.metrics" % (
             java, java_opts, picard, work_gatk,work_gatk,MarkDuplicates_opts,work_gatk)
         command="bash -c \"%s\""%command      
@@ -155,6 +160,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
 
     msg = "GATK SplitNCigarReads for %s"%sample
     if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
         command="%s %s -jar %s -T SplitNCigarReads -R %s -I %s/dedupped.bam -o %s/split.bam %s" % (
             java, java_opts, gatk, ref_genome,work_gatk,work_gatk,SplitNCigarReads_opts)
         command="bash -c \"%s\""%command      
@@ -168,6 +174,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     if IndelRealignment:
         msg = "GATK RealignerTargetCreator for %s"%sample
         if start<=step:
+            logger.info("--------------------------STEP %s--------------------------"%step)
             command="%s %s -jar %s -T RealignerTargetCreator -R %s -I %s/split.bam -o %s/forIndelRealigner.intervals %s" % (
                 java, java_opts, gatk, ref_genome,work_gatk,work_gatk,RealignerTargetCreator_opts)
             command="bash -c \"%s\""%command      
@@ -179,6 +186,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         
         msg = "GATK IndelRealigner for %s"%sample
         if start<=step:
+            logger.info("--------------------------STEP %s--------------------------"%step)
             command="%s %s -jar %s -T IndelRealigner -R %s -I %s/split.bam -targetIntervals %s/forIndelRealigner.intervals -o %s/split_realigned.bam %s" % (
                 java, java_opts, gatk, ref_genome,work_gatk,work_gatk,work_gatk,IndelRealigner_opts)
             command="bash -c \"%s\""%command      
@@ -201,6 +209,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     if not no_BaseRecalibrator:
         msg = "GATK BaseRecalibrator for %s"%sample
         if start<=step:
+            logger.info("--------------------------STEP %s--------------------------"%step)
             command="%s %s -jar %s -T BaseRecalibrator -R %s -I %s  -o %s/recal_data.table %s" % (
                 java, java_opts, gatk, ref_genome,split_bam,work_gatk,BaseRecalibrator_opts)
             command="bash -c \"%s\""%command      
@@ -212,6 +221,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
 
         msg = "GATK PrintReads for %s"%sample
         if start<=step:
+            logger.info("--------------------------STEP %s--------------------------"%step)
             command="%s %s -jar %s -T PrintReads -R %s -I %s -BQSR %s/recal_data.table -o %s/bsqr.bam %s" % (
                 java, java_opts, gatk, ref_genome,split_bam,work_gatk,work_gatk,PrintReads_opts)
             command="bash -c \"%s\""%command      
@@ -231,6 +241,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
 
     msg = "GATK HaplotypeCaller for %s"%sample
     if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
         command="%s %s -jar %s -T HaplotypeCaller -R %s -I %s -o %s/variants.vcf %s" % (
             java, java_opts, gatk, ref_genome,split_bam,work_gatk,HaplotypeCaller_opts)
         command="bash -c \"%s\""%command      
@@ -242,6 +253,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
 
     msg = "GATK VariantFiltration for %s"%sample
     if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
         command="%s %s -jar %s -T VariantFiltration -R %s -V %s/variants.vcf -o %s/variants_filtered.vcf %s" % (
             java, java_opts, gatk, ref_genome,work_gatk,work_gatk,VariantFiltration_opts)
         command="bash -c \"%s\""%command      
@@ -272,7 +284,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         logger.info("Output variants: %s/variants_filtered.vcf"%out_gatk)
         variants = "%s/variants_filtered.vcf"%out_gatk   
     else:            
-        logger.info("GATK was not successfull!")
+        logger.info("GATK failed!")
     return variants
 
 def run_variant(variant_caller="GATK", alignment="",
@@ -286,10 +298,11 @@ def run_variant(variant_caller="GATK", alignment="",
                   PrintReads_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     variants=""
     if variant_caller.upper()=="GATK":
-        variants=run_gatk(alignment=alignment,
+        try:
+            variants=run_gatk(alignment=alignment,
                   ref_genome=ref_genome, knownsites=knownsites,
                   picard=picard, gatk=gatk,                  
                   java=java, java_opts=java_opts,
@@ -305,6 +318,11 @@ def run_variant(variant_caller="GATK", alignment="",
                   VariantFiltration_opts=VariantFiltration_opts,  
                   start=start, sample= sample, nthreads=nthreads, 
                   workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("GATK failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
     return variants
     
     

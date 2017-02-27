@@ -5,9 +5,11 @@ from utils import *
 import csv
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
-
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def tx2gene_map(ref_gtf_file,tx2gene_file):
     tx2gene={}
@@ -18,8 +20,8 @@ def tx2gene_map(ref_gtf_file,tx2gene_file):
             fields = line.strip().split()
             transcript_info = {k.split()[0]:k.split()[1] for k in ' '.join(fields[8:]).split(";")[:-1]}
             if "transcript_id" in transcript_info and "gene_id" in transcript_info:
-                t=transcript_info["transcript_id"].strip()
-                g=transcript_info["gene_id"].strip()
+                t=transcript_info["transcript_id"].strip().strip("\"")
+                g=transcript_info["gene_id"].strip().strip("\"")
                 if t not in tx2gene:
                     tx2gene[t]=g
     with open(tx2gene_file , 'wb') as csvfile:
@@ -96,6 +98,9 @@ def run_deseq2(quant_files="", alignments="",
             if not os.path.exists(ref_gtf):
                 logger.error("Aborting!")
                 raise Exception("No reference GTF file %s"%ref_gtf)
+    else:
+        logger.error("Aborting!")
+        raise Exception("Either (quantification files + ref_gtf) or (Alignment files + transcripts_gtfs or ref_gtf) is needed.")
 
     work_deseq2=os.path.join(workdir,"deseq2",samples_txt)
     create_dirs([work_deseq2])
@@ -312,7 +317,7 @@ def run_deseq2(quant_files="", alignments="",
         logger.info("Output differential expressions: %s/deseq2_res.tab"%out_deseq2)
         diff = "%s/deseq2_res.tab"%out_deseq2   
     else:            
-        logger.info("DESeq2 was not successfull!")
+        logger.info("DESeq2 failed!")
     return diff
 
 def run_diff(difftool="DESeq2", quant_files="", alignments="",
@@ -323,15 +328,22 @@ def run_diff(difftool="DESeq2", quant_files="", alignments="",
               mincount=DESeq2_MINCNT, alpha=DESeq2_ALPHA, 
               R=R_CMD, 
               start=0, samples="", nthreads=1,
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     diff=""
     if difftool.upper()=="DESEQ2":
-        diff=run_deseq2(quant_files=quant_files, alignments=alignments,
-                      transcripts_gtfs=transcripts_gtfs, ref_gtf=ref_gtf, 
-                      featureCounts_opts=featureCounts_opts, featureCounts=featureCounts,                     
-                      stringtie=stringtie, stringtie_merge_opts=stringtie_merge_opts,
-                      mincount=mincount, alpha=alpha, 
-                      R=R, 
-                      start=start, samples=samples, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout)
+        try:
+            diff=run_deseq2(quant_files=quant_files, alignments=alignments,
+                          transcripts_gtfs=transcripts_gtfs, ref_gtf=ref_gtf, 
+                          featureCounts_opts=featureCounts_opts, featureCounts=featureCounts,                     
+                          stringtie=stringtie, stringtie_merge_opts=stringtie_merge_opts,
+                          mincount=mincount, alpha=alpha, 
+                          R=R, 
+                          start=start, samples=samples, nthreads=nthreads,
+                          workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("DESeq2 failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
+        
     return diff

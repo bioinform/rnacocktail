@@ -4,8 +4,11 @@ from defaults import *
 from utils import *
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def run_starlong(long="", 
                   genome_dir="", ref_gtf="",
@@ -130,7 +133,7 @@ def run_starlong(long="",
         logger.info("Output alignment: %s/Aligned.out.psl"%out_starlong)
         alignments_psl = "%s/Aligned.out.psl"%out_starlong
     else:            
-        logger.info("STARlong was not successfull!")
+        logger.info("STARlong failed!")
     return alignments_psl
 
 def run_lr_align(long_aligner="STARlong", long="", 
@@ -138,12 +141,18 @@ def run_lr_align(long_aligner="STARlong", long="",
                   starlong=STARLONG, sam2psl=SAM2PSL, samtools=SAMTOOLS,
                   starlong_opts="",
                   start=0, sample= "", nthreads=1, 
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     alignments_psl=""
     if long_aligner.upper()=="STARLONG":
-        alignments_bam=run_starlong(genome_dir=genome_dir, ref_gtf=ref_gtf,
-                      long=long, starlong=starlong, sam2psl=sam2psl, samtools=samtools,
-                      starlong_opts=starlong_opts,
-                      start=start, sample= sample, nthreads=nthreads,
-                      workdir=workdir, outdir=outdir, timeout=timeout) 
+        try:
+            alignments_psl=run_starlong(genome_dir=genome_dir, ref_gtf=ref_gtf,
+                          long=long, starlong=starlong, sam2psl=sam2psl, samtools=samtools,
+                          starlong_opts=starlong_opts,
+                          start=start, sample= sample, nthreads=nthreads,
+                          workdir=workdir, outdir=outdir, timeout=timeout) 
+        except Exception as excp:
+            logger.info("STARlong failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
     return alignments_psl

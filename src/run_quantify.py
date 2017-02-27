@@ -4,8 +4,11 @@ from defaults import *
 from utils import *
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+logFormatter = logging.Formatter(FORMAT)
 logger = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 def run_salmon_smem(quantifier_idx=None,
                   seq_1="", seq_2="", seq_u="",
@@ -109,7 +112,7 @@ def run_salmon_smem(quantifier_idx=None,
         logger.info("Output expressions: %s/quant.sf"%out_salmon_smem)
         quant = "%s/quant.sf"%out_salmon_smem
     else:            
-        logger.info("Salmon-SMEM was not successfull!")
+        logger.info("Salmon-SMEM failed!")
     return quant
 
 def run_quantify(quantifier="Salmon-SMEM", quantifier_idx=None,
@@ -117,13 +120,19 @@ def run_quantify(quantifier="Salmon-SMEM", quantifier_idx=None,
                   salmon_k=SALMON_SMEM_k, libtype="",
                   salmon_smem_opts="", salmon=SALMON,
                   start=0, sample= "", nthreads=1, unzip=False,
-                  workdir=None, outdir=None, timeout=TIMEOUT):
+                  workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
     quant=""
     if quantifier.upper()=="SALMON-SMEM":
-        quant=run_salmon_smem(quantifier_idx=quantifier_idx,
-                      seq_1=seq_1, seq_2=seq_2, seq_u=seq_u,
-                      salmon_k=salmon_k, libtype=libtype,
-                      salmon_smem_opts=salmon_smem_opts, salmon=salmon,
-                      start=start, sample= sample, nthreads=nthreads, unzip=unzip,
-                      workdir=workdir, outdir=outdir, timeout=timeout)
+        try:
+            quant=run_salmon_smem(quantifier_idx=quantifier_idx,
+                          seq_1=seq_1, seq_2=seq_2, seq_u=seq_u,
+                          salmon_k=salmon_k, libtype=libtype,
+                          salmon_smem_opts=salmon_smem_opts, salmon=salmon,
+                          start=start, sample= sample, nthreads=nthreads, unzip=unzip,
+                          workdir=workdir, outdir=outdir, timeout=timeout)
+        except Exception as excp:
+            logger.info("Salmon-SMEM failed!")
+            logger.error(excp)
+            if not ignore_exceptions:
+                raise Exception(excp)
     return quant

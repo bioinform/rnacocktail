@@ -8,5 +8,7 @@
 
 /dist
 
-/test/example
+/test/example*
+
+/test/*.jar
 

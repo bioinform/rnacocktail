@@ -119,7 +119,7 @@ if __name__ == "__main__":
         quantifier_parser.add_argument("--libtype", metavar="libtype",
                                   help="Format string describing the library type. (For Salmon \
                                   check http://salmon.readthedocs.io/en/latest/library_type.html#fraglibtype)." 
-                                  , required=True)
+                                  , default=SALMON_LIBTYPE)
         quantifier_parser.add_argument("--unzip", action="store_true",
                                   help="The sequence files are zipped. So unzip them first.")
         quantifier_parser.add_argument("--start", metavar="start", type=int,
@@ -168,11 +168,11 @@ if __name__ == "__main__":
                                         the beginning the entire pipeline. 0 is for restarting \
                                         automatically and 1 is the first step. Default is '0'."
                                   , default=0)
-        diff_parser.add_argument("--samples",nargs="*", metavar="Sample", help="Sample names. \
+        diff_parser.add_argument("--sample",nargs="*", metavar="Sample", help="Sample names. \
                                         Number of samples and replicates should match the \
                                         input quantification (--quant_files) or alignemnt (--alignments).\
                                            Replicates in same sample should be listed comma separated. \
-                                        e.g --samples A1,A2 B1,B2", required=True)                             
+                                        e.g --sample A1,A2 B1,B2", required=True)                             
         diff_parser.add_argument("--mincount", type=int, metavar="mincount",
                                   help="Minimum read counts per transcripts. Differential analysis \
                                   pre-filtering step removes transcripts that have less than this number of reads.", 
@@ -311,21 +311,21 @@ if __name__ == "__main__":
         long_reconstructor_parser = parser.add_argument_group("Long-read transcriptome reconstruction options")
         long_reconstructor_parser.add_argument("--long_reconstructor", metavar="long_reconstructor",
                                   help="The long-read transcriptome reconstruction tool to use.", default="IDP")
-        long_reconstructor_parser.add_argument("--alignment", metavar="--alignment",
+        long_reconstructor_parser.add_argument("--alignment", metavar="alignment",
                                   help="A BAM/SAM file with short RNA-Seq read mappings (e.g. \
                                   The output BAM file generated in align mode). \
                                   If BAM file is given, it will be converted to SAM." 
                                   , required=True)
-        long_reconstructor_parser.add_argument("--short_junction", metavar="--junction_bed",
+        long_reconstructor_parser.add_argument("--short_junction", metavar="junction_bed",
                                   help="A BED file with short RNA-Seq read junctions (e.g. \
                                   The bed junction file generated in align mode.) For bed file format\
                                   check https://genome.ucsc.edu/FAQ/FAQformat.html." 
                                   , required=True)
-        long_reconstructor_parser.add_argument("--long_alignment", metavar="--long_alignment",
+        long_reconstructor_parser.add_argument("--long_alignment", metavar="long_alignment",
                                   help="A PSL file with long RNA-Seq read mappings (e.g. \
                                   The output PSL file generated in long_align mode)." 
                                   , required=True)
-        long_reconstructor_parser.add_argument("--mode_number", type=int, metavar="--mode_number",
+        long_reconstructor_parser.add_argument("--mode_number", type=int, metavar="mode_number",
                                   help="You can run IDP in two steps. If for a reason IDP finished \
                                   isoform candidate construction step but was terminated in candidate selection \
                                   step, you can restart the candidate selection step without re-running \
@@ -336,16 +336,18 @@ if __name__ == "__main__":
                                   file is already generated in temp folder."
                                                                     , default=0)
         long_reconstructor_parser.add_argument("--ref_genome", metavar="ref_genome",
-                                  help="The reference genome FASTA file",  default="")
+                                  help="The reference genome FASTA file",  required=True)
         long_reconstructor_parser.add_argument("--ref_all_gpd", metavar="ref_genome",
                                   help="GPD format annotation file for the whole genome \
                                   splicing data from multiple sources including ESTs and \
                                   reference genome databases. For hg19 you may use \
                                   the full genome example at \
-                                  http://www.stanford.edu/group/wonglab/SpliceMap/hg19.all.gene_est.refFlat.txt.", required=True)
+                                  http://www.stanford.edu/group/wonglab/SpliceMap/hg19.all.gene_est.refFlat.txt.")
         long_reconstructor_parser.add_argument("--ref_gpd", metavar="ref_gpd",
                                   help="The reference transcriptome annotation file \
-                                  (in GPD format) to guide the analysis.", default="")
+                                  (in GPD format) to guide the analysis.")
+        long_reconstructor_parser.add_argument("--read_length", type=int, metavar="read_length",
+                                  help="The short-read length.", default=100)
         long_reconstructor_parser.add_argument("--start", metavar="start", type=int,
                                   help="It re-starts executing the workflow/pipeline \
                                         from the given step number. This can be used when the pipeline \
@@ -360,7 +362,82 @@ if __name__ == "__main__":
         long_reconstructor_parser.add_argument("--idp_cfg", metavar="idp_cfg",
                                   help="the .cfg file that include other options used for IDP \
                                   long read transcriptome reconstruction. \
-                                  (For IDP http://www.healthcare.uiowa.edu/labs/au/IDP/IDP_tutorial.asp) \
+                                  (For IDP check http://www.healthcare.uiowa.edu/labs/au/IDP/IDP_tutorial.asp) \
+                                  These options will be used to generate the .cfg file.", default="")
+    elif mode == "long_fusion":
+        long_fusion_parser = parser.add_argument_group("Long-read fusion detection")
+        long_fusion_parser.add_argument("--long_fusion_caller", metavar="long_fusion_caller",
+                                  help="The long-read fusion detection tool to use.", default="IDP-fusion")
+        long_fusion_parser.add_argument("--alignment", metavar="alignment",
+                                  help="A BAM/SAM file with short RNA-Seq read mappings (e.g. \
+                                  The output BAM file generated in align mode). \
+                                  If BAM file is given, it will be converted to SAM." 
+                                  , required=True)
+        long_fusion_parser.add_argument("--short_junction", metavar="junction_bed",
+                                  help="A BED file with short RNA-Seq read junctions (e.g. \
+                                  The bed junction file generated in align mode.) For bed file format\
+                                  check https://genome.ucsc.edu/FAQ/FAQformat.html." 
+                                  , required=True)
+        long_fusion_parser.add_argument("--long_alignment", metavar="long_alignment",
+                                  help="A PSL file with long RNA-Seq read mappings (\
+                                  The output PSL file generated by GMAP). \
+                                  This is optional, if you don't provide it,\
+                                  the code will automatically call gmap to align")
+        long_fusion_parser.add_argument("--long_fasta", metavar="seq_l",
+                                  help="The FASTA file containing long reads ", required=True)
+        long_fusion_parser.add_argument("--short_fasta", metavar="seq_s",
+                                  help="The FASTA file containing short reads ", required=True)
+        long_fusion_parser.add_argument("--mode_number", type=int, metavar="mode_number",
+                                  help="You can run IDP-fusion in two steps. If for a reason IDP-fusion finished \
+                                  isoform candidate construction step but was terminated in candidate selection \
+                                  step, you can restart the candidate selection step without re-running \
+                                  the isoform candidate construction. mode 0 (default): end-to-end IDP-fusion run.\
+                                  mode 1: generates isoform candidate pool (file: isoform_construction.NisoXX.gpd).\
+                                  mode 2: runs candidate selection step. \
+                                  Note: make sure isoform candidate pool (file: isoform_construction.NisoXX.gpd) \
+                                  file is already generated in temp folder."
+                                                                    , default=0)
+        long_fusion_parser.add_argument("--ref_genome", metavar="ref_genome",
+                                  help="The reference genome FASTA file",  default="")
+        long_fusion_parser.add_argument("--ref_all_gpd", metavar="ref_genome",
+                                  help="GPD format annotation file for the whole genome \
+                                  splicing data from multiple sources including ESTs and \
+                                  reference genome databases. For hg19 you may use \
+                                  the full genome example at \
+                                  http://www.stanford.edu/group/wonglab/SpliceMap/hg19.all.gene_est.refFlat.txt.", required=True)
+        long_fusion_parser.add_argument("--ref_gpd", metavar="ref_gpd",
+                                  help="The reference transcriptome annotation file \
+                                  (in GPD format) to guide the analysis.", required=True)
+        long_fusion_parser.add_argument("--uniqueness_bedgraph", metavar="uniqueness_bedgraph",
+                                  help="File with the uniqueness scores in bedgraph format. \
+                                  Used to annotate the uniqueness of regions flanking fusions sites. \
+                                  Duke Uniqueness track from UCSC genome browser in bedGraph format can be used", required=True)
+        long_fusion_parser.add_argument("--genome_bowtie2_idx", metavar="genome_bowtie2_idx",
+                                  help="The reference genome bowtie2 index file.", required=True)
+        long_fusion_parser.add_argument("--transcriptome_bowtie2_idx", metavar="transcriptome_bowtie2_idx",
+                                  help="The reference transcriptome bowtie2 index file.", required=True)
+        long_fusion_parser.add_argument("--read_length", type=int, metavar="read_length",
+                                  help="The short-read length.", default=100)
+        long_fusion_parser.add_argument("--start", metavar="start", type=int,
+                                  help="It re-starts executing the workflow/pipeline \
+                                        from the given step number. This can be used when the pipeline \
+                                        has crashed/stopped and one wants to re-run it from \
+                                        from the step where it stopped without re-running from \
+                                        the beginning the entire pipeline. 0 is for restarting \
+                                        automatically and 1 is the first step. Default is '0'."
+                                  , default=0)
+        long_fusion_parser.add_argument("--sample", metavar="Sample", help="Sample name", required=True)                             
+        long_fusion_parser.add_argument("--samtools", help="Path to samtools executable", default=SAMTOOLS)
+        long_fusion_parser.add_argument("--star_dir", help="Path to the directory with STAR executable", default=STAR_DIR)
+        long_fusion_parser.add_argument("--bowtie2_dir", help="Path to the directory with bowtie2 executable", default=BOWTIE2_DIR)
+        long_fusion_parser.add_argument("--gmap", help="Path to GMAP executable", default=GMAP)
+        long_fusion_parser.add_argument("--gmap_idx", metavar="align_idx",
+                                  help="Path to the directory with GMAP index for the reference genome", required=True)
+        long_fusion_parser.add_argument("--idpfusion", help="Path to runIDP.py script in IDP-fusion package", default=IDPFUSION)
+        long_fusion_parser.add_argument("--idpfusion_cfg", metavar="idp_cfg",
+                                  help="the .cfg file that include other options used for IDP \
+                                  long read transcriptome reconstruction. \
+                                  (For IDP-fusion check https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/IDP-fusion_tutorial.asp) \
                                   These options will be used to generate the .cfg file.", default="")
     elif mode == "variant":
         variant_parser = parser.add_argument_group("Variant calling options")
@@ -534,5 +611,321 @@ if __name__ == "__main__":
                                    (For FusionCatcher check \
                                    https://github.com/ndaniel/fusioncatcher/blob/master/doc/manual.md)."
                                    , default="")
+
+    elif mode == "all":
+        all_parser = parser.add_argument_group("Run all pipeline options")
+        all_parser.add_argument("--1", nargs="*", metavar="seq_1",
+                                  help="List of files containing mate 1s (filename usually includes _1).\
+                                   Replicates in same sample should be listed comma-separated :\
+                                   e.g. --1 A1_1.fq,A2_1.fq B1_1.fq,B2_1.fq.", default="")
+        all_parser.add_argument("--2", nargs="*", metavar="seq_2",
+                                  help="List of files containing mate 2s (filename usually includes _2).\
+                                   Replicates in same sample should be listed comma-separated :\
+                                   e.g. --2 A1_2.fq,A2_2.fq B1_2.fq,B2_2.fq.", default="")
+        all_parser.add_argument("--U", nargs="*", metavar="seq_u",
+                                  help="List of files containing unpaired reads to be aligned.\
+                                   Replicates in same sample should be listed comma-separated :\
+                                   e.g. --U A1.fq,A2.fq B1.fq,B2.fq.", default="")
+        all_parser.add_argument("--long", nargs="*", metavar="seq_l",
+                                  help="List of FASTA files containing long reads.\
+                                   Replicates in same sample should be listed comma-separated :\
+                                   e.g. --long A1.fasta,A2.fasta B1.fasta,B2.fasta.", default="")
+        all_parser.add_argument("--sample", nargs="*", metavar="Sample", help="Sample name", required=True)                             
+        all_parser.add_argument("--exclude", nargs="*", metavar="excluded_steps",
+                                  help="List of exlcluded steps",choices=MODES-set(["pipeline"]),default="")
+        all_parser.add_argument("--ref_gtf", metavar="ref_gtf",
+                                  help="The reference transcriptome annotation file \
+                                  (in GTF or GFF3 format) to guide the analysis. \
+                                  ( --known-splicesite-infile option for HISAT will be created based on this file)", default="")
+        all_parser.add_argument("--ref_genome", metavar="ref_genome",
+                                  help="The reference genome FASTA file",  default="")
+        all_parser.add_argument("--ref_all_gpd", metavar="ref_genome",
+                                  help="GPD format annotation file for the whole genome \
+                                  splicing data from multiple sources including ESTs and \
+                                  reference genome databases. (Required for long-read transcriptome reconstruction).\
+                                  For hg19 you may use the full genome example at \
+                                  http://www.stanford.edu/group/wonglab/SpliceMap/hg19.all.gene_est.refFlat.txt.", default="")
+        all_parser.add_argument("--ref_gpd", metavar="ref_gpd",
+                                  help="The reference transcriptome annotation file \
+                                  (in GPD format) to guide the analysis. \
+                                  (Required for long-read transcriptome reconstruction).", default="")
+        all_parser.add_argument("--knownsites", metavar="knownsites",
+                                  help="A database of known polymorphic sites (e.g. dbSNP). Used \
+                                  in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step \
+                                  knownsites should be provided.", default="")
+        all_parser.add_argument("--strand_pos", metavar="strand_pos",
+                                  help="A BED file which specifies the strand of the genes/transcripts. \
+                                  Each row should have 5 columns: chromosome,start,end,name,score(can be .),strand (+ or -). \
+                                  Examples for Human on GRCh37 can be found in test directory. \
+                                  You can generate this file using reference transcript annotations.\
+                                  (Required for RNA editing detection).", default="")
+        all_parser.add_argument("--genes_pos", metavar="genes_pos",
+                                  help="A BED file which specifies the positions in the genome that genes reside. \
+                                  Each row should have 3 columns: chromosome,start,end,name. \
+                                  Examples for Human on GRCh37 can be found in test directory. \
+                                  You can generate this file using reference transcript annotations.", default="")
+        all_parser.add_argument("--data_dir", metavar="alignment",
+                                  help="The data directory where all the annotations files \
+                                  from Ensembl database are placed. This \
+                                  directory should be built using 'fusioncatcher-build'.\
+                                  (Required for RNA fusion detection).", default="")
+        all_parser.add_argument("--align_idx", metavar="align_idx",
+                                  help="The basename of the index generated by the alignment tool for the reference genome.\
+                                  (Required for short-read alignment)", default="")
+        all_parser.add_argument("--quantifier_idx", metavar="quantifier_idx",
+                                  help="The index generated for the reference transcriptome  \
+                                  (FMD-based index for Salmon-SMEM). \
+                                  (Required for short-read alignment-free quantification)", default="")
+        all_parser.add_argument("--salmon_k", type=int, metavar="salmon_k",
+                                  help="SMEM's smaller than this size will not be considered by Salmon." 
+                                  , default=SALMON_SMEM_k)
+        all_parser.add_argument("--libtype", metavar="libtype",
+                                  help="Format string describing the library type. (For Salmon \
+                                  check http://salmon.readthedocs.io/en/latest/library_type.html#fraglibtype). \
+                                  (Required for short-read alignment-free quantification)", default=SALMON_LIBTYPE)
+        all_parser.add_argument("--unzip", action="store_true",
+                                  help="The sequence files are zipped. So unzip them first.")
+        all_parser.add_argument("--use_transcripts_for_diff", action="store_true",
+                                  help="Use the reconstructed transcript GTF files \
+                                  instead of reference GTF for differential analysis.")
+        all_parser.add_argument("--mincount", type=int, metavar="mincount",
+                                  help="Minimum read counts per transcripts. Differential analysis \
+                                  pre-filtering step removes transcripts that have less than this number of reads.", 
+                                  default=2)
+        all_parser.add_argument("--alpha", type=float, metavar="alpha",
+                                  help="Adjusted p-value significance level for differential analysis", 
+                                  default=0.05)
+        all_parser.add_argument("--assmebly_hash", type=int ,metavar="assmebly_hash",
+                                  help="Odd integer, or a comma separated list of odd integers that specify the assembly \
+                                  has length (for Oases/Velvet)." 
+                                  , default=DNV_HASH)
+        all_parser.add_argument("--file_format", metavar="file_format",
+                                  help="Input file format for de novo assembly Options: fasta, fastq, raw, \
+                                  fasta.gz, fastq.gz, raw.gz, sam, bam, fmtAuto." 
+                                  , default=DNV_FORMAT)
+        all_parser.add_argument("--read_type", metavar="file_format",
+                                  help="Input sequence read type for de novo assembly Options: short, shortPaired, \
+                                  short2, shortPaired2, long, longPaired, reference.\
+                                   (Check https://www.ebi.ac.uk/~zerbino/velvet/Manual.pdf for description)", 
+                                   default=DNV_READTYPE)
+        all_parser.add_argument("--kmer", type=int, metavar="kmer",
+                                  help="LoRDEC k-mer length. (Required for long-read error correction.)", default=23)
+        all_parser.add_argument("--solid", type=int, metavar="kmer",
+                                  help="LoRDEC solidity abundance threshold for k-mers.\
+                                  (Required for long-read error correction.)", default=3)
+        all_parser.add_argument("--star_genome_dir", metavar="genome_dir",
+                                  help="Specifies path to the genome directory where STAR genome indices where generated. \
+                                  (Required for long-read transcriptome reconstruction.)", default="")
+        all_parser.add_argument("--read_length", type=int, metavar="read_length",
+                                  help="The short-read length.", default=100)
+        all_parser.add_argument("--mode_number", type=int, metavar="mode_number",
+                                  help="You can run IDP in two steps. If for a reason IDP finished \
+                                  isoform candidate construction step but was terminated in candidate selection \
+                                  step, you can restart the candidate selection step without re-running \
+                                  the isoform candidate construction. mode 0 (default): end-to-end IDP run.\
+                                  mode 1: generates isoform candidate pool (file: isoform_construction.NisoXX.gpd).\
+                                  mode 2: runs candidate selection step. \
+                                  Note: make sure isoform candidate pool (file: isoform_construction.NisoXX.gpd) \
+                                  file is already generated in temp folder."
+                                                                    , default=0)
+        all_parser.add_argument("--uniqueness_bedgraph", metavar="uniqueness_bedgraph",
+                                  help="File with the uniqueness scores in bedgraph format (used for IDP-fusion). \
+                                  Used to annotate the uniqueness of regions flanking fusions sites. \
+                                  Duke Uniqueness track from UCSC genome browser in bedGraph format can be used")
+        all_parser.add_argument("--genome_bowtie2_idx", metavar="genome_bowtie2_idx",
+                                  help="The reference genome bowtie2 index file(used for IDP-fusion).")
+        all_parser.add_argument("--transcriptome_bowtie2_idx", metavar="transcriptome_bowtie2_idx",
+                                  help="The reference transcriptome bowtie2 index file (used for IDP-fusion).")
+        all_parser.add_argument("--gmap_idx", metavar="align_idx",
+                                  help="Path to the directory with GMAP index for the reference genome (used for IDP-fusion)")
+        all_parser.add_argument("--CleanSam", action="store_true",
+                                  help="Use Picard's CleanSam command to clean the input alignment.")
+        all_parser.add_argument("--IndelRealignment", action="store_true",
+                                  help="Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).")
+        all_parser.add_argument("--no_BaseRecalibrator", action="store_true",
+                                  help="Don't run BaseRecalibrator step.")
+        all_parser.add_argument("--sr_aligner", metavar="sr_aligner",
+                                  help="The short-read alignment tool to use.", default="HISAT2")
+        all_parser.add_argument("--reconstructor", metavar="reconstructor",
+                                  help="The transcriptome reconstruction tool to use.", default="StringTie")
+        all_parser.add_argument("--quantifier", metavar="quantifier",
+                                  help="The quantification tool to use.", default="Salmon-SMEM")
+        all_parser.add_argument("--difftool", metavar="difftool",
+                                  help="The differential analysis tool to use.", default="DESeq2")
+        all_parser.add_argument("--assembler", metavar="assembler",
+                                  help="The de novo assembler to use.", default="Oases")
+        all_parser.add_argument("--long_corrector", metavar="long_corrector",
+                                  help="The long-read error correction tool to use.", default="LoRDEC")
+        all_parser.add_argument("--long_aligner", metavar="long_aligner",
+                                  help="The long-read error correction tool to use.", default="STARlong")
+        all_parser.add_argument("--long_reconstructor", metavar="long_reconstructor",
+                                  help="The long-read transcriptome reconstruction tool to use.", default="IDP")
+        all_parser.add_argument("--variant_caller", metavar="variant_caller",
+                                  help="The variant caller to use. For GATK's general approach used for calling variants in RNAseq check \
+                                  https://software.broadinstitute.org/gatk/guide/article?id=3891 ", default="GATK")
+        all_parser.add_argument("--editing_caller", metavar="editing_caller",
+                                  help="The RNA Editing caller to use.", default="GIREMI")
+        all_parser.add_argument("--fusion_caller", metavar="fusion_caller",
+                                  help="The RNA fusion caller to use.", default="FusionCatcher")
+        all_parser.add_argument("--long_fusion_caller", metavar="long_fusion_caller",
+                                  help="The long-read fusion detection tool to use.", default="IDP-fusion")
+        all_parser.add_argument("--samtools", help="Path to samtools executable", default=SAMTOOLS)
+        all_parser.add_argument("--hisat2", help="Path to HISAT2 executable", default=HISAT2)
+        all_parser.add_argument("--hisat2_sps", help="Path to hisat2_extract_splice_sites.py script \
+                                    Can be found in HISAT2 package.", default=HISAT2_SPS)
+        all_parser.add_argument("--hisat2_opts", metavar="hisat2_opts",
+                                  help="Other options used for HISAT2 aligner. \
+                                  (should be put between \" \") \
+                                   (For HISAT2 check http://ccb.jhu.edu/software/hisat2/manual.shtml).", default="")
+        all_parser.add_argument("--stringtie", help="Path to StringTie executable", default=STRINGTIE)
+        all_parser.add_argument("--stringtie_opts", metavar="stringtie_opts",
+                                  help="Other options used for StringTie transcriptome reconstruction. \
+                                  (should be put between \" \") \
+                                  (For StringTie check https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual).", default="")
+        all_parser.add_argument("--salmon", help="Path to Salmon executable", default=SALMON)
+        all_parser.add_argument("--salmon_smem_opts", metavar="salmon_smem_opts",
+                                  help="Other options used for Salmon-SMEM quantifications. \
+                                  (should be put between \" \") \
+                                  (For Salmon check http://salmon.readthedocs.io/en/latest/salmon.html#using-salmon).", 
+                                  default="")
+        all_parser.add_argument("--quant_files", nargs="*", metavar="quant_files",
+                                  help="Quantification files for each sample (e.g. Salmon's quant.sf outputs). \
+                                  Replicates in same sample should be listed comma separated. \
+                                  e.g --quant_files A1/quant.sf,A2/quant.sf B1/quant.sf,B2/quant.sf" 
+                                  , default=[])
+        all_parser.add_argument("--featureCounts_opts", metavar="featureCounts_opts",
+                                  help="Other options used for featureCounts. \
+                                  (should be put between \" \") \
+                                  (For options check http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf).", 
+                                  default="")
+        all_parser.add_argument("--stringtie_merge_opts", metavar="stringtie_merge_opts",
+                                  help="Other options used for StringTie merge. Can be set when the reconstructed transcript GTFs are used.\
+                                  (should be put between \" \") \
+                                  (For StringTie check https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual).", default="")
+        all_parser.add_argument("--R", help="Path to R executable (DESeq2, readr, tximport \
+                                 should have been installed in R)", default=R_CMD)
+        all_parser.add_argument("--featureCounts", help="Path to featureCounts executable", default=FEATURECOUNTS)
+        all_parser.add_argument("--oases", help="Path to oases executable", default=OASES)
+        all_parser.add_argument("--velvetg", help="Path to velvetg executable", default=VELVETG)
+        all_parser.add_argument("--velveth", help="Path to velveth executable", default=VELVETH)
+        all_parser.add_argument("--velveth_opts", metavar="velveth_opts",
+                                  help="Other options used for assembly by velveth. \
+                                  (For velvet options check https://github.com/dzerbino/velvet/blob/master/Manual.pdf).", 
+                                  default="")
+        all_parser.add_argument("--velvetg_opts", metavar="velvetg_opts",
+                                  help="Other options used for assembly by velvetg. \
+                                  (should be put between \" \") \
+                                  (For velvet options check https://github.com/dzerbino/velvet/blob/master/Manual.pdf).", 
+                                  default="")
+        all_parser.add_argument("--oases_opts", metavar="oases_opts",
+                                  help="Other options used for assembly by Oases. \
+                                  (should be put between \" \") \
+                                  (For Oases options check https://github.com/dzerbino/oases).", 
+                                  default="")
+        all_parser.add_argument("--lordec", help="Path to LoRDEC executable", default=LORDEC)
+        all_parser.add_argument("--lordec_opts", metavar="lordec_opts",
+                                  help="Other options used for LoRDEC. \
+                                  (should be put between \" \") \
+                                   (For LoRDEC check http://www.atgc-montpellier.fr/lordec/README.html).", default="")
+        all_parser.add_argument("--starlong", help="Path to STARlong executable (version 2.5.0a or later)", default=STARLONG)
+        all_parser.add_argument("--sam2psl", help="Path to the sam2psl.py script \
+                                    Can be found in FusionCatcher package.", default=SAM2PSL)
+        all_parser.add_argument("--starlong_opts", metavar="starlong_opts",
+                                  help="Other options used for LoRDEC. \
+                                  (should be put between \" \") \
+                                   (For LoRDEC check http://www.atgc-montpellier.fr/lordec/README.html).\
+                                   As the default we use the following options as advised in \
+                                   https://github.com/PacificBiosciences/cDNA_primer/wiki/Bioinfx-study:-Optimizing-STAR-aligner-for-Iso-Seq-data\
+                                   %s"%STARLONG_DEFAULTS, default="")
+        all_parser.add_argument("--idp", help="Path to runIDP.py script", default=IDP)
+        all_parser.add_argument("--idp_cfg", metavar="idp_cfg",
+                                  help="the .cfg file that include other options used for IDP \
+                                  long read transcriptome reconstruction. \
+                                  (For IDP http://www.healthcare.uiowa.edu/labs/au/IDP/IDP_tutorial.asp) \
+                                  These options will be used to generate the .cfg file.", default="")
+        all_parser.add_argument("--star_dir", help="Path to the directory with STAR executable", default=STAR_DIR)
+        all_parser.add_argument("--bowtie2_dir", help="Path to the directory with bowtie2 executable", default=BOWTIE2_DIR)
+        all_parser.add_argument("--gmap", help="Path to GMAP executable", default=GMAP)
+        all_parser.add_argument("--idpfusion", help="Path to runIDP.py script in IDP-fusion package", default=IDPFUSION)
+        all_parser.add_argument("--idpfusion_cfg", metavar="idp_cfg",
+                                  help="the .cfg file that include other options used for IDP \
+                                  long read transcriptome reconstruction. \
+                                  (For IDP-fusion check https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/IDP-fusion_tutorial.asp) \
+                                  These options will be used to generate the .cfg file.", default="")
+        all_parser.add_argument("--picard", help="Path to picard executable", default=PICARD)
+        all_parser.add_argument("--gatk", help="Path to GATK executable", default=GATK)
+        all_parser.add_argument("--java", help="Path to JAVA executable", default=JAVA)
+        all_parser.add_argument("--java_opts", metavar="java_opts",
+                                  help="Java options used for picard and GATK commands. \
+                                  (should be put between \" \") ", default=JAVA_OPT)
+        all_parser.add_argument("--AddOrReplaceReadGroups_opts", metavar="AddOrReplaceReadGroups_opts",
+                                  help="Other options used for picard AddOrReplaceReadGroups command. \
+                                  (should be put between \" \") \
+                                   (For Picard check https://broadinstitute.github.io/picard/command-line-overview.html).", default="SO=coordinate RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=sample")
+        all_parser.add_argument("--MarkDuplicates_opts", metavar="MarkDuplicates_opts",
+                                  help="Other options used for picard MarkDuplicates command. \
+                                  (should be put between \" \") \
+                                   (For Picard check https://broadinstitute.github.io/picard/command-line-overview.html).", default="CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT")
+        all_parser.add_argument("--SplitNCigarReads_opts", metavar="SplitNCigarReads_opts",
+                                  help="Other options used for GATK SplitNCigarReads command. \
+                                  (should be put between \" \") \
+                                   (For GATK SplitNCigarReads check \
+                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
+        all_parser.add_argument("--RealignerTargetCreator_opts", metavar="RealignerTargetCreator_opts",
+                                  help="Other options used for GATK RealignerTargetCreator command. \
+                                  (should be put between \" \") \
+                                   (For GATK RealignerTargetCreator check \
+                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php).", default="")
+        all_parser.add_argument("--IndelRealigner_opts", metavar="IndelRealigner_opts",
+                                  help="Other options used for GATK IndelRealigner command. \
+                                  (should be put between \" \") \
+                                   (For GATK IndelRealigner check \
+                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php).", default="")
+        all_parser.add_argument("--BaseRecalibrator_opts", metavar="BaseRecalibrator_opts",
+                                  help="Other options used for GATK BaseRecalibrator command. \
+                                  (should be put between \" \") \
+                                   (For GATK BaseRecalibrator check \
+                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
+        all_parser.add_argument("--PrintReads_opts", metavar="PrintReads_opts",
+                                  help="Other options used for GATK PrintReads command. \
+                                  (should be put between \" \") \
+                                   (For GATK PrintReads check \
+                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php).", default="")
+        all_parser.add_argument("--HaplotypeCaller_opts", metavar="HaplotypeCaller_opts",
+                                  help="Other options used for GATK HaplotypeCaller command. \
+                                  (should be put between \" \") \
+                                   (For GATK HaplotypeCaller check \
+                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
+        all_parser.add_argument("--VariantFiltration_opts", metavar="VariantFiltration_opts",
+                                  help="Other options used for GATK VariantFiltration command. \
+                                  (should be put between \" \") \
+                                   (For GATK VariantFiltration check \
+                                   https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
+        all_parser.add_argument("--giremi_dir", help="Path to giremi directory that include  \
+                                  giremi executable and giremi.r R script. \
+                                  (required for RNA editing detection.)", default="")
+        all_parser.add_argument("--htslib_dir", help="Path to HTSlib library directory", default=HTSLIB)
+        all_parser.add_argument("--giremi_opts", metavar="java_opts",
+                                  help="Other options used for GIREMI. \
+                                  (should be put between \" \") \
+                                   (For GIREMI check \
+                                   https://github.com/zhqingit/giremi)", default="")
+        all_parser.add_argument("--VariantAnnotator_opts", metavar="VariantAnnotator_opts",
+                                  help="Other options used for GATK VariantAnnotator command. \
+                                  (should be put between \" \") \
+                                   (For GATK VariantAnnotator check \
+                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php)."
+                                   , default="")
+        all_parser.add_argument("--fusioncatcher", help="Path to FusionCatcher executable", default=FUSIONCATCHER)
+        all_parser.add_argument("--fusioncatcher_opts", metavar="fusioncatcher_opts",
+                                  help="Other options used for FusionCatcher. \
+                                  (should be put between \" \") \
+                                   (For FusionCatcher check \
+                                   https://github.com/ndaniel/fusioncatcher/blob/master/doc/manual.md)."
+                                   , default="")
+
+
+
+
     args = parser.parse_args()
     sys.exit(run_pipeline(args,parser))

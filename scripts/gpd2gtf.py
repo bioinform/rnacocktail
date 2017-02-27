@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 ############################################################################
 #This script is modified from the original code by Kin Fai Au 
 #Obtained from https://github.com/jason-weirather/Au-public/blob/master/gold/gpd2gtf.py
