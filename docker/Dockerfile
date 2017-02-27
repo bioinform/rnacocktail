@@ -80,7 +80,6 @@ RUN pip install pybedtools==${PYBEDTOOLS_VERSION} pysam==${PYSAM_VERSION} biopyt
 
 RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/1.2.0/bowtie-1.2-linux-x86_64.zip -O /opt/bowtie-1.2-linux-x86_64.zip
 RUN cd /opt && unzip bowtie-1.2-linux-x86_64.zip && cp -p /opt/bowtie-1.2/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
-ENV LD_LIBRARY_PATH /usr/local/lib:$LD_LIBRARY_PATH
 
 RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip/download -O /opt/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip 
 RUN cd /opt && unzip bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie2-${BOWTIE2_VERSION}/bowtie2* /usr/local/bin && cd /opt && rm -rf bowtie2*
@@ -108,8 +107,6 @@ RUN cd /opt && tar -xJf coreutils-${COREUTILS_VERSION}.tar.xz && cd coreutils-${
 
 ADD http://pkgs.fedoraproject.org/repo/pkgs/pigz/pigz-${PIGZ_VERSION}.tar.gz/e803f8bc0770c7a5e96dccb1d2dd2aab/pigz-${PIGZ_VERSION}.tar.gz /opt/pigz-${PIGZ_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf pigz-${PIGZ_VERSION}.tar.gz && cd pigz-${PIGZ_VERSION} && make && cp -p /opt/pigz-${PIGZ_VERSION}/pigz /usr/local/bin && cd /opt && rm -rf pigz*
-
-RUN wget http://sourceforge.net/projects/samtools/files/samtools/0.1.19/samtools-0.1.19.tar.bz2 -O /opt/samtools-0.1.19.tar.bz2 && cd /opt && tar -xjvf samtools-0.1.19.tar.bz2 && cd samtools-0.1.19 && make && rm -rf /opt/samtools-0.1.19.tar.bz2
 
 ADD http://research-pub.gene.com/gmap/src/gmap-gsnap-${GMAP_VERSION}.tar.gz /opt/gmap-gsnap-${GMAP_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf gmap-gsnap-${GMAP_VERSION}.tar.gz && cd gmap-${GMAP_VERSION} && ./configure && make && make install && cd /opt && rm -rf gmap*
