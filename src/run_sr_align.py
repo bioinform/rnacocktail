@@ -131,8 +131,8 @@ def run_hisat2(align_idx=None,
     msg = "sorting BAM for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s sort  -@ %d %s/alignments.bam %s/alignments.sorted " % (
-            samtools, nthreads, work_hisat2, work_hisat2)
+        command="%s sort  -@ %d -T %s/alignments.sorted -o %s/alignments.sorted.bam %s/alignments.bam  " % (
+            samtools, nthreads, work_hisat2, work_hisat2, work_hisat2)
         command="bash -c \"%s\""%command        
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
         retcode = cmd.run(cmd_log_fd_out=hisat2_log_fd, cmd_log=hisat2_log, msg=msg, timeout=timeout)

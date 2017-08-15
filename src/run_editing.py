@@ -196,8 +196,8 @@ def run_giremi(alignment="", variant="",
     msg = "Sort BAM by name for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s sort -n -@ %d %s %s/alignments.name_sorted" % (
-            samtools, nthreads, alignment, work_giremi)
+        command="%s sort -n -@ %d -T %s/alignments.name_sorted -o %s/alignments.name_sorted.bam %s" % (
+            samtools, nthreads, work_giremi, work_giremi, alignment)
         command="bash -c \"%s\""%command        
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
         retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)
@@ -218,8 +218,8 @@ def run_giremi(alignment="", variant="",
     msg = "Sort BAM by pos for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s sort -@ %d %s/alignments.chr_unique.bam %s/alignments.pos_sorted " % (
-            samtools, nthreads, work_giremi, work_giremi)
+        command="%s sort -@ %d -T %s/alignments.pos_sorted -o %s/alignments.pos_sorted.bam %s/alignments.chr_unique.bam" % (
+            samtools, nthreads, work_giremi, work_giremi, work_giremi)
         command="bash -c \"%s\""%command        
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
         retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)
