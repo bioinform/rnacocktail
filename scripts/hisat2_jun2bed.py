@@ -20,14 +20,14 @@ for line in junction:
         line_list=line.strip().split("\t")
         leftpos=str(int(line_list[1]))
         rightpos=str(int(line_list[2]))
-        locus = "_".join([line_list[0],leftpos,rightpos,line_list[3]])
+        locus = "___".join([line_list[0],leftpos,rightpos,line_list[3]])
         jun_s.add(locus)
 
 output_file.write("track name=junctions description=\"HISAT2 junctions\"\n")
 i=0
 for locus in jun_s:
     output_ls = []
-    locus_ls = locus.split("_")
+    locus_ls = locus.split("___")
     chr_name = locus_ls[0]
     int_start =  int(locus_ls[1])-51
     if int_start<=0:
