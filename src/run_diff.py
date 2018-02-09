@@ -191,8 +191,8 @@ def run_deseq2(quant_files="", alignments="",
             msg = "featureCounts for %s"%samples_txt
             if start<=step:
                 logger.info("--------------------------STEP %s--------------------------"%step)
-                command="%s -o %s/featureCounts.txt -T %d -a %s -g gene_id %s" % (
-                featureCounts, work_deseq2, nthreads, ref_gtf, " ".join(reduce(lambda x,y:x+y,alignments)))
+                command="%s %s -o %s/featureCounts.txt -T %d -a %s -g gene_id %s" % (
+                featureCounts, featureCounts_opts, work_deseq2, nthreads, ref_gtf, " ".join(reduce(lambda x,y:x+y,alignments)))
                 command="bash -c \"%s\""%command
                 cmd = TimedExternalCmd(command, logger, raise_exception=True)
                 retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   
@@ -258,8 +258,8 @@ def run_deseq2(quant_files="", alignments="",
             msg = "featureCounts for %s"%samples_txt
             if start<=step:
                 logger.info("--------------------------STEP %s--------------------------"%step)
-                command="%s -o %s/featureCounts.txt -T %d -a %s/merged.gtf -g gene_id %s" % (
-                featureCounts, work_deseq2, nthreads, work_deseq2, " ".join(reduce(lambda x,y:x+y,alignments)))
+                command="%s %s -o %s/featureCounts.txt -T %d -a %s/merged.gtf -g gene_id %s" % (
+                featureCounts, featureCounts_opts, work_deseq2, nthreads, work_deseq2, " ".join(reduce(lambda x,y:x+y,alignments)))
                 command="bash -c \"%s\""%command
                 cmd = TimedExternalCmd(command, logger, raise_exception=True)
                 retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   

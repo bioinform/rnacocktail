@@ -559,12 +559,12 @@ of RNACocktail is v0.2.1. In general, the install source would be https://github
 
 	<h4>Example 7 (diff):</h4> Run of RNACocktail for differential expression analysis of reads aligned using HISAT2 on reference transcriptome (DESeq2).
 
-	<p><code>run_rnacocktail.py diff --alignments work/hisat2/A1/alignments.sorted.bam,work/hisat2/A2/alignments.sorted.bam work/hisat2/B1/alignments.sorted.bam,work/hisat2/B2/alignments.sorted.bam --samples A1,A2 B1,B2 --ref_gtf genes.GRCh37.gtf --outdir out --workdir work --featureCounts /path/to/featureCounts
+	<p><code>run_rnacocktail.py diff --alignments work/hisat2/A1/alignments.sorted.bam,work/hisat2/A2/alignments.sorted.bam work/hisat2/B1/alignments.sorted.bam,work/hisat2/B2/alignments.sorted.bam --sample A1,A2 B1,B2 --ref_gtf genes.GRCh37.gtf --outdir out --workdir work --featureCounts /path/to/featureCounts
  </code></p>
 
 	<h4>Example 8 (diff):</h4> Run of RNACocktail for differential expression analysis of reads aligned using HISAT2 on StringTie computed transcriptome (DESeq2).
 
-	<p><code>run_rnacocktail.py diff --alignments work/hisat2/A1/alignments.sorted.bam,work/hisat2/A2/alignments.sorted.bam work/hisat2/B1/alignments.sorted.bam,work/hisat2/B2/alignments.sorted.bam --transcripts_gtfs work/stringtie/A1/transcripts.gtf,work/stringtie/A2/transcripts.gtf work/stringtie/B1/transcripts.gtf,work/stringtie/B2/transcripts.gtf --samples A1,A2 B1,B2 --ref_gtf genes.GRCh37.gtf --outdir out --workdir work --featureCounts /path/to/featureCounts
+	<p><code>run_rnacocktail.py diff --alignments work/hisat2/A1/alignments.sorted.bam,work/hisat2/A2/alignments.sorted.bam work/hisat2/B1/alignments.sorted.bam,work/hisat2/B2/alignments.sorted.bam --transcripts_gtfs work/stringtie/A1/transcripts.gtf,work/stringtie/A2/transcripts.gtf work/stringtie/B1/transcripts.gtf,work/stringtie/B2/transcripts.gtf --sample A1,A2 B1,B2 --ref_gtf genes.GRCh37.gtf --outdir out --workdir work --featureCounts /path/to/featureCounts
  </code></p>
 
 	<h4>Example 9 (denovo):</h4> Run of RNACocktail for de novo assembly (Oases).
@@ -815,7 +815,7 @@ of RNACocktail is v0.2.1. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--sample STRING</code></td>
-			<td>Sample names. Number of samples and replicates should match the input quantification (--quant_files) or alignemnt (--alignments). Replicates in same sample should be listed comma separated. e.g --samples A1,A2 B1,B2</td> 
+			<td>Sample names. Number of samples and replicates should match the input quantification (--quant_files) or alignemnt (--alignments). Replicates in same sample should be listed comma separated. e.g --sample A1,A2 B1,B2</td> 
 		  </tr>
 		  <tr>
 			<td><code>--mincount INT</code></td>
