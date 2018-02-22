@@ -21,7 +21,7 @@ def sort_gpd(in_file,out_file,order_chrs=dict([("%s"%k,k) for k in range(1,23)]+
         others_chrs=sorted(set(map(lambda x:x[2],rows))-set(order_chrs.keys()))
         if others_chrs:
             max_id=max(order_chrs.values())
-            for i,c in enumerated(others_chrs):
+            for i,c in enumerate(others_chrs):
                 order_chrs[c]=max_id+i+1
         sorted_rows=sorted(rows,key=lambda x: (order_chrs[x[2]],int(x[4])))
         with open(out_file, 'wb') as csvfile:
