@@ -102,7 +102,7 @@ mkdir fusioncatcher_data
 cd fusioncatcher_data
 wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.aa &
 wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.ab &
-wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.ac &
+wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.ac
 wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.ad 
 cat human_v90.tar.gz.* | tar xz
 rm -rf human_v90.tar.gz.a*
