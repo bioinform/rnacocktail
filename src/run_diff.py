@@ -38,11 +38,11 @@ def fix_quant_file(quant_file,fixed_quant_file):
             for line in quant_file:
                 if cnt>0:
                     fields=line.strip().split("\t")
-                    fields[0]=fields.split("|")[0]
+                    fields[0]=fields[0].split("|")[0]
                     line="\t".join(fields)+"\n"
                 fixed_q_f.write(line)
                 cnt+=1
-                
+
 def run_deseq2(quant_files="", alignments="",
               transcripts_gtfs="", ref_gtf="", 
               featureCounts_opts="", featureCounts=FEATURECOUNTS, 
