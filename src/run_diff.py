@@ -35,7 +35,7 @@ def fix_quant_file(quant_file,fixed_quant_file):
     cnt=0
     with open(quant_file) as q_f:
         with open(fixed_quant_file,"w'") as fixed_q_f:
-            for line in quant_file:
+            for line in q_f:
                 if cnt>0:
                     fields=line.strip().split("\t")
                     fields[0]=fields[0].split("|")[0]
