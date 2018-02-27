@@ -170,7 +170,7 @@ def run_deseq2(quant_files="", alignments="",
                        write.table(txi$length, file = '%s/txi.length', quote = FALSE, \
                        sep='\\t'); write.table(txi$counts, file = '%s/txi.counts',\
                        quote = FALSE, sep='\\t');\""%(R, ",".join(map(lambda x: "'%s'"%x,reduce(lambda x,y:x+y,samples)))
-                                              ,",".join(map(lambda x: "'%s'"%x,reduce(lambda x,y:x+y,quant_files)))
+                                              ,",".join(map(lambda x: "'%s'"%x,reduce(lambda x,y:x+y,fixed_quant_files)))
                                               ,tx2gene_file, work_deseq2, work_deseq2, work_deseq2, work_deseq2)
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)
