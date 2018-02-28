@@ -43,8 +43,8 @@ def run_lordec(kmer=23,
     lordec_log_fd = open(lordec_log, "w")
     ksps = ""
 
-    if "--threads " not in lordec_opts:
-        lordec_opts += " --threads %d"%nthreads 
+    if "-T " not in lordec_opts:
+        lordec_opts += " -T %d"%nthreads 
 
 
     msg = "LoRDEC for %s"%sample
