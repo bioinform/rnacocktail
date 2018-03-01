@@ -82,7 +82,7 @@ echo "Test differential expression analysis based on alignment-free"
 echo "quantifications (DESeq2)"
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
-docker run -v=${PWD}/../:/work_dir/  marghoob/rnacocktail run_rnacocktail.py diff --quant_files /work_dir/example/work/salmon_smem/A1/quant.sf,/work_dir/example/work/salmon_smem/A2/quant.sf /work_dir/example/work/salmon_smem/B1/quant.sf,/work_dir/example/work/salmon_smem/B2/quant.sf --sample A1,A2 B1,B2 --ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf --outdir /work_dir/example/out/alignfree --workdir /work_dir/example/work/diff-alignfree
+docker run -v=${PWD}/../:/work_dir/  marghoob/rnacocktail run_rnacocktail.py diff --quant_files /work_dir/example/work/salmon_smem/A1/quant.sf,/work_dir/example/work/salmon_smem/A2/quant.sf /work_dir/example/work/salmon_smem/B1/quant.sf,/work_dir/example/work/salmon_smem/B2/quant.sf --sample A1,A2 B1,B2 --ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf --outdir /work_dir/example/out/diff-quant --workdir /work_dir/example/work/diff-quant
 
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
@@ -187,7 +187,7 @@ docker run -v=${PWD}/../:/work_dir/  marghoob/rnacocktail java -jar /usr/local/b
 docker run -v=${PWD}/../:/work_dir/  marghoob/rnacocktail hisat2-build /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.HISAT2
 echo "Download NA12878 FASTQ files"
 
-wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR896/SRR896663/SRR896663_1.fastq.gz &
+wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR896/SRR896663/SRR896663_1.fastq.gz 
 wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR896/SRR896663/SRR896663_2.fastq.gz 
 
 docker run -v=${PWD}/../:/work_dir/  marghoob/rnacocktail run_rnacocktail.py align --align_idx /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.HISAT2 --outdir /work_dir/example/out --workdir /work_dir/example/work --ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.gtf --1 /work_dir/example/SRR896663_1.fastq.gz  --2 /work_dir/example/SRR896663_2.fastq.gz --sample E --threads 10

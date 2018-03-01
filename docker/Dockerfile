@@ -128,7 +128,9 @@ RUN cd /opt/ && git clone https://github.com/bioinform/IDP.git && cd IDP && git 
 ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_${IDPFUSION_VERSION}.tar.gz /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
-RUN pip install https://github.com/bioinform/rnacocktail/archive/v0.2.2.tar.gz
+ENV PATH $PATH:/opt/bb
+
+RUN pip install https://github.com/bioinform/rnacocktail/archive/docker-update.zip
 
 VOLUME /work_dir
 
