@@ -31,7 +31,17 @@ def tx2gene_map(ref_gtf_file,tx2gene_file):
         spamwriter.writerows(tx2gene.items())
     return tx2gene
 
-
+def fix_quant_file(quant_file,fixed_quant_file):
+    cnt=0
+    with open(quant_file) as q_f:
+        with open(fixed_quant_file,"w'") as fixed_q_f:
+            for line in q_f:
+                if cnt>0:
+                    fields=line.strip().split("\t")
+                    fields[0]=fields[0].split("|")[0]
+                    line="\t".join(fields)+"\n"
+                fixed_q_f.write(line)
+                cnt+=1
 
 def run_deseq2(quant_files="", alignments="",
               transcripts_gtfs="", ref_gtf="", 
@@ -140,6 +150,16 @@ def run_deseq2(quant_files="", alignments="",
         msg="compute gene level abundances for %s."%samples_txt
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
+
+            fixed_quant_files=[]
+            for i,qs in enumerate(quant_files):
+                fixed_qs=[]
+                for j,q in enumerate(qs):
+                    fixed_q =  os.path.join(work_deseq2, "{}.fixed_quant.sf".format(samples[i][j]))
+                    fix_quant_file(q,fixed_q)
+                    fixed_qs.append(fixed_q)
+                fixed_quant_files.append(fixed_qs)
+
             command = "%s -e \"library('readr'); library('tximport'); \
                        samples=c(%s); (files <- file.path(c(%s))); names(files) <- samples; \
                        tx2gene <- read.csv(file.path('%s'),sep='\\t'); \
@@ -150,7 +170,7 @@ def run_deseq2(quant_files="", alignments="",
                        write.table(txi$length, file = '%s/txi.length', quote = FALSE, \
                        sep='\\t'); write.table(txi$counts, file = '%s/txi.counts',\
                        quote = FALSE, sep='\\t');\""%(R, ",".join(map(lambda x: "'%s'"%x,reduce(lambda x,y:x+y,samples)))
-                                              ,",".join(map(lambda x: "'%s'"%x,reduce(lambda x,y:x+y,quant_files)))
+                                              ,",".join(map(lambda x: "'%s'"%x,reduce(lambda x,y:x+y,fixed_quant_files)))
                                               ,tx2gene_file, work_deseq2, work_deseq2, work_deseq2, work_deseq2)
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)

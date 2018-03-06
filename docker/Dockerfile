@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 		 
-
+ENV R_VERSION 3.3.2
 ENV SAMTOOLS_VERSION 1.2
 ENV BEDTOOLS2_VERSION 2.24.0
 ENV PYBEDTOOLS_VERSION 0.7.7
@@ -19,16 +19,18 @@ ENV BWA_VERSION 0.7.15
 ENV SRA_VERSION 2.8.1
 ENV COREUTILS_VERSION 8.25
 ENV PIGZ_VERSION 2.3.1
+ENV BBMAP_VERSION 37.28
 ENV GMAP_VERSION 2017-02-15
 ENV IDPFUSION_VERSION 1.1.1
 
 RUN apt-get update && \
-    apt-get install -y --fix-missing build-essential zlib1g-dev unzip libncurses5-dev curl wget r-base r-base-dev python python-pip python-dev cmake libboost-all-dev  libxml2-dev libcurl4-gnutls-dev software-properties-common apt-transport-https default-jre default-jdk less vim libtbb-dev
+    apt-get install -y --fix-missing build-essential zlib1g-dev unzip libncurses5-dev curl wget python python-pip python-dev cmake libboost-all-dev  libxml2-dev libcurl4-gnutls-dev software-properties-common apt-transport-https default-jre default-jdk less vim libtbb-dev git
 
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/'
 RUN apt-get update
-RUN apt-get install -y --fix-missing r-base r-base-dev
+RUN apt-get install -y --fix-missing r-base=${R_VERSION}-1xenial0  r-recommended=${R_VERSION}-1xenial0 
+RUN apt-get install -y --fix-missing --allow-downgrades r-base-core=${R_VERSION}-1xenial0
 
 RUN echo 'local({r <- getOption("repos"); r["CRAN"] <- "http://cran.r-project.org"; options(repos=r)})' > ~/.Rprofile
 RUN R -e 'source("http://bioconductor.org/biocLite.R"); biocLite("DESeq2"); biocLite("tximport"); biocLite("readr");'
@@ -87,8 +89,8 @@ RUN cd /opt && unzip bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip && cp -p /opt/b
 RUN wget https://sourceforge.net/projects/bio-bwa/files/bwa-${BWA_VERSION}.tar.bz2/download -O /opt/bwa-${BWA_VERSION}.tar.bz2 
 RUN cd /opt && tar xjf bwa-${BWA_VERSION}.tar.bz2 && cd bwa-${BWA_VERSION} && make && cp -p /opt/bwa-${BWA_VERSION}/bwa /usr/local/bin && cd /opt && rm -rf bwa*
 
-ADD https://github.com/ndaniel/seqtk/archive/1.0-r82b.tar.gz /opt/seqtk-1.0-r82b.tar.gz
-RUN cd /opt && tar -zxvf /opt/seqtk-1.0-r82b.tar.gz && cd seqtk-1.0-r82b && make  && cp -p /opt/seqtk-1.0-r82b/seqtk /usr/local/bin && cd /opt && rm -rf seqtk*
+ADD https://github.com/ndaniel/seqtk/archive/1.2-r101c.tar.gz /opt/seqtk-1.2-r101c.tar.gz
+RUN cd /opt && tar -zxvf /opt/seqtk-1.2-r101c.tar.gz && cd seqtk-1.2-r101c && make  && cp -p /opt/seqtk-1.2-r101c/seqtk /usr/local/bin && cd /opt && rm -rf seqtk*
 
 ADD http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/blat/blat /usr/local/bin/blat
 RUN chmod 755 /usr/local/bin/blat
@@ -96,7 +98,7 @@ RUN chmod 755 /usr/local/bin/blat
 ADD http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/faToTwoBit /usr/local/bin/faToTwoBit
 RUN chmod 755 /usr/local/bin/faToTwoBit
 
-ADD http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64.v287/liftOver /usr/local/bin/liftOver
+ADD http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver /usr/local/bin/liftOver
 RUN chmod 755 /usr/local/bin/liftOver
 
 ADD https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz /opt/sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz
@@ -105,25 +107,28 @@ RUN cd /opt && tar -zxvf sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz && cp -Rp /op
 ADD http://ftp.gnu.org/gnu/coreutils/coreutils-${COREUTILS_VERSION}.tar.xz /opt/coreutils-${COREUTILS_VERSION}.tar.xz 
 RUN cd /opt && tar -xJf coreutils-${COREUTILS_VERSION}.tar.xz && cd coreutils-${COREUTILS_VERSION} && ./configure FORCE_UNSAFE_CONFIGURE=1 && make && make install && cd /opt && rm -rf coreutils*
 
-ADD http://pkgs.fedoraproject.org/repo/pkgs/pigz/pigz-${PIGZ_VERSION}.tar.gz/e803f8bc0770c7a5e96dccb1d2dd2aab/pigz-${PIGZ_VERSION}.tar.gz /opt/pigz-${PIGZ_VERSION}.tar.gz
+ADD https://github.com/madler/pigz/archive/v${PIGZ_VERSION}.tar.gz /opt/pigz-${PIGZ_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf pigz-${PIGZ_VERSION}.tar.gz && cd pigz-${PIGZ_VERSION} && make && cp -p /opt/pigz-${PIGZ_VERSION}/pigz /usr/local/bin && cd /opt && rm -rf pigz*
 
 ADD http://research-pub.gene.com/gmap/src/gmap-gsnap-${GMAP_VERSION}.tar.gz /opt/gmap-gsnap-${GMAP_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf gmap-gsnap-${GMAP_VERSION}.tar.gz && cd gmap-${GMAP_VERSION} && ./configure && make && make install && cd /opt && rm -rf gmap*
 
-RUN wget https://github.com/ndaniel/fusioncatcher/archive/master.zip -O /opt/fusioncatcher-master.zip && cd /opt && unzip fusioncatcher-master.zip  && cp -p /opt/fusioncatcher-master/bin/sam2psl.py /usr/local/bin
-ENV PATH $PATH:/opt/fusioncatcher-master/bin/
+RUN wget https://sourceforge.net/projects/bbmap/files/BBMap_${BBMAP_VERSION}.tar.gz -O /opt/BBMap_${BBMAP_VERSION}.tar.gz
+RUN cd /opt && tar -xzvf BBMap_${BBMAP_VERSION}.tar.gz
+ENV PATH $PATH:/opt/bbmap/
 
-ADD https://github.com/bioinform/IDP/archive/master.zip /opt/IDP-master.zip
-RUN rm -rf /usr/local/bin/IDP* && cd /opt && unzip IDP-master.zip && rm -rf /opt/IDP-master.zip
+RUN cd /opt/ && git clone https://github.com/ndaniel/fusioncatcher.git && cd fusioncatcher && git checkout 60bddd2f1ddfd95a2dbc6c4efa3c521bea3421da &&  cp -p /opt/fusioncatcher/bin/sam2psl.py /usr/local/bin
+ENV PATH $PATH:/opt/fusioncatcher/bin/
+
+ADD http://ccb.jhu.edu/software/stringtie/dl/gffread-0.9.12.Linux_x86_64.tar.gz opt/gffread-0.9.12.Linux_x86_64.tar.gz 
+RUN cd /opt && tar -xzvf gffread-0.9.12.Linux_x86_64.tar.gz && cp -p /opt/gffread-0.9.12.Linux_x86_64/gffread /usr/local/bin && rm -rf /opt/gffread*
+
+RUN cd /opt/ && git clone https://github.com/bioinform/IDP.git && cd IDP && git checkout a5d2d624ab8e4545feff3f51d264931b440d0b53
 
 ADD https://www.healthcare.uiowa.edu/labs/au/IDP-fusion/files/IDP-fusion_${IDPFUSION_VERSION}.tar.gz /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
-
-RUN pip install https://github.com/bioinform/RNACocktail/archive/v0.2.tar.gz
+RUN pip install https://github.com/bioinform/rnacocktail/archive/v0.2.2.tar.gz
 
 VOLUME /work_dir
-
-
 
