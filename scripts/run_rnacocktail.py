@@ -255,7 +255,7 @@ if __name__ == "__main__":
                                   help="The long-read error correction tool to use.", default="LoRDEC")
         lrcorrect_parser.add_argument("--kmer", type=int, metavar="kmer",
                                   help="LoRDEC k-mer length", required=True)
-        lrcorrect_parser.add_argument("--solid", type=int, metavar="kmer",
+        lrcorrect_parser.add_argument("--solid", type=int, metavar="solid",
                                   help="LoRDEC solidity abundance threshold for k-mers.", required=True)
         lrcorrect_parser.add_argument("--long", metavar="seq_l",
                                   help="The FASTA file containing long reads ", required=True)
@@ -710,7 +710,7 @@ if __name__ == "__main__":
                                    default=DNV_READTYPE)
         all_parser.add_argument("--kmer", type=int, metavar="kmer",
                                   help="LoRDEC k-mer length. (Required for long-read error correction.)", default=23)
-        all_parser.add_argument("--solid", type=int, metavar="kmer",
+        all_parser.add_argument("--solid", type=int, metavar="solid",
                                   help="LoRDEC solidity abundance threshold for k-mers.\
                                   (Required for long-read error correction.)", default=3)
         all_parser.add_argument("--star_genome_dir", metavar="genome_dir",

@@ -64,12 +64,12 @@ ENV LORDEC_VERSION 0.9
 ADD https://gite.lirmm.fr/lordec/lordec-releases/uploads/710113d83c210b6989ccfbdbafa89234/lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2 /opt/lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2
 RUN cd /opt && tar xjf lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2 && cd lordec-bin_${LORDEC_VERSION}_linux64 && cp -p /opt/lordec-bin_${LORDEC_VERSION}_linux64/lordec* /usr/local/bin && cd /opt && rm -rf lordec*
 
-ENV STAR_VERSION 2.7.3a
+ENV STAR_VERSION 2.7.0f
 
 ADD https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz /opt/STAR_${STAR_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf STAR_${STAR_VERSION}.tar.gz && cp -p /opt/STAR-${STAR_VERSION}/bin/Linux_x86_64_static/* /usr/local/bin && cd /opt && rm -rf STAR*
 
-ENV PICARD_VERSION 2.21.2
+ENV PICARD_VERSION 2.19.0
 ADD https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar /opt/picard.jar
 RUN cd /opt && cp -p picard.jar /usr/local/bin && cd /opt && rm -rf picard*
 
@@ -90,15 +90,15 @@ ENV XLRD_VERSION 1.1.0
 RUN pip install --upgrade pip
 RUN pip install pybedtools==${PYBEDTOOLS_VERSION} pysam==${PYSAM_VERSION} biopython==${BIOPYTHON_VERSION} openpyxl==${OPENPYXL_VERSION} xlrd==${XLRD_VERSION} numpy pandas scipy
 
-ENV BOWTIE_VERSION 1.2.3
+ENV BOWTIE_VERSION 1.2.2
 
 RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/${BOWTIE_VERSION}/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip -O /opt/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip
-RUN cd /opt && unzip bowtie-${BOWTIE_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie-1.2.3-linux-x86_64/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
+RUN cd /opt && unzip bowtie-${BOWTIE_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie-${BOWTIE_VERSION}-linux-x86_64/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
 
-ENV BOWTIE2_VERSION 2.3.5.1
+ENV BOWTIE2_VERSION 2.2.9
 
 RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip/download -O /opt/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip 
-RUN cd /opt && unzip bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie2-${BOWTIE2_VERSION}-linux-x86_64/bowtie2* /usr/local/bin && cd /opt && rm -rf bowtie2*
+RUN cd /opt && unzip bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie2-${BOWTIE2_VERSION}/bowtie2* /usr/local/bin && cd /opt && rm -rf bowtie2*
 
 
 ENV BWA_VERSION 0.7.17
@@ -125,12 +125,12 @@ ENV SRA_VERSION 2.9.6
 ADD https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz /opt/sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz
 RUN cd /opt && tar -zxvf sratoolkit.${SRA_VERSION}-ubuntu64.tar.gz && cp -Rp /opt/sratoolkit.${SRA_VERSION}-ubuntu64/bin/* /usr/local/bin/ && cd /opt && rm -rf sratoolkit*
 
-ENV COREUTILS_VERSION 8.31
+ENV COREUTILS_VERSION 8.27
 
 ADD http://ftp.gnu.org/gnu/coreutils/coreutils-${COREUTILS_VERSION}.tar.xz /opt/coreutils-${COREUTILS_VERSION}.tar.xz 
 RUN cd /opt && tar -xJf coreutils-${COREUTILS_VERSION}.tar.xz && cd coreutils-${COREUTILS_VERSION} && ./configure FORCE_UNSAFE_CONFIGURE=1 && make && make install && cd /opt && rm -rf coreutils*
 
-ENV PIGZ_VERSION 2.4
+ENV PIGZ_VERSION 2.3.1
 
 ADD https://github.com/madler/pigz/archive/v${PIGZ_VERSION}.tar.gz /opt/pigz-${PIGZ_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf pigz-${PIGZ_VERSION}.tar.gz && cd pigz-${PIGZ_VERSION} && make && cp -p /opt/pigz-${PIGZ_VERSION}/pigz /usr/local/bin && cd /opt && rm -rf pigz*
@@ -140,7 +140,7 @@ ENV GMAP_VERSION 2019-09-12
 ADD http://research-pub.gene.com/gmap/src/gmap-gsnap-${GMAP_VERSION}.tar.gz /opt/gmap-gsnap-${GMAP_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf gmap-gsnap-${GMAP_VERSION}.tar.gz && cd gmap-${GMAP_VERSION} && ./configure && make && make install && cd /opt && rm -rf gmap*
 
-ENV BBMAP_VERSION 38.71
+ENV BBMAP_VERSION 38.44
 
 RUN wget https://sourceforge.net/projects/bbmap/files/BBMap_${BBMAP_VERSION}.tar.gz -O /opt/BBMap_${BBMAP_VERSION}.tar.gz
 RUN cd /opt && tar -xzvf BBMap_${BBMAP_VERSION}.tar.gz
@@ -169,7 +169,9 @@ ENV GATK_VERSION 4.1.4.0
 
 RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip
 
-RUN pip install https://github.com/bioinform/rnacocktail/archive/v0.2.2.tar.gz
+ENV GATK_VERSION 4.1.4.0
+
+RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
 
 VOLUME /work_dir
 

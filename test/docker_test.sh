@@ -1,177 +1,178 @@
 #!/bin/bash
 set -ex
 
-mkdir example
-chmod -R 777 example/
+# mkdir example
+# chmod -R 777 example/
 cd example
 
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Initialization"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Download reference genome (chromosome 21) FASTA file"
-wget ftp://ftp.ensembl.org/pub/release-90//fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.21.fa.gz
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Initialization"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Download reference genome (chromosome 21) FASTA file"
+# wget ftp://ftp.ensembl.org/pub/release-90//fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.21.fa.gz
 
-echo "Unzip reference genome (chromosome 21) FASTA file"
-gunzip Homo_sapiens.GRCh38.dna.chromosome.21.fa.gz
+# echo "Unzip reference genome (chromosome 21) FASTA file"
+# gunzip Homo_sapiens.GRCh38.dna.chromosome.21.fa.gz
 
-echo "Download reference annotation GTF file"
-wget ftp://ftp.ensembl.org/pub/release-90//gtf/homo_sapiens/Homo_sapiens.GRCh38.90.gtf.gz
+# echo "Download reference annotation GTF file"
+# wget ftp://ftp.ensembl.org/pub/release-90//gtf/homo_sapiens/Homo_sapiens.GRCh38.90.gtf.gz
 
-echo "Unzip reference annotation GTF file"
-gunzip Homo_sapiens.GRCh38.90.gtf.gz
+# echo "Unzip reference annotation GTF file"
+# gunzip Homo_sapiens.GRCh38.90.gtf.gz
 
-echo "Restrict GTF to chromosome 21"
-less Homo_sapiens.GRCh38.90.gtf |awk '{if ($1==21) print}' > Homo_sapiens.GRCh38.90.chromosome.21.gtf
+# echo "Restrict GTF to chromosome 21"
+# less Homo_sapiens.GRCh38.90.gtf |awk '{if ($1==21) print}' > Homo_sapiens.GRCh38.90.chromosome.21.gtf
 
-echo "Prepare reference transcriptome FASTA file"
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 gffread \
-				/work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
-				-g /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
-				-w /work_dir/example/Homo_sapiens.GRCh38.cdna.21.fa
+# echo "Prepare reference transcriptome FASTA file"
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 gffread \
+# 				/work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
+# 				-g /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
+# 				-w /work_dir/example/Homo_sapiens.GRCh38.cdna.21.fa
 
 gunzip -c ../C_long.fa.gz > C_long.fa 
 gunzip -c ../C_short.fa.gz > C_short.fa 
-gunzip -c ../GRCh38_genes_pos.bed.gz > GRCh38_genes_pos.bed 
-gunzip -c ../GRCh38_strand_pos.bed.gz > GRCh38_strand_pos.bed 
-gunzip -c ../GRCh38.21.gpd.gz > GRCh38.21.gpd 
+# gunzip -c ../GRCh38_genes_pos.bed.gz > GRCh38_genes_pos.bed 
+# gunzip -c ../GRCh38_strand_pos.bed.gz > GRCh38_strand_pos.bed 
+# gunzip -c ../GRCh38.21.gpd.gz > GRCh38.21.gpd 
 
 
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Test short-read alignment (HISAT2)"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Index genome (chromosome 21) with HISAT2"
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 hisat2-build \
-				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
-				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.HISAT2
-for sample in A1 A2 B1 B2
-do
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py align \
-				--align_idx /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.HISAT2 \
-				--outdir /work_dir/example/out \
-				--workdir /work_dir/example/work \
-				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
-				--1 /work_dir/${sample}_1.fq.gz  \
-				--2 /work_dir/${sample}_2.fq.gz \
-				--sample ${sample}
-done
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Test short-read transcriptome reconstruction (StringTie)"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-for sample in A1 A2 B1 B2
-do
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py reconstruct \
-				--alignment_bam /work_dir/example/work/hisat2/${sample}/alignments.sorted.bam \
-				--outdir /work_dir/example/out \
-				--workdir /work_dir/example/work \
-				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
-				--sample ${sample}
-done
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Test short-read alignment (HISAT2)"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Index genome (chromosome 21) with HISAT2"
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 hisat2-build \
+# 				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
+# 				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.HISAT2
+# for sample in A1 A2 B1 B2
+# do
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py align \
+# 				--align_idx /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.HISAT2 \
+# 				--outdir /work_dir/example/out \
+# 				--workdir /work_dir/example/work \
+# 				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
+# 				--1 /work_dir/${sample}_1.fq.gz  \
+# 				--2 /work_dir/${sample}_2.fq.gz \
+# 				--sample ${sample}
+# done
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Test short-read transcriptome reconstruction (StringTie)"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# for sample in A1 A2 B1 B2
+# do
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py reconstruct \
+# 				--alignment_bam /work_dir/example/work/hisat2/${sample}/alignments.sorted.bam \
+# 				--outdir /work_dir/example/out \
+# 				--workdir /work_dir/example/work \
+# 				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
+# 				--sample ${sample}
+# done
 
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Test quantification (Salmon-SMEM)"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Index transcriptome with Salmon-SMEM"
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 salmon index \
-				-t /work_dir/example/Homo_sapiens.GRCh38.cdna.21.fa  \
-				-i /work_dir/example/Homo_sapiens.GRCh38.cdna.21.Salmon.fmd \
-				--type fmd
-for sample in A1 A2 B1 B2
-do
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py quantify \
-				--quantifier_idx /work_dir/example/Homo_sapiens.GRCh38.cdna.21.Salmon.fmd \
-				--1 /work_dir/${sample}_1.fq.gz \
-				--2 /work_dir/${sample}_2.fq.gz \
-				--libtype IU \
-				--salmon_k 19 \
-				--outdir /work_dir/example/out \
-				--workdir /work_dir/example/work \
-				--threads 10 \
-				--sample ${sample} \
-				--unzip
-done
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Test quantification (Salmon-SMEM)"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Index transcriptome with Salmon-SMEM"
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 salmon index \
+# 				-t /work_dir/example/Homo_sapiens.GRCh38.cdna.21.fa  \
+# 				-i /work_dir/example/Homo_sapiens.GRCh38.cdna.21.Salmon.fmd \
+# 				--type fmd
+# for sample in A1 A2 B1 B2
+# do
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py quantify \
+# 				--quantifier_idx /work_dir/example/Homo_sapiens.GRCh38.cdna.21.Salmon.fmd \
+# 				--1 /work_dir/${sample}_1.fq.gz \
+# 				--2 /work_dir/${sample}_2.fq.gz \
+# 				--libtype IU \
+# 				--salmon_k 19 \
+# 				--outdir /work_dir/example/out \
+# 				--workdir /work_dir/example/work \
+# 				--threads 10 \
+# 				--sample ${sample} \
+# 				--unzip
+# done
 
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Test differential expression analysis based on alignment"
-echo "results(DESeq2)"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py diff \
-				--alignments /work_dir/example/work/hisat2/A1/alignments.sorted.bam,/work_dir/example/work/hisat2/A2/alignments.sorted.bam /work_dir/example/work/hisat2/B1/alignments.sorted.bam,/work_dir/example/work/hisat2/B2/alignments.sorted.bam \
-				--sample A1,A2 B1,B2 \
-				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
-				--outdir /work_dir/example/out/diff-alignment/ \
-				--workdir /work_dir/example/work/diff-alignment/
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Test differential expression analysis based on alignment"
+# echo "results(DESeq2)"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py diff \
+# 				--alignments /work_dir/example/work/hisat2/A1/alignments.sorted.bam,/work_dir/example/work/hisat2/A2/alignments.sorted.bam /work_dir/example/work/hisat2/B1/alignments.sorted.bam,/work_dir/example/work/hisat2/B2/alignments.sorted.bam \
+# 				--sample A1,A2 B1,B2 \
+# 				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
+# 				--outdir /work_dir/example/out/diff-alignment/ \
+# 				--workdir /work_dir/example/work/diff-alignment/
 
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Test differential expression analysis based on alignment-free"
-echo "quantifications (DESeq2)"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py diff \
-				--quant_files /work_dir/example/work/salmon_smem/A1/quant.sf,/work_dir/example/work/salmon_smem/A2/quant.sf /work_dir/example/work/salmon_smem/B1/quant.sf,/work_dir/example/work/salmon_smem/B2/quant.sf \
-				--sample A1,A2 B1,B2 \
-				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
-				--outdir /work_dir/example/out/diff-quant \
-				--workdir /work_dir/example/work/diff-quant
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Test differential expression analysis based on alignment-free"
+# echo "quantifications (DESeq2)"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py diff \
+# 				--quant_files /work_dir/example/work/salmon_smem/A1/quant.sf,/work_dir/example/work/salmon_smem/A2/quant.sf /work_dir/example/work/salmon_smem/B1/quant.sf,/work_dir/example/work/salmon_smem/B2/quant.sf \
+# 				--sample A1,A2 B1,B2 \
+# 				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf \
+# 				--outdir /work_dir/example/out/diff-quant \
+# 				--workdir /work_dir/example/work/diff-quant
 
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Test de novo assembly (Oases)"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py denovo \
-				--1 /work_dir/A1_1.fq.gz \
-				--2 /work_dir/A1_2.fq.gz \
-				--outdir /work_dir/example/out \
-				--workdir /work_dir/example/work \
-				--threads 4 \
-				--sample A1 \
-				--file_format fastq.gz
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Test de novo assembly (Oases)"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py denovo \
+# 				--1 /work_dir/A1_1.fq.gz \
+# 				--2 /work_dir/A1_2.fq.gz \
+# 				--outdir /work_dir/example/out \
+# 				--workdir /work_dir/example/work \
+# 				--threads 4 \
+# 				--sample A1 \
+# 				--file_format fastq.gz
 
 
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Test short-read fusion detection (FusionCatcher)"
-echo "Note: downloading FusionCatcher necessary data may take 1-2 hours"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-mkdir fusioncatcher_data
-cd fusioncatcher_data
-wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.aa &
-wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.ab &
-wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.ac
-wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v90.tar.gz.ad 
-cat human_v90.tar.gz.* | tar xz
-rm -rf human_v90.tar.gz.a*
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Test short-read fusion detection (FusionCatcher)"
+# echo "Note: downloading FusionCatcher necessary data may take 1-2 hours"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# mkdir fusioncatcher_data
+# cd fusioncatcher_data
+# wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v95.tar.gz.aa
+# wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v95.tar.gz.ab
+# wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v95.tar.gz.ac
+# wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v95.tar.gz.ad 
+# wget https://sourceforge.net/projects/fusioncatcher/files/data/human_v95.tar.gz.ae 
+# cat human_v95.tar.gz.* | tar xz
+# rm -rf human_v95.tar.gz.a*
 
-wget http://sourceforge.net/projects/fusioncatcher/files/test/reads_1.fq.gz &
-wget http://sourceforge.net/projects/fusioncatcher/files/test/reads_2.fq.gz
-cd ..
+# wget http://sourceforge.net/projects/fusioncatcher/files/test/reads_1.fq.gz 
+# wget http://sourceforge.net/projects/fusioncatcher/files/test/reads_2.fq.gz
+# cd ..
 
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py fusion \
-				--data_dir /work_dir/example/fusioncatcher_data/human_v90/ \
-				--input /work_dir/example/fusioncatcher_data/reads_1.fq.gz,/work_dir/example/fusioncatcher_data/reads_2.fq.gz \
-				--outdir /work_dir/example/out \
-				--workdir /work_dir/example/work \
-				--threads 4 \
-				--sample D
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py fusion \
+# 				--data_dir /work_dir/example/fusioncatcher_data/human_v95/ \
+# 				--input /work_dir/example/fusioncatcher_data/reads_1.fq.gz,/work_dir/example/fusioncatcher_data/reads_2.fq.gz \
+# 				--outdir /work_dir/example/out \
+# 				--workdir /work_dir/example/work \
+# 				--threads 4 \
+# 				--sample D
 
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Test long-read error correction (LoRDEC)"
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py long_correct \
+docker run -u $UID -v=${PWD}/../:/work_dir/ marghoob/rnacocktail:0.2.2 run_rnacocktail.py long_correct \
 				--kmer 23 \
 				--solid 3 \
 				--short /work_dir/example/C_short.fa \
@@ -385,7 +386,7 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py
 				--knownsites /work_dir/example/variants_21.vcf \
 				--strand_pos /work_dir/example/GRCh38_strand_pos_.bed \
 				--genes_pos /work_dir/example/GRCh38_genes_pos_.bed \
-				--data_dir /work_dir/example/fusioncatcher_data/human_v90/ \
+				--data_dir /work_dir/example/fusioncatcher_data/human_v95/ \
 				--giremi_dir /usr/local/bin/ \
 				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-spark.jar \
 				--htslib_dir /opt/htslib-1.9/ \
@@ -413,7 +414,7 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py
 				--outdir /work_dir/example/out \
 				--workdir /work_dir/example/work \
 				--threads 10 \
-				--data_dir /work_dir/example/fusioncatcher_data/human_v90/ \
+				--data_dir /work_dir/example/fusioncatcher_data/human_v95/ \
 				--U /work_dir/example/C_short.fa \
 				--long /work_dir/example/C_long.fa \
 				--sample all_C \

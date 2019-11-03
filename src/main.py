@@ -147,7 +147,7 @@ def run_pipeline(args,parser):
             return os.EX_USAGE
         logger.info("Running long read error correction step using %s"%args.long_corrector)
         run_lr_correct(long_corrector=args.long_corrector, kmer=args.kmer,
-                      solid=args.kmer,long=args.long, short=args.short, 
+                      solid=args.solid,long=args.long, short=args.short, 
                       lordec=args.lordec, lordec_opts=args.lordec_opts,
                       start=args.start, sample= args.sample, nthreads=args.threads,
                       workdir=args.workdir, outdir=args.outdir, timeout=args.timeout)
@@ -587,7 +587,7 @@ def run_pipeline(args,parser):
                             logger.info("Running long read error correction step using %s for %s"%(args.long_corrector,replicate))
                             logger.info("******************************************************************************")
                             corrected[si][replicate]=run_lr_correct(long_corrector=args.long_corrector, kmer=args.kmer,
-                                          solid=args.kmer,long=input_lr[replicate], short="%s,%s"%(input_sr["1"][replicate],
+                                          solid=args.solid,long=input_lr[replicate], short="%s,%s"%(input_sr["1"][replicate],
                                           input_sr["2"][replicate]) if input_mode=="paired" else input_sr["U"][replicate], 
                                           lordec=args.lordec, lordec_opts=args.lordec_opts,
                                           start=0, sample= replicate, nthreads=args.threads,
