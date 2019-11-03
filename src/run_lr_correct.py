@@ -49,7 +49,8 @@ def run_lordec(kmer=23,
 
     if not os.path.exists("%s/tmp/"%work_lordec):
         os.mkdir("%s/tmp/"%work_lordec)
-        
+        os.system("chmod -R 755 %s/tmp/")
+
     msg = "LoRDEC for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
