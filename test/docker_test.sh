@@ -180,7 +180,7 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.2.3 run_rnacocktail.py
 				--outdir /work_dir/example/out \
 				--workdir /work_dir/example/work \
 				--sample C
-
+				
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 echo "Test long-read alignment (STARlong)"

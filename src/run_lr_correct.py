@@ -47,6 +47,9 @@ def run_lordec(kmer=23,
         lordec_opts += " -T %d"%nthreads 
 
 
+    if not os.path.exists("%s/tmp/"%work_lordec):
+        os.mkdir("%s/tmp/"%work_lordec)
+        
     msg = "LoRDEC for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
