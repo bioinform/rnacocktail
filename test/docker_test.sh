@@ -32,7 +32,7 @@ cd example
 # 				-w /work_dir/example/Homo_sapiens.GRCh38.cdna.21.fa
 
 # gunzip -c ../C_long.fa.gz > C_long.fa 
-# gunzip -c ../C_short.fa.gz > C_short.fa 
+gunzip -c ../C_short.fa.gz > C_short.fa 
 # gunzip -c ../GRCh38_genes_pos.bed.gz > GRCh38_genes_pos.bed 
 # gunzip -c ../GRCh38_strand_pos.bed.gz > GRCh38_strand_pos.bed 
 # gunzip -c ../GRCh38.21.gpd.gz > GRCh38.21.gpd 
