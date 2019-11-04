@@ -71,8 +71,8 @@ RUN rm -rf /opt/oases-${OASES_VERSION}/velvet/* && rm -rf /opt/oases-${OASES_VER
 RUN wget http://downloads.sourceforge.net/project/subread/subread-${SUBREAD_VERSION}/subread-${SUBREAD_VERSION}-Linux-x86_64.tar.gz -O /opt/subread-${SUBREAD_VERSION}-Linux-x86_64.tar.gz && cd /opt && tar -zxvf subread-${SUBREAD_VERSION}-Linux-x86_64.tar.gz  && cp -p /opt/subread-${SUBREAD_VERSION}-Linux-x86_64/bin/featureCounts /usr/local/bin && cd /opt && rm -rf subread*
 
 
-ADD https://gite.lirmm.fr/lordec/lordec-releases/uploads/710113d83c210b6989ccfbdbafa89234/lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2 /opt/lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2
-RUN cd /opt && tar xjf lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2 && cd lordec-bin_${LORDEC_VERSION}_linux64 && cp -p /opt/lordec-bin_${LORDEC_VERSION}_linux64/lordec* /usr/local/bin && chmod -R 777 /usr/local/bin/lordec* && cd /opt && rm -rf lordec*
+ADD https://gite.lirmm.fr/lordec/lordec-releases/uploads/800a96d81b3348e368a0ff3a260a88e1/lordec-src_${LORDEC_VERSION}.tar.bz2 /opt/lordec-src_${LORDEC_VERSION}.tar.bz2
+RUN cd /opt && tar xjf lordec-src_${LORDEC_VERSION}.tar.bz2 && cd lordec-src_${LORDEC_VERSION} && make clean all -j8 && cp -p /opt/lordec-src_${LORDEC_VERSION}/lordec* /usr/local/bin && cd /opt && rm -rf lordec*
 
 
 ADD https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz /opt/STAR_${STAR_VERSION}.tar.gz
@@ -148,7 +148,7 @@ ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
-RUN chown -R root /usr/local/bin/lordec* && chgrp -R root /usr/local/bin/lordec*
+ENV GATK_VERSION 4.1.4.0
 
 RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
 
