@@ -47,9 +47,9 @@ def run_lordec(kmer=23,
         lordec_opts += " -T %d"%nthreads 
 
 
-    # if not os.path.exists("%s/tmp/"%work_lordec):
-    #     os.system("mkdir -p %s/tmp/"%work_lordec)
-    #     os.system("chmod -R 777 %s/tmp/"%work_lordec)
+    if not os.path.exists("%s/tmp/"%work_lordec):
+        os.mkdir("%s/tmp/"%work_lordec)
+        os.chmod("%s/tmp/"%work_lordec, 777)
 
     msg = "LoRDEC for %s"%sample
     if start<=step:

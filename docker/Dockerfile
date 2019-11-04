@@ -145,6 +145,7 @@ RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4
 ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
+ENV GATK_VERSION 4.1.4.0
 
 RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
 
