@@ -150,8 +150,13 @@ ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
+ENV GATK_VERSION 4.1.4.0
+ENV GATK_VERSION 4.1.4.0
 
 RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
+
+RUN chown -R root /usr/local/bin/lordec* && chgrp -R root /usr/local/bin/lordec* 
+
 
 VOLUME /work_dir
 
