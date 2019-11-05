@@ -450,15 +450,13 @@ if __name__ == "__main__":
                                   , required=True)
         variant_parser.add_argument("--CleanSam", action="store_true",
                                   help="Use Picard's CleanSam command to clean the input alignment.")
-        variant_parser.add_argument("--IndelRealignment", action="store_true",
-                                  help="Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).")
         variant_parser.add_argument("--no_BaseRecalibrator", action="store_true",
                                   help="Don't run BaseRecalibrator step.")
         variant_parser.add_argument("--ref_genome", metavar="ref_genome",
                                   help="The reference genome FASTA file",  required=True)
         variant_parser.add_argument("--knownsites", metavar="knownsites",
                                   help="A database of known polymorphic sites (e.g. dbSNP). Used \
-                                  in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step \
+                                  in GATK BaseRecalibrator. NOTE: to run BaseRecalibrator step \
                                   knownsites should be provided.", default="")
         variant_parser.add_argument("--start", metavar="start", type=int,
                                   help="It re-starts executing the workflow/pipeline \
@@ -488,16 +486,6 @@ if __name__ == "__main__":
                                   (should be put between \" \") \
                                    (For GATK SplitNCigarReads check \
                                    https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
-        variant_parser.add_argument("--RealignerTargetCreator_opts", metavar="RealignerTargetCreator_opts",
-                                  help="Other options used for GATK RealignerTargetCreator command. \
-                                  (should be put between \" \") \
-                                   (For GATK RealignerTargetCreator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php).", default="")
-        variant_parser.add_argument("--IndelRealigner_opts", metavar="IndelRealigner_opts",
-                                  help="Other options used for GATK IndelRealigner command. \
-                                  (should be put between \" \") \
-                                   (For GATK IndelRealigner check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php).", default="")
         variant_parser.add_argument("--BaseRecalibrator_opts", metavar="BaseRecalibrator_opts",
                                   help="Other options used for GATK BaseRecalibrator command. \
                                   (should be put between \" \") \
@@ -651,7 +639,7 @@ if __name__ == "__main__":
                                   (Required for long-read transcriptome reconstruction).", default="")
         all_parser.add_argument("--knownsites", metavar="knownsites",
                                   help="A database of known polymorphic sites (e.g. dbSNP). Used \
-                                  in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step \
+                                  in GATK BaseRecalibrator. NOTE: to run BaseRecalibrator step \
                                   knownsites should be provided.", default="")
         all_parser.add_argument("--strand_pos", metavar="strand_pos",
                                   help="A BED file which specifies the strand of the genes/transcripts. \
@@ -740,8 +728,6 @@ if __name__ == "__main__":
                                   help="Path to the directory with GMAP index for the reference genome (used for IDP-fusion)")
         all_parser.add_argument("--CleanSam", action="store_true",
                                   help="Use Picard's CleanSam command to clean the input alignment.")
-        all_parser.add_argument("--IndelRealignment", action="store_true",
-                                  help="Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).")
         all_parser.add_argument("--no_BaseRecalibrator", action="store_true",
                                   help="Don't run BaseRecalibrator step.")
         all_parser.add_argument("--sr_aligner", metavar="sr_aligner",
@@ -871,16 +857,6 @@ if __name__ == "__main__":
                                   (should be put between \" \") \
                                    (For GATK SplitNCigarReads check \
                                    https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
-        all_parser.add_argument("--RealignerTargetCreator_opts", metavar="RealignerTargetCreator_opts",
-                                  help="Other options used for GATK RealignerTargetCreator command. \
-                                  (should be put between \" \") \
-                                   (For GATK RealignerTargetCreator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php).", default="")
-        all_parser.add_argument("--IndelRealigner_opts", metavar="IndelRealigner_opts",
-                                  help="Other options used for GATK IndelRealigner command. \
-                                  (should be put between \" \") \
-                                   (For GATK IndelRealigner check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php).", default="")
         all_parser.add_argument("--BaseRecalibrator_opts", metavar="BaseRecalibrator_opts",
                                   help="Other options used for GATK BaseRecalibrator command. \
                                   (should be put between \" \") \

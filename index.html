@@ -595,15 +595,15 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
  </code></p>
 
 
-	<h4>Example 14 (variant):</h4> Run of RNACocktail for RNA-Seq variant calling (GATK) with enabled IndelRealignment.
+	<h4>Example 14 (variant):</h4> Run of RNACocktail for RNA-Seq variant calling (GATK).
 
-	<p><code>run_rnacocktail.py variant --alignment  work/hisat2/A/alignments.sorted.bam --outdir out --workdir work --picard /path/to/picard.jar --gatk /path/to/GenomeAnalysisTK.jar --threads 10 --sample A --ref_genome genome.GRCh37.fa --IndelRealignment --knownsites dbsnp_138.b37.vcf
+	<p><code>run_rnacocktail.py variant --alignment  work/hisat2/A/alignments.sorted.bam --outdir out --workdir work --picard /path/to/picard.jar --gatk /path/to/gatk.jar --threads 10 --sample A --ref_genome genome.GRCh37.fa --knownsites dbsnp_138.b37.vcf
  </code></p>
 
 
 	<h4>Example 15 (editing):</h4> Run of RNACocktail for RNA editing detection (GIREMI)
 
-	<p><code>run_rnacocktail.py editing --alignment  work/gatk/A/bsqr.bam --variant work/gatk/A/variants_filtered.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --outdir out --workdir work --giremi_dir /path/to/giremi/directory/ --gatk /path/to/GenomeAnalysisTK.jar --samtools /path/to/samtools --htslib_dir /path/to/htslib/directory/ --threads 10 --sample A --ref_genome genome.GRCh37.fa --knownsites dbsnp_138.b37.vcf
+	<p><code>run_rnacocktail.py editing --alignment  work/gatk/A/bsqr.bam --variant work/gatk/A/variants_filtered.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --outdir out --workdir work --giremi_dir /path/to/giremi/directory/ --gatk /path/to/gatk.jar --samtools /path/to/samtools --htslib_dir /path/to/htslib/directory/ --threads 10 --sample A --ref_genome genome.GRCh37.fa --knownsites dbsnp_138.b37.vcf
  </code></p>
 
 
@@ -613,11 +613,11 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
  </code></p>
 
 	<h4>Example 17 (all):</h4> Run all pipeline steps (Short-read example)
-	<p><code>run_rnacocktail.py all --outdir out --workdir work --threads 10 --1 A1_1.fq.gz,A2_1.fq.gz B1_1.fq.gz,B2_1.fq.gz --2 A1_2.fq.gz,A2_2.fq.gz B1_2.fq.gz,B2_2.fq.gz --sample all_A1,all_A2 all_B1,all_B2  --ref_gtf genes.GRCh37.gtf --ref_genome  genome.GRCh37.fa --align_idx hisat2-idx  --quantifier_idx salmon_fmd_idx --unzip --file_format fastq.gz --IndelRealignment --CleanSam --knownsites dbsnp_138.b37.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --giremi_dir /path/to/giremi/directory/ --gatk /path/to/GenomeAnalysisTK.jar --htslib_dir /path/to/htslib/directory/ --picard /path/to/picard.jar --samtools /path/to/samtools --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py --stringtie /path/to/stringtie --salmon /path/to/salmon --featureCounts /path/to/featureCounts --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --lordec /path/to/lordec-correct --sam2psl /path/to/sam2psl.py --fusioncatcher /path/to/fusioncatcher
+	<p><code>run_rnacocktail.py all --outdir out --workdir work --threads 10 --1 A1_1.fq.gz,A2_1.fq.gz B1_1.fq.gz,B2_1.fq.gz --2 A1_2.fq.gz,A2_2.fq.gz B1_2.fq.gz,B2_2.fq.gz --sample all_A1,all_A2 all_B1,all_B2  --ref_gtf genes.GRCh37.gtf --ref_genome  genome.GRCh37.fa --align_idx hisat2-idx  --quantifier_idx salmon_fmd_idx --unzip --file_format fastq.gz --CleanSam --knownsites dbsnp_138.b37.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --giremi_dir /path/to/giremi/directory/ --gatk /path/to/gatk.jar --htslib_dir /path/to/htslib/directory/ --picard /path/to/picard.jar --samtools /path/to/samtools --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py --stringtie /path/to/stringtie --salmon /path/to/salmon --featureCounts /path/to/featureCounts --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --lordec /path/to/lordec-correct --sam2psl /path/to/sam2psl.py --fusioncatcher /path/to/fusioncatcher
  </code></p>
 
 	<h4>Example 18 (all):</h4> Run all pipeline steps (long-read example)
-	<p><code>run_rnacocktail.py all --outdir out --workdir work --threads 10 --U seq_short.fa --long seq_long.fa --sample all_C  --ref_gtf genes.GRCh37.gtf --ref_genome  genome.GRCh37.fa --align_idx hisat2-idx  --quantifier_idx salmon_fmd_idx --unzip --file_format fasta --IndelRealignment --CleanSam --knownsites dbsnp_138.b37.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --giremi_dir /path/to/giremi/directory/ --gatk /path/to/GenomeAnalysisTK.jar --htslib_dir /path/to/htslib/directory/ --star_genome_dir /path/to/STAR/genome_idx/ --genome_bowtie2_idx genome.bt2_idx --transcriptome_bowtie2_idx genes.bt2_idx --uniqueness_bedgraph uniqueness.bedGraph --gmap_idx gmap_idx --ref_all_gpd hg19.all.refSeq_gencode_ensemble_EST_known.gpd --ref_gpd genes.GRCh37.refFlat.txt --read_length 100 --picard /path/to/picard.jar --hisat2_opts \"-f\" --idp /path/to/idp/runIDP.py --idpfusion /path/to/idpfusion/runIDP.py --samtools /path/to/samtools --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py --stringtie /path/to/stringtie --salmon /path/to/salmon --featureCounts /path/to/featureCounts --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --lordec /path/to/lordec-correct --sam2psl /path/to/sam2psl.py --fusioncatcher /path/to/fusioncatcher 
+	<p><code>run_rnacocktail.py all --outdir out --workdir work --threads 10 --U seq_short.fa --long seq_long.fa --sample all_C  --ref_gtf genes.GRCh37.gtf --ref_genome  genome.GRCh37.fa --align_idx hisat2-idx  --quantifier_idx salmon_fmd_idx --unzip --file_format fasta --CleanSam --knownsites dbsnp_138.b37.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --giremi_dir /path/to/giremi/directory/ --gatk /path/to/gatk.jar --htslib_dir /path/to/htslib/directory/ --star_genome_dir /path/to/STAR/genome_idx/ --genome_bowtie2_idx genome.bt2_idx --transcriptome_bowtie2_idx genes.bt2_idx --uniqueness_bedgraph uniqueness.bedGraph --gmap_idx gmap_idx --ref_all_gpd hg19.all.refSeq_gencode_ensemble_EST_known.gpd --ref_gpd genes.GRCh37.refFlat.txt --read_length 100 --picard /path/to/picard.jar --hisat2_opts \"-f\" --idp /path/to/idp/runIDP.py --idpfusion /path/to/idpfusion/runIDP.py --samtools /path/to/samtools --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py --stringtie /path/to/stringtie --salmon /path/to/salmon --featureCounts /path/to/featureCounts --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --lordec /path/to/lordec-correct --sam2psl /path/to/sam2psl.py --fusioncatcher /path/to/fusioncatcher 
  </code></p>
 
 
@@ -1182,10 +1182,6 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 			<td>Use Picard's CleanSam command to clean the input alignment.</td>
 		  </tr>
 		  <tr>
-			<td><code>--IndelRealignment</code></td>
-			<td>Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).</td>
-		  </tr>
-		  <tr>
 			<td><code>--no_BaseRecalibrator</code></td>
 			<td>Don't run BaseRecalibrator step.</td>
 		  </tr>
@@ -1195,7 +1191,7 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--knownsites</code></td>
-			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
+			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
 		  </tr>
 		  <tr>
 			<td><code>--picard</code></td>
@@ -1224,14 +1220,6 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  <tr>
 			<td><code>--SplitNCigarReads_opts</code></td>
 			<td>Other options used for GATK SplitNCigarReads command. (should be put between " ")  (For GATK SplitNCigarReads check  <a href="https://software.broadinstitute.org/gatk/gatkdocs org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php">here</a>) (default: "-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS")  </td>
-		  </tr>
-		  <tr>
-			<td><code>--RealignerTargetCreator_opts</code></td>
-			<td>Other options used for GATK RealignerTargetCreator command. (should be put between " ")  (For GATK RealignerTargetCreator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php">here</a>). </td>
-		  </tr>
-		  <tr>
-			<td><code>--IndelRealigner_opts</code></td>
-			<td>Other options used for GATK IndelRealigner command. (should be put between " ")  (For GATK IndelRealigner check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php">here</a>).</td>
 		  </tr>
 		  <tr>
 			<td><code>--BaseRecalibrator_opts</code></td>
@@ -1509,10 +1497,6 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 			<td>Use Picard's CleanSam command to clean the input alignment.</td>
 		  </tr>
 		  <tr>
-			<td><code>--IndelRealignment</code></td>
-			<td>Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).</td>
-		  </tr>
-		  <tr>
 			<td><code>--no_BaseRecalibrator</code></td>
 			<td>Don't run BaseRecalibrator step.</td>
 		  </tr>
@@ -1546,7 +1530,7 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--knownsites</code></td>
-			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
+			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
 		  </tr>
 		  <tr>
 			<td><code>--strand_pos STRING</code></td>
@@ -1712,14 +1696,6 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  <tr>
 			<td><code>--SplitNCigarReads_opts</code></td>
 			<td>Other options used for GATK SplitNCigarReads command. (should be put between " ")  (For GATK SplitNCigarReads check  <a href="https://software.broadinstitute.org/gatk/gatkdocs org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php">here</a>) (default: "-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS")  </td>
-		  </tr>
-		  <tr>
-			<td><code>--RealignerTargetCreator_opts</code></td>
-			<td>Other options used for GATK RealignerTargetCreator command. (should be put between " ")  (For GATK RealignerTargetCreator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php">here</a>). </td>
-		  </tr>
-		  <tr>
-			<td><code>--IndelRealigner_opts</code></td>
-			<td>Other options used for GATK IndelRealigner command. (should be put between " ")  (For GATK IndelRealigner check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php">here</a>).</td>
 		  </tr>
 		  <tr>
 			<td><code>--BaseRecalibrator_opts</code></td>

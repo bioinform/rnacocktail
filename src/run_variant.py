@@ -13,10 +13,10 @@ logger.addHandler(consoleHandler)
 def run_gatk(alignment="", ref_genome="", knownsites="",
                   picard=PICARD, gatk=GATK,                  
                   java=JAVA, java_opts="",
-                  CleanSam=False, IndelRealignment=False, no_BaseRecalibrator=False ,               
+                  CleanSam=False, no_BaseRecalibrator=False ,               
                   AddOrReplaceReadGroups_opts="",  MarkDuplicates_opts="",
-                  SplitNCigarReads_opts="",  RealignerTargetCreator_opts="",
-                  IndelRealigner_opts="",  BaseRecalibrator_opts="",
+                  SplitNCigarReads_opts="",
+                  BaseRecalibrator_opts="",
                   PrintReads_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1,
@@ -69,10 +69,6 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         if not os.path.exists(knownsites):
             logger.error("Aborting!")
             raise Exception("No VCF knownsites file %s"%knownsites)
-        if "--known " not in RealignerTargetCreator_opts:
-            RealignerTargetCreator_opts += " --known %s"%knownsites
-        if "-known " not in IndelRealigner_opts and "--knownAlleles " not in IndelRealigner_opts:
-            IndelRealigner_opts += " -known %s"%knownsites
         if "-knownSites " not in BaseRecalibrator_opts:
             BaseRecalibrator_opts += " -knownSites %s"%knownsites
 
@@ -151,7 +147,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "GATK SplitNCigarReads for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s SplitNCigarReads -R %s -I %s/dedupped.bam -o %s/split.bam %s" % (
+        command="%s %s -jar %s SplitNCigarReads -R %s -I %s/dedupped.bam -O %s/split.bam %s" % (
             java, java_opts, gatk, ref_genome,work_gatk,work_gatk,SplitNCigarReads_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -161,40 +157,6 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     step+=1
 
     split_bam="%s/split.bam"%work_gatk
-    if IndelRealignment:
-        msg = "GATK RealignerTargetCreator for %s"%sample
-        if start<=step:
-            logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s RealignerTargetCreator -R %s -I %s/split.bam -o %s/forIndelRealigner.intervals %s" % (
-                java, java_opts, gatk, ref_genome,work_gatk,work_gatk,RealignerTargetCreator_opts)
-            command="bash -c \"%s\""%command      
-            cmd = TimedExternalCmd(command, logger, raise_exception=True)
-            retcode = cmd.run(cmd_log_fd_out=gatk_log_fd, cmd_log=gatk_log, msg=msg, timeout=timeout)   
-        else:
-            logger.info("Skipping step %d: %s"%(step,msg))
-        step+=1
-        
-        msg = "GATK IndelRealigner for %s"%sample
-        if start<=step:
-            logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s IndelRealigner -R %s -I %s/split.bam -targetIntervals %s/forIndelRealigner.intervals -o %s/split_realigned.bam %s" % (
-                java, java_opts, gatk, ref_genome,work_gatk,work_gatk,work_gatk,IndelRealigner_opts)
-            command="bash -c \"%s\""%command      
-            cmd = TimedExternalCmd(command, logger, raise_exception=True)
-            retcode = cmd.run(cmd_log_fd_out=gatk_log_fd, cmd_log=gatk_log, msg=msg, timeout=timeout)   
-        else:
-            logger.info("Skipping step %d: %s"%(step,msg))
-        step+=1
-        split_bam="%s/split_realigned.bam"%work_gatk
-    else:
-        msg = "GATK RealignerTargetCreator for %s"%sample
-        logger.info("Skipping step %d: %s"%(step,msg))
-        step+=1
-        msg = "GATK IndelRealigner for %s"%sample
-        logger.info("Skipping step %d: %s"%(step,msg))
-        step+=1
-        
-
 
     if not no_BaseRecalibrator:
         msg = "GATK BaseRecalibrator for %s"%sample
@@ -281,10 +243,10 @@ def run_variant(variant_caller="GATK", alignment="",
                   ref_genome="", knownsites="",
                   picard=PICARD, gatk=GATK,                  
                   java=JAVA, java_opts="",
-                  CleanSam=False, IndelRealignment=False, no_BaseRecalibrator=False,                  
+                  CleanSam=False, no_BaseRecalibrator=False,                  
                   AddOrReplaceReadGroups_opts="",  MarkDuplicates_opts="",
-                  SplitNCigarReads_opts="",  RealignerTargetCreator_opts="",
-                  IndelRealigner_opts="",  BaseRecalibrator_opts="",
+                  SplitNCigarReads_opts="",
+                  BaseRecalibrator_opts="",
                   PrintReads_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1, 
@@ -296,13 +258,11 @@ def run_variant(variant_caller="GATK", alignment="",
                   ref_genome=ref_genome, knownsites=knownsites,
                   picard=picard, gatk=gatk,                  
                   java=java, java_opts=java_opts,
-                  CleanSam=CleanSam, IndelRealignment=IndelRealignment, 
+                  CleanSam=CleanSam,
                   no_BaseRecalibrator=no_BaseRecalibrator,                 
                   AddOrReplaceReadGroups_opts=AddOrReplaceReadGroups_opts,  
                   MarkDuplicates_opts=MarkDuplicates_opts,
                   SplitNCigarReads_opts=SplitNCigarReads_opts,  
-                  RealignerTargetCreator_opts=RealignerTargetCreator_opts,
-                  IndelRealigner_opts=IndelRealigner_opts,  
                   BaseRecalibrator_opts=BaseRecalibrator_opts,
                   PrintReads_opts=PrintReads_opts,  HaplotypeCaller_opts=HaplotypeCaller_opts,
                   VariantFiltration_opts=VariantFiltration_opts,  
