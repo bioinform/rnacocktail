@@ -173,9 +173,9 @@ echo "Test long-read error correction (LoRDEC)"
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
 
-mkdir example/tmp
-chmod -R 777 example/tmp
-docker run -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py long_correct \
+mkdir tmp
+chmod -R 777 tmp
+docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py long_correct \
 				--kmer 23 \
 				--solid 3 \
 				--short /work_dir/example/C_short.fa \
