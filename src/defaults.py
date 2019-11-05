@@ -32,8 +32,7 @@ STARLONG_DEFAULTS = {"outSAMattributes": "NH HI NM MD", "readNameSeparator": "sp
                      "alignTranscriptsPerWindowNmax": "10000"}
 
 
-GATK_SN_RF = "ReassignOneMappingQuality"
-GATK_SN_OPT = (("-RF %s " % GATK_SN_RF) if GATK_SN_RF else "") 
+GATK_SN_OPT = "" 
 
 GATK_HC_STANDCALLCONF = 20.0
 GATK_HC_STANDEMITCONF = 20.0

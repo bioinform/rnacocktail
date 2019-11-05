@@ -77,7 +77,7 @@ ADD https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz /opt/STAR_$
 RUN cd /opt && tar -zxvf STAR_${STAR_VERSION}.tar.gz && cp -p /opt/STAR-${STAR_VERSION}/bin/Linux_x86_64_static/* /usr/local/bin && cd /opt && rm -rf STAR*
 
 ADD https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar /opt/picard.jar
-RUN cd /opt && cp -p picard.jar /usr/local/bin && cd /opt && rm -rf picard*
+RUN cd /opt && cp -p picard.jar /usr/local/bin && chmod 755 /usr/local/bin/picard.jar && cd /opt && rm -rf picard*
 
 ADD https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 /opt/htslib-${HTSLIB_VERSION}.tar.bz2
 RUN cd /opt && tar xjf htslib-${HTSLIB_VERSION}.tar.bz2 && cd htslib-${HTSLIB_VERSION} && ./configure && make && rm -rf /opt/htslib-${HTSLIB_VERSION}.tar.bz2
@@ -138,12 +138,9 @@ RUN cd /opt/ && git clone https://github.com/bioinform/IDP.git && cd IDP && git 
 ADD http://augroup.org/IDP-fusion/files/IDP-fusion_${IDPFUSION_VERSION}.tar.gz /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/IDP-fusion_${IDPFUSION_VERSION}.tar.gz
 
-RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip
+RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip && chmod -R 755 /opt/gatk-4.1.4.0
 
 RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
-
-RUN chmod 755 /usr/local/bin/picard.jar
-RUN chmod 755 /opt/gatk-4.1.4.0
 
 VOLUME /work_dir
 

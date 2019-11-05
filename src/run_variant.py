@@ -65,10 +65,6 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     if "VALIDATION_STRINGENCY=" not in MarkDuplicates_opts:
         MarkDuplicates_opts += " VALIDATION_STRINGENCY=SILENT"
 
-
-    if "-RF " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -RF %s" % GATK_SN_RF
-    
     if knownsites:    
         if not os.path.exists(knownsites):
             logger.error("Aborting!")
