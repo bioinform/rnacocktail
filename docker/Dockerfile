@@ -70,10 +70,8 @@ RUN rm -rf /opt/oases-${OASES_VERSION}/velvet/* && rm -rf /opt/oases-${OASES_VER
 
 RUN wget http://downloads.sourceforge.net/project/subread/subread-${SUBREAD_VERSION}/subread-${SUBREAD_VERSION}-Linux-x86_64.tar.gz -O /opt/subread-${SUBREAD_VERSION}-Linux-x86_64.tar.gz && cd /opt && tar -zxvf subread-${SUBREAD_VERSION}-Linux-x86_64.tar.gz  && cp -p /opt/subread-${SUBREAD_VERSION}-Linux-x86_64/bin/featureCounts /usr/local/bin && cd /opt && rm -rf subread*
 
-
 ADD https://gite.lirmm.fr/lordec/lordec-releases/uploads/710113d83c210b6989ccfbdbafa89234/lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2 /opt/lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2
-RUN cd /opt && tar xjf lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2 && cd lordec-bin_${LORDEC_VERSION}_linux64 && cp -p /opt/lordec-bin_${LORDEC_VERSION}_linux64/lordec* /usr/local/bin && chmod -R 777 /usr/local/bin/lordec* && cd /opt && rm -rf lordec*
-
+RUN cd /opt && tar xjf lordec-bin_${LORDEC_VERSION}_linux64.tar.bz2 && cd lordec-bin_${LORDEC_VERSION}_linux64 && cp -p /opt/lordec-bin_${LORDEC_VERSION}_linux64/lordec* /usr/local/bin && chmod -R 777 /usr/local/bin/lordec* && chown -R root /usr/local/bin/lordec* && chgrp -R root /usr/local/bin/lordec* && cd /opt && rm -rf lordec*
 
 ADD https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz /opt/STAR_${STAR_VERSION}.tar.gz
 RUN cd /opt && tar -zxvf STAR_${STAR_VERSION}.tar.gz && cp -p /opt/STAR-${STAR_VERSION}/bin/Linux_x86_64_static/* /usr/local/bin && cd /opt && rm -rf STAR*
@@ -142,23 +140,10 @@ RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/I
 
 RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip
 
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-
 RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
 
-RUN chown -R root /usr/local/bin/lordec* && chgrp -R root /usr/local/bin/lordec* 
-
+RUN chmod 755 /usr/local/bin/picard.jar
+RUN chmod 755 /opt/gatk-4.1.4.0
 
 VOLUME /work_dir
 

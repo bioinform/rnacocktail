@@ -66,14 +66,8 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         MarkDuplicates_opts += " VALIDATION_STRINGENCY=SILENT"
 
 
-    if "-rf " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -rf %s" % GATK_SN_RF
-    if "-RMQF " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -RMQF %d" % GATK_SN_RMQF
-    if "-RMQT " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -RMQT %d" % GATK_SN_RMQT
-    if "-U " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -U ALLOW_N_CIGAR_READS"
+    if "-RF " not in SplitNCigarReads_opts:
+        SplitNCigarReads_opts += " -RF %s" % GATK_SN_RF
     
     if knownsites:    
         if not os.path.exists(knownsites):
@@ -161,7 +155,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "GATK SplitNCigarReads for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T SplitNCigarReads -R %s -I %s/dedupped.bam -o %s/split.bam %s" % (
+        command="%s %s -jar %s SplitNCigarReads -R %s -I %s/dedupped.bam -o %s/split.bam %s" % (
             java, java_opts, gatk, ref_genome,work_gatk,work_gatk,SplitNCigarReads_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -175,7 +169,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         msg = "GATK RealignerTargetCreator for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s -T RealignerTargetCreator -R %s -I %s/split.bam -o %s/forIndelRealigner.intervals %s" % (
+            command="%s %s -jar %s RealignerTargetCreator -R %s -I %s/split.bam -o %s/forIndelRealigner.intervals %s" % (
                 java, java_opts, gatk, ref_genome,work_gatk,work_gatk,RealignerTargetCreator_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -187,7 +181,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         msg = "GATK IndelRealigner for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s -T IndelRealigner -R %s -I %s/split.bam -targetIntervals %s/forIndelRealigner.intervals -o %s/split_realigned.bam %s" % (
+            command="%s %s -jar %s IndelRealigner -R %s -I %s/split.bam -targetIntervals %s/forIndelRealigner.intervals -o %s/split_realigned.bam %s" % (
                 java, java_opts, gatk, ref_genome,work_gatk,work_gatk,work_gatk,IndelRealigner_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -210,7 +204,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         msg = "GATK BaseRecalibrator for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s -T BaseRecalibrator -R %s -I %s  -o %s/recal_data.table %s" % (
+            command="%s %s -jar %s BaseRecalibrator -R %s -I %s  -o %s/recal_data.table %s" % (
                 java, java_opts, gatk, ref_genome,split_bam,work_gatk,BaseRecalibrator_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -222,7 +216,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         msg = "GATK PrintReads for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s -T PrintReads -R %s -I %s -BQSR %s/recal_data.table -o %s/bsqr.bam %s" % (
+            command="%s %s -jar %s PrintReads -R %s -I %s -BQSR %s/recal_data.table -o %s/bsqr.bam %s" % (
                 java, java_opts, gatk, ref_genome,split_bam,work_gatk,work_gatk,PrintReads_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -242,7 +236,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "GATK HaplotypeCaller for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T HaplotypeCaller -R %s -I %s -o %s/variants.vcf %s" % (
+        command="%s %s -jar %s HaplotypeCaller -R %s -I %s -o %s/variants.vcf %s" % (
             java, java_opts, gatk, ref_genome,split_bam,work_gatk,HaplotypeCaller_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -254,7 +248,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "GATK VariantFiltration for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T VariantFiltration -R %s -V %s/variants.vcf -o %s/variants_filtered.vcf %s" % (
+        command="%s %s -jar %s VariantFiltration -R %s -V %s/variants.vcf -o %s/variants_filtered.vcf %s" % (
             java, java_opts, gatk, ref_genome,work_gatk,work_gatk,VariantFiltration_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)

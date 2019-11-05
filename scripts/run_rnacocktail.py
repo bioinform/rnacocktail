@@ -487,7 +487,7 @@ if __name__ == "__main__":
                                   help="Other options used for GATK SplitNCigarReads command. \
                                   (should be put between \" \") \
                                    (For GATK SplitNCigarReads check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
         variant_parser.add_argument("--RealignerTargetCreator_opts", metavar="RealignerTargetCreator_opts",
                                   help="Other options used for GATK RealignerTargetCreator command. \
                                   (should be put between \" \") \
