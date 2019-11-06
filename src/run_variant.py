@@ -69,8 +69,8 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         if not os.path.exists(knownsites):
             logger.error("Aborting!")
             raise Exception("No VCF knownsites file %s"%knownsites)
-        if "-knownSites " not in BaseRecalibrator_opts:
-            BaseRecalibrator_opts += " -knownSites %s"%knownsites
+        if "--known-sites " not in BaseRecalibrator_opts:
+            BaseRecalibrator_opts += " --known-sites %s"%knownsites
 
 
 
