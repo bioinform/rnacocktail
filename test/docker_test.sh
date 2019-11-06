@@ -295,10 +295,11 @@ cd example
 # wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa
 # echo "Download dbsnp files"
 # wget ftp://ftp.ncbi.nih.gov/snp/organisms/human_9606/VCF/All_20180418.vcf.gz
-# wget ftp://ftp.ncbi.nih.gov/snp/organisms/human_9606/VCF/All_20180418.vcf.gz.tbi
 # gunzip All_20180418.vcf.gz
  # awk '{if($0 !~ /^#/) print "chr"$0; else print $0}' All_20180418.vcf |sed  "s/chrMT/chrM/g" > All_20180418_chr.vcf
  # mv All_20180418_chr.vcf All_20180418.vcf
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 bgzip /work_dir/example/All_20180418.vcf
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 tabix /work_dir/example/All_20180418.vcf.gz
 # echo "Index reference genome FASTA file"
 # docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 samtools faidx /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa
 # docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 java -jar /usr/local/bin/picard.jar CreateSequenceDictionary \
@@ -327,8 +328,9 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py v
 				--workdir /work_dir/example/work \
 				--picard /usr/local/bin/picard.jar \
 				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
-				--threads 10 \
+				--threads 1 \
 				--sample E \
+				--start 7 \
 				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
 				--CleanSam \
 				--knownsites /work_dir/example/All_20180418.vcf.gz \
@@ -347,7 +349,7 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py e
 				--outdir /work_dir/example/out \
 				--workdir /work_dir/example/work \
 				--giremi_dir /usr/local/bin/ \
-				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-spark.jar \
+				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
 				--htslib_dir /opt/htslib-1.9/ \
 				--threads 1 \
 				--sample E \
@@ -362,7 +364,7 @@ echo "reconstruction, quantification, differential expression,"
 echo "denovo assembly, variant calling, and fusion detection."
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"
-cat <(less All_20180418.vcf |head -10000|grep "#") <(less All_20180418.vcf |awk '{if ($1=="chr21") print}') |sed "s/chr//g" > variants_21.vcf
+cat <(zcat All_20180418.vcf.gz |head -10000|grep "#") <(zcat All_20180418.vcf.gz |awk '{if ($1=="chr21") print}') |sed "s/chr//g" > variants_21.vcf
 cat GRCh38_genes_pos.bed |sed "s/chrM/MT/g"|sed "s/chr//g" > GRCh38_genes_pos_.bed
 cat GRCh38_strand_pos.bed |sed "s/chrM/MT/g"|sed "s/chr//g" > GRCh38_strand_pos_.bed
 docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 samtools faidx /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa

@@ -36,9 +36,8 @@ GATK_SN_OPT = ""
 
 GATK_HC_STANDCALLCONF = 20.0
 GATK_HC_STANDEMITCONF = 20.0
-GATK_HC_OPT = (("-stand_call_conf %f " % GATK_HC_STANDCALLCONF) if GATK_HC_STANDCALLCONF else "") + \
-              (("-stand_emit_conf %f " % GATK_HC_STANDEMITCONF) if GATK_HC_STANDEMITCONF else "") + \
-              "-dontUseSoftClippedBases "
+GATK_HC_OPT = (("-stand-call-conf %f " % GATK_HC_STANDCALLCONF) if GATK_HC_STANDCALLCONF else "") + \
+              "--dont-use-soft-clipped-bases "
 
 GATK_VF_WINDOW = 35
 GATK_VF_CLUSTER = 3

@@ -17,7 +17,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
                   AddOrReplaceReadGroups_opts="",  MarkDuplicates_opts="",
                   SplitNCigarReads_opts="",
                   BaseRecalibrator_opts="",
-                  PrintReads_opts="",  HaplotypeCaller_opts="",
+                  ApplyBQSR_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1,
                   workdir=None, outdir=None, timeout=TIMEOUT):
@@ -74,12 +74,10 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
 
 
 
-    if "-dontUseSoftClippedBases " not in HaplotypeCaller_opts:
-        HaplotypeCaller_opts += " -dontUseSoftClippedBases"
-    if "-stand_call_conf " not in HaplotypeCaller_opts:
-        HaplotypeCaller_opts += " -stand_call_conf %f"%GATK_HC_STANDCALLCONF
-    if "-stand_emit_conf " not in HaplotypeCaller_opts:
-        HaplotypeCaller_opts += " -stand_emit_conf %f"%GATK_HC_STANDEMITCONF
+    if "--dont-use-soft-clipped-bases " not in HaplotypeCaller_opts:
+        HaplotypeCaller_opts += " --dont-use-soft-clipped-bases"
+    if "-stand-call-conf " not in HaplotypeCaller_opts:
+        HaplotypeCaller_opts += " -stand-call-conf %f"%GATK_HC_STANDCALLCONF
 
     if "-window " not in VariantFiltration_opts:
         VariantFiltration_opts += " -window %d"%GATK_VF_WINDOW
@@ -165,11 +163,11 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
             logger.info("Skipping step %d: %s"%(step,msg))
         step+=1
 
-        msg = "GATK PrintReads for %s"%sample
+        msg = "GATK ApplyBQSR for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s PrintReads -R %s -I %s -BQSR %s/recal_data.table -O %s/bsqr.bam %s" % (
-                java, java_opts, gatk, ref_genome,split_bam,work_gatk,work_gatk,PrintReads_opts)
+            command="%s %s -jar %s ApplyBQSR -R %s -I %s -bqsr %s/recal_data.table -O %s/bsqr.bam %s" % (
+                java, java_opts, gatk, ref_genome,split_bam,work_gatk,work_gatk,ApplyBQSR_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=gatk_log_fd, cmd_log=gatk_log, msg=msg, timeout=timeout)   
@@ -181,7 +179,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         msg = "GATK BaseRecalibrator for %s"%sample
         logger.info("Skipping step %d: %s"%(step,msg))
         step+=1
-        msg = "GATK PrintReads for %s"%sample
+        msg = "GATK ApplyBQSR for %s"%sample
         logger.info("Skipping step %d: %s"%(step,msg))
         step+=1
 
@@ -241,7 +239,7 @@ def run_variant(variant_caller="GATK", alignment="",
                   AddOrReplaceReadGroups_opts="",  MarkDuplicates_opts="",
                   SplitNCigarReads_opts="",
                   BaseRecalibrator_opts="",
-                  PrintReads_opts="",  HaplotypeCaller_opts="",
+                  ApplyBQSR_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1, 
                   workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
@@ -258,7 +256,7 @@ def run_variant(variant_caller="GATK", alignment="",
                   MarkDuplicates_opts=MarkDuplicates_opts,
                   SplitNCigarReads_opts=SplitNCigarReads_opts,  
                   BaseRecalibrator_opts=BaseRecalibrator_opts,
-                  PrintReads_opts=PrintReads_opts,  HaplotypeCaller_opts=HaplotypeCaller_opts,
+                  ApplyBQSR_opts=ApplyBQSR_opts,  HaplotypeCaller_opts=HaplotypeCaller_opts,
                   VariantFiltration_opts=VariantFiltration_opts,  
                   start=start, sample= sample, nthreads=nthreads, 
                   workdir=workdir, outdir=outdir, timeout=timeout)

@@ -490,22 +490,22 @@ if __name__ == "__main__":
                                   help="Other options used for GATK BaseRecalibrator command. \
                                   (should be put between \" \") \
                                    (For GATK BaseRecalibrator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
-        variant_parser.add_argument("--PrintReads_opts", metavar="PrintReads_opts",
-                                  help="Other options used for GATK PrintReads command. \
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
+        variant_parser.add_argument("--ApplyBQSR_opts", metavar="ApplyBQSR_opts",
+                                  help="Other options used for GATK ApplyBQSR command. \
                                   (should be put between \" \") \
-                                   (For GATK PrintReads check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php).", default="")
+                                   (For GATK ApplyBQSR check \
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_ApplyBQSR.php).", default="")
         variant_parser.add_argument("--HaplotypeCaller_opts", metavar="HaplotypeCaller_opts",
                                   help="Other options used for GATK HaplotypeCaller command. \
                                   (should be put between \" \") \
                                    (For GATK HaplotypeCaller check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
         variant_parser.add_argument("--VariantFiltration_opts", metavar="VariantFiltration_opts",
                                   help="Other options used for GATK VariantFiltration command. \
                                   (should be put between \" \") \
                                    (For GATK VariantFiltration check \
-                                   https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
     elif mode == "editing":
         edit_parser = parser.add_argument_group("RNA Editing prediction options")
         edit_parser.add_argument("--editing_caller", metavar="editing_caller",
@@ -856,27 +856,27 @@ if __name__ == "__main__":
                                   help="Other options used for GATK SplitNCigarReads command. \
                                   (should be put between \" \") \
                                    (For GATK SplitNCigarReads check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
         all_parser.add_argument("--BaseRecalibrator_opts", metavar="BaseRecalibrator_opts",
                                   help="Other options used for GATK BaseRecalibrator command. \
                                   (should be put between \" \") \
                                    (For GATK BaseRecalibrator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
-        all_parser.add_argument("--PrintReads_opts", metavar="PrintReads_opts",
-                                  help="Other options used for GATK PrintReads command. \
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
+        all_parser.add_argument("--ApplyBQSR_opts", metavar="ApplyBQSR_opts",
+                                  help="Other options used for GATK ApplyBQSR command. \
                                   (should be put between \" \") \
-                                   (For GATK PrintReads check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php).", default="")
+                                   (For GATK ApplyBQSR check \
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_ApplyBQSR.php).", default="")
         all_parser.add_argument("--HaplotypeCaller_opts", metavar="HaplotypeCaller_opts",
                                   help="Other options used for GATK HaplotypeCaller command. \
                                   (should be put between \" \") \
                                    (For GATK HaplotypeCaller check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
         all_parser.add_argument("--VariantFiltration_opts", metavar="VariantFiltration_opts",
                                   help="Other options used for GATK VariantFiltration command. \
                                   (should be put between \" \") \
                                    (For GATK VariantFiltration check \
-                                   https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
         all_parser.add_argument("--giremi_dir", help="Path to giremi directory that include  \
                                   giremi executable and giremi.r R script. \
                                   (required for RNA editing detection.)", default="")
