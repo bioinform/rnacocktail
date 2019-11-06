@@ -90,12 +90,6 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     if "-filterName QD " not in VariantFiltration_opts:
         VariantFiltration_opts += " -filterName QD -filter 'QD < %f'"%GATK_VF_QDMAX
 
-    if nthreads>1:
-        if "-nct " not in BaseRecalibrator_opts:
-            BaseRecalibrator_opts += " -nct %d"%nthreads 
-        if "-nct " not in PrintReads_opts:
-            PrintReads_opts += " -nct %d"%nthreads 
-
     if "-Xms" not in java_opts:
         java_opts += " %s"%JAVA_XMS
     if "-Xmx" not in java_opts:

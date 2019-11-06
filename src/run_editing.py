@@ -230,7 +230,7 @@ def run_giremi(alignment="", variant="",
     msg = "GATK VariantAnnotator for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T VariantAnnotator -R %s -V %s -L %s -o %s/annotated.vcf --dbsnp %s %s" % (
+        command="%s %s -jar %s VariantAnnotator -R %s -V %s -L %s -o %s/annotated.vcf --dbsnp %s %s" % (
             java, java_opts, gatk, ref_genome,variant,variant,work_giremi,knownsites,VariantAnnotator_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)

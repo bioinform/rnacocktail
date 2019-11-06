@@ -295,6 +295,7 @@ cd example
 # wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa
 # echo "Download dbsnp files"
 # wget ftp://ftp.ncbi.nih.gov/snp/organisms/human_9606/VCF/All_20180418.vcf.gz
+# wget ftp://ftp.ncbi.nih.gov/snp/organisms/human_9606/VCF/All_20180418.vcf.gz.tbi
 # gunzip All_20180418.vcf.gz
  # awk '{if($0 !~ /^#/) print "chr"$0; else print $0}' All_20180418.vcf |sed  "s/chrMT/chrM/g" > All_20180418_chr.vcf
  # mv All_20180418_chr.vcf All_20180418.vcf
@@ -330,7 +331,7 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py v
 				--sample E \
 				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
 				--CleanSam \
-				--knownsites /work_dir/example/All_20180418.vcf \
+				--knownsites /work_dir/example/All_20180418.vcf.gz \
 				--picard /usr/local/bin/picard.jar
 
 echo "--------------------------------------------------------"
@@ -351,7 +352,7 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py e
 				--threads 1 \
 				--sample E \
 				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
-				--knownsites /work_dir/example/All_20180418.vcf
+				--knownsites /work_dir/example/All_20180418.vcf.gz
 
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"

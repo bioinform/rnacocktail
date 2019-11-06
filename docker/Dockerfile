@@ -140,9 +140,7 @@ RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/I
 
 RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip && chmod -R 755 /opt/gatk-4.1.4.0
 
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
+RUN apt-get install -y --fix-missing build-essential tabix 
 
 RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
 
