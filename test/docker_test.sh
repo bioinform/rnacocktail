@@ -322,19 +322,18 @@ cd example
 # 				--2 /work_dir/example/SRR896663_2.fastq.gz \
 # 				--sample E \
 # 				--threads 10
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py variant \
-				--alignment /work_dir/example/work/hisat2/E/alignments.sorted.bam \
-				--outdir /work_dir/example/out \
-				--workdir /work_dir/example/work \
-				--picard /usr/local/bin/picard.jar \
-				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
-				--threads 1 \
-				--sample E \
-				--start 8 \
-				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
-				--CleanSam \
-				--knownsites /work_dir/example/All_20180418.vcf.gz \
-				--picard /usr/local/bin/picard.jar
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py variant \
+# 				--alignment /work_dir/example/work/hisat2/E/alignments.sorted.bam \
+# 				--outdir /work_dir/example/out \
+# 				--workdir /work_dir/example/work \
+# 				--picard /usr/local/bin/picard.jar \
+# 				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
+# 				--threads 1 \
+# 				--sample E \
+# 				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
+# 				--CleanSam \
+# 				--knownsites /work_dir/example/All_20180418.vcf.gz \
+# 				--picard /usr/local/bin/picard.jar
 
 echo "--------------------------------------------------------"
 echo "--------------------------------------------------------"

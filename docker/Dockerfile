@@ -83,7 +83,7 @@ ADD https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htsli
 RUN cd /opt && tar xjf htslib-${HTSLIB_VERSION}.tar.bz2 && cd htslib-${HTSLIB_VERSION} && ./configure && make && rm -rf /opt/htslib-${HTSLIB_VERSION}.tar.bz2
 
 ADD https://github.com/zhqingit/giremi/archive/v${GIREMI_VERSION}.tar.gz /opt/giremi-${GIREMI_VERSION}.tar.gz
-RUN cd /opt && tar -zxvf giremi-${GIREMI_VERSION}.tar.gz && cp -p giremi-${GIREMI_VERSION}/giremi* /usr/local/bin  && cd /opt && rm -rf giremi-*
+RUN cd /opt && tar -zxvf giremi-${GIREMI_VERSION}.tar.gz && cp -p giremi-${GIREMI_VERSION}/giremi* /usr/local/bin && chmod -R 777 /usr/local/bin/giremi* && cd /opt && rm -rf giremi-*
 
 RUN pip install --upgrade pip
 RUN pip install pybedtools==${PYBEDTOOLS_VERSION} pysam==${PYSAM_VERSION} biopython==${BIOPYTHON_VERSION} openpyxl==${OPENPYXL_VERSION} xlrd==${XLRD_VERSION} numpy pandas scipy
@@ -142,6 +142,7 @@ RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4
 
 RUN apt-get install -y --fix-missing build-essential tabix 
 
+ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
 
