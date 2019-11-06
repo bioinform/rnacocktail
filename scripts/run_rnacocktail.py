@@ -563,7 +563,7 @@ if __name__ == "__main__":
                                   help="Other options used for GATK VariantAnnotator command. \
                                   (should be put between \" \") \
                                    (For GATK VariantAnnotator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php)."
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.1.2.0/org_broadinstitute_hellbender_tools_walkers_annotator_VariantAnnotator.php)."
                                    , default="")
     elif mode == "fusion":
         fusion_parser = parser.add_argument_group("RNA fusion prediction options")
@@ -890,7 +890,7 @@ if __name__ == "__main__":
                                   help="Other options used for GATK VariantAnnotator command. \
                                   (should be put between \" \") \
                                    (For GATK VariantAnnotator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php)."
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.1.2.0/org_broadinstitute_hellbender_tools_walkers_annotator_VariantAnnotator.php)."
                                    , default="")
         all_parser.add_argument("--fusioncatcher", help="Path to FusionCatcher executable", default=FUSIONCATCHER)
         all_parser.add_argument("--fusioncatcher_opts", metavar="fusioncatcher_opts",

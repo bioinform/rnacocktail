@@ -165,10 +165,6 @@ def run_giremi(alignment="", variant="",
     work_giremi=os.path.join(workdir,"giremi",sample)
     create_dirs([work_giremi])
     
-    if nthreads>1:
-        if "-nt " not in VariantAnnotator_opts:
-            VariantAnnotator_opts += " -nt %d"%nthreads 
-
     if "-Xms" not in java_opts:
         java_opts += " %s"%JAVA_XMS
     if "-Xmx" not in java_opts:
@@ -230,7 +226,7 @@ def run_giremi(alignment="", variant="",
     msg = "GATK VariantAnnotator for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s VariantAnnotator -R %s -V %s -L %s -o %s/annotated.vcf --dbsnp %s %s" % (
+        command="%s %s -jar %s VariantAnnotator -R %s -V %s -L %s -O %s/annotated.vcf --dbsnp %s %s" % (
             java, java_opts, gatk, ref_genome,variant,variant,work_giremi,knownsites,VariantAnnotator_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
