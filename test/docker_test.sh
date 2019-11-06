@@ -330,7 +330,7 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py v
 				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
 				--threads 1 \
 				--sample E \
-				--start 7 \
+				--start 8 \
 				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
 				--CleanSam \
 				--knownsites /work_dir/example/All_20180418.vcf.gz \

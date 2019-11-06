@@ -45,8 +45,8 @@ GATK_VF_FSMIN = 30.0
 GATK_VF_QDMAX = 2.0
 GATK_VF_OPT = (("-window %d " % GATK_VF_WINDOW) if GATK_VF_WINDOW else "") + \
               (("-cluster %d " % GATK_VF_CLUSTER) if GATK_VF_CLUSTER else "") + \
-              (("-filterName FS -filter 'FS > %f' " % GATK_VF_FSMIN) if GATK_VF_FSMIN else "") + \
-              (("-filterName QD -filter 'QD < %f' " % GATK_VF_QDMAX) if GATK_VF_QDMAX else "") 
+              (("--filter-name FS -filter 'FS > %f' " % GATK_VF_FSMIN) if GATK_VF_FSMIN else "") + \
+              (("--filter-name QD -filter 'QD < %f' " % GATK_VF_QDMAX) if GATK_VF_QDMAX else "") 
 
 JAVA_XMS = "-Xms1g"
 JAVA_XMG = "-Xmx5g"

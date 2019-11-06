@@ -83,10 +83,10 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         VariantFiltration_opts += " -window %d"%GATK_VF_WINDOW
     if "-cluster " not in VariantFiltration_opts:
         VariantFiltration_opts += " -cluster %d"%GATK_VF_CLUSTER
-    if "-filterName FS " not in VariantFiltration_opts:
-        VariantFiltration_opts += " -filterName FS -filter 'FS > %f'"%GATK_VF_FSMIN
-    if "-filterName QD " not in VariantFiltration_opts:
-        VariantFiltration_opts += " -filterName QD -filter 'QD < %f'"%GATK_VF_QDMAX
+    if "--filter-name FS " not in VariantFiltration_opts:
+        VariantFiltration_opts += " --filter-name FS -filter 'FS > %f'"%GATK_VF_FSMIN
+    if "--filter-name QD " not in VariantFiltration_opts:
+        VariantFiltration_opts += " --filter-name QD -filter 'QD < %f'"%GATK_VF_QDMAX
 
     if "-Xms" not in java_opts:
         java_opts += " %s"%JAVA_XMS
