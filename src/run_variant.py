@@ -162,7 +162,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         msg = "GATK BaseRecalibrator for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s BaseRecalibrator -R %s -I %s  -o %s/recal_data.table %s" % (
+            command="%s %s -jar %s BaseRecalibrator -R %s -I %s  -O %s/recal_data.table %s" % (
                 java, java_opts, gatk, ref_genome,split_bam,work_gatk,BaseRecalibrator_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -174,7 +174,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         msg = "GATK PrintReads for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s PrintReads -R %s -I %s -BQSR %s/recal_data.table -o %s/bsqr.bam %s" % (
+            command="%s %s -jar %s PrintReads -R %s -I %s -BQSR %s/recal_data.table -O %s/bsqr.bam %s" % (
                 java, java_opts, gatk, ref_genome,split_bam,work_gatk,work_gatk,PrintReads_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -194,7 +194,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "GATK HaplotypeCaller for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s HaplotypeCaller -R %s -I %s -o %s/variants.vcf %s" % (
+        command="%s %s -jar %s HaplotypeCaller -R %s -I %s -O %s/variants.vcf %s" % (
             java, java_opts, gatk, ref_genome,split_bam,work_gatk,HaplotypeCaller_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -206,7 +206,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "GATK VariantFiltration for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s VariantFiltration -R %s -V %s/variants.vcf -o %s/variants_filtered.vcf %s" % (
+        command="%s %s -jar %s VariantFiltration -R %s -V %s/variants.vcf -O %s/variants_filtered.vcf %s" % (
             java, java_opts, gatk, ref_genome,work_gatk,work_gatk,VariantFiltration_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)

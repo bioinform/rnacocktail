@@ -329,7 +329,6 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py v
 				--threads 10 \
 				--sample E \
 				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
-				--IndelRealignment \
 				--CleanSam \
 				--knownsites /work_dir/example/All_20180418.vcf \
 				--picard /usr/local/bin/picard.jar
@@ -382,7 +381,6 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py a
 				--quantifier_idx /work_dir/example/Homo_sapiens.GRCh38.cdna.21.Salmon.fmd \
 				--unzip \
 				--file_format fastq.gz \
-				--IndelRealignment \
 				--CleanSam \
 				--knownsites /work_dir/example/variants_21.vcf \
 				--strand_pos /work_dir/example/GRCh38_strand_pos_.bed \
@@ -429,7 +427,6 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py a
 				--ref_all_gpd /work_dir/example/GRCh38.21.gpd \
 				--ref_gpd /work_dir/example/refFlat.21.txt \
 				--file_format fasta \
-				--IndelRealignment \
 				--CleanSam \
 				--knownsites /work_dir/example/variants_21.vcf \
 				--strand_pos /work_dir/example/GRCh38_strand_pos_.bed \
