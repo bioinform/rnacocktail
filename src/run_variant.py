@@ -94,6 +94,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         java_opts += " %s"%JAVA_XMG
     if "-Djava.io.tmpdir" not in java_opts:
         java_opts += " -Djava.io.tmpdir=%s/javatmp/"%(work_gatk)
+        create_dirs(["%s/javatmp/"%(work_gatk)])
 
     msg = "picard CleanSam for %s"%sample
     if start<=step:
