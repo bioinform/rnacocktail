@@ -165,13 +165,14 @@ def run_giremi(alignment="", variant="",
     work_giremi=os.path.join(workdir,"giremi",sample)
     create_dirs([work_giremi])
     
+    tmp_dir = ""
     if "-Xms" not in java_opts:
         java_opts += " %s"%JAVA_XMS
     if "-Xmx" not in java_opts:
         java_opts += " %s"%JAVA_XMG
     if "-Djava.io.tmpdir" not in java_opts:
         java_opts += " -Djava.io.tmpdir=%s/javatmp/"%(work_giremi)
-
+        tmp_dir="%s/javatmp/"%(work_giremi)
 
 
     step=0
@@ -188,7 +189,9 @@ def run_giremi(alignment="", variant="",
     giremi_log = os.path.join(work_giremi, "giremi.log")
     giremi_log_fd = open(giremi_log, "w")
     
-    
+    if tmp_dir:
+        create_dirs([tmp_dir])
+
     msg = "Sort BAM by name for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
