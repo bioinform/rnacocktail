@@ -100,7 +100,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
         if CleanSam:
-            command="%s %s -cp %s picard.cmdline.PicardCommandLine CleanSam -I %s -O %s/alignments_clean.bam" % (
+            command="%s %s -cp %s picard.cmdline.PicardCommandLine CleanSam I=%s O=%s/alignments_clean.bam" % (
                 java, java_opts, picard, alignment,work_gatk )
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -114,7 +114,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "picard AddOrReplaceReadGroups for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -cp %s picard.cmdline.PicardCommandLine AddOrReplaceReadGroups -I %s -O %s/rg_added_sorted.bam %s" % (
+        command="%s %s -cp %s picard.cmdline.PicardCommandLine AddOrReplaceReadGroups I=%s O=%s/rg_added_sorted.bam %s" % (
             java, java_opts, picard, alignment,work_gatk,AddOrReplaceReadGroups_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -127,7 +127,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "picard MarkDuplicates for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -cp %s picard.cmdline.PicardCommandLine MarkDuplicates -I %s/rg_added_sorted.bam -O %s/dedupped.bam %s -M %s/output.metrics" % (
+        command="%s %s -cp %s picard.cmdline.PicardCommandLine MarkDuplicates I=%s/rg_added_sorted.bam O=%s/dedupped.bam %s M=%s/output.metrics" % (
             java, java_opts, picard, work_gatk,work_gatk,MarkDuplicates_opts,work_gatk)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
