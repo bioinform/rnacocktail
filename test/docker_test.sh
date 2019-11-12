@@ -364,6 +364,8 @@ cd example
 # echo "--------------------------------------------------------"
 # echo "--------------------------------------------------------"
 # cat <(zcat All_20180418.vcf.gz |head -10000|grep "#") <(zcat All_20180418.vcf.gz |awk '{if ($1=="chr21") print}') |sed "s/chr//g" > variants_21.vcf
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 bgzip /work_dir/example/variants_21.vcf
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 tabix /work_dir/example/variants_21.vcf.gz
 # cat GRCh38_genes_pos.bed |sed "s/chrM/MT/g"|sed "s/chr//g" > GRCh38_genes_pos_.bed
 # cat GRCh38_strand_pos.bed |sed "s/chrM/MT/g"|sed "s/chr//g" > GRCh38_strand_pos_.bed
 # docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 samtools faidx /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa

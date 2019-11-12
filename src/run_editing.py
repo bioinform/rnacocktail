@@ -226,6 +226,19 @@ def run_giremi(alignment="", variant="",
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
 
+    msg = "GATK IndexFeatureFile for %s"%sample
+    if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
+        command="%s %s -jar %s IndexFeatureFile -F %s" % (
+            java, java_opts, gatk, variant)
+        command="bash -c \"%s\""%command      
+        cmd = TimedExternalCmd(command, logger, raise_exception=True)
+        retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)   
+    else:
+        logger.info("Skipping step %d: %s"%(step,msg))
+    step+=1
+
+
     msg = "GATK VariantAnnotator for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)

@@ -144,6 +144,7 @@ RUN apt-get install -y --fix-missing build-essential tabix
 
 ENV GATK_VERSION 4.1.4.0
 ENV GATK_VERSION 4.1.4.0
+ENV GATK_VERSION 4.1.4.0
 
 RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
 
