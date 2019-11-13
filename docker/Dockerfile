@@ -79,6 +79,8 @@ RUN cd /opt && tar -zxvf STAR_${STAR_VERSION}.tar.gz && cp -p /opt/STAR-${STAR_V
 ADD https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar /opt/picard.jar
 RUN cd /opt && cp -p picard.jar /usr/local/bin && chmod 755 /usr/local/bin/picard.jar && cd /opt && rm -rf picard*
 
+ENV HTSLIB_VERSION 1.3
+
 ADD https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 /opt/htslib-${HTSLIB_VERSION}.tar.bz2
 RUN cd /opt && tar xjf htslib-${HTSLIB_VERSION}.tar.bz2 && cd htslib-${HTSLIB_VERSION} && ./configure && make && rm -rf /opt/htslib-${HTSLIB_VERSION}.tar.bz2
 
@@ -141,10 +143,6 @@ RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/I
 RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip && chmod -R 777 /opt/gatk-4.1.4.0
 
 RUN apt-get install -y --fix-missing build-essential tabix 
-
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
-ENV GATK_VERSION 4.1.4.0
 
 RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
 

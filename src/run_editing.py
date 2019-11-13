@@ -85,14 +85,20 @@ def find_SNV_strands(strand_pos_bed,genes_pos_bed,input_annotated_vcf,output_ann
     for w in [0,10,50,100,200,400,800,1000]:
         if w==0:
             SNV_no=SNV
-        SNV_fwd=SNV_no.window(final_fwd,w=w).each(merge_info_SNV).sort().groupby(g=[1,2,3],c=[4,5,6,7,8],o="first,first,first,max,min")
+        SNV_fwd=SNV_no.window(final_fwd,w=w).each(merge_info_SNV).sort()    
+        if len(SNV_fwd)>0:
+            SNV_fwd=SNV_fwd.groupby(g=[1,2,3],c=[4,5,6,7,8],o="first,first,first,max,min")
         SNV_fwd1=SNV_no.window(final_fwd,w=w,v=True)
         SNV_fwd=SNV_fwd.cat(SNV_fwd1,postmerge=False).sort()
 
-        SNV_rev=SNV_no.window(final_rev,w=w).each(merge_info_SNV).sort().groupby(g=[1,2,3],c=[4,5,6,7,8],o="first,first,first,max,min")
+        SNV_rev=SNV_no.window(final_rev,w=w).each(merge_info_SNV).sort()
+        if len(SNV_rev)>0:
+            SNV_rev=SNV_rev.groupby(g=[1,2,3],c=[4,5,6,7,8],o="first,first,first,max,min")
         SNV_rev1=SNV_no.window(final_rev,w=w,v=True)
         SNV_rev=SNV_rev.cat(SNV_rev1,postmerge=False).sort()
-        SNV_final=SNV_fwd.cat(SNV_rev,postmerge=False).sort().groupby(g=[1,2,3],c=[4,5,6,7,8],o="collapse,first,collapse,collapse,collapse")
+        SNV_final=SNV_fwd.cat(SNV_rev,postmerge=False).sort()
+        if len(SNV_final)>0:
+            SNV_final=SNV_final.groupby(g=[1,2,3],c=[4,5,6,7,8],o="collapse,first,collapse,collapse,collapse")
     
         SNV_good_=SNV_final.filter(lambda x:len(set(x[5].split(","))-set("."))==1).sort()
         SNV_no=SNV_final.filter(lambda x:len(set(x[5].split(","))-set("."))==0).each(fix_SNV_no).sort()

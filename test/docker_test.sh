@@ -340,20 +340,20 @@ cd example
 # echo "Test RNA editing detection (GIREMI)"
 # echo "--------------------------------------------------------"
 # echo "--------------------------------------------------------"
-# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py editing \
-# 				--alignment /work_dir/example/work/gatk/E/bsqr.bam \
-# 				--variant /work_dir/example/work/gatk/E/variants_filtered.vcf \
-# 				--strand_pos /work_dir/example/GRCh38_strand_pos.bed \
-# 				--genes_pos /work_dir/example/GRCh38_genes_pos.bed \
-# 				--outdir /work_dir/example/out \
-# 				--workdir /work_dir/example/work \
-# 				--giremi_dir /usr/local/bin/ \
-# 				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
-# 				--htslib_dir /opt/htslib-1.9/ \
-# 				--threads 1 \
-# 				--sample E \
-# 				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
-# 				--knownsites /work_dir/example/All_20180418.vcf.gz
+docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py editing \
+				--alignment /work_dir/example/work/gatk/E/bsqr.bam \
+				--variant /work_dir/example/work/gatk/E/variants_filtered.vcf \
+				--strand_pos /work_dir/example/GRCh38_strand_pos.bed \
+				--genes_pos /work_dir/example/GRCh38_genes_pos.bed \
+				--outdir /work_dir/example/out \
+				--workdir /work_dir/example/work \
+				--giremi_dir /usr/local/bin/ \
+				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
+				--htslib_dir /opt/htslib-1.3/ \
+				--threads 1 \
+				--sample E \
+				--ref_genome /work_dir/example/GRCh38_full_analysis_set_plus_decoy_hla.fa \
+				--knownsites /work_dir/example/All_20180418.vcf.gz
 
 # echo "--------------------------------------------------------"
 # echo "--------------------------------------------------------"
@@ -372,49 +372,49 @@ cd example
 # docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 java -jar /usr/local/bin/picard.jar CreateSequenceDictionary \
 # 				R= /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
 # 				O= /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.dict
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py all \
-				--outdir /work_dir/example/out \
-				--workdir /work_dir/example/work \
-				--threads 10 \
-				--1 /work_dir/A1_1.fq.gz,/work_dir/A2_1.fq.gz /work_dir/B1_1.fq.gz,/work_dir/B2_1.fq.gz \
-				--2 /work_dir/A1_2.fq.gz,/work_dir/A2_2.fq.gz /work_dir/B1_2.fq.gz,/work_dir/B2_2.fq.gz \
-				--sample all_A1,all_A2 all_B1,all_B2  \
-				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf  \
-				--ref_genome /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
-				--align_idx /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.HISAT2  \
-				--quantifier_idx /work_dir/example/Homo_sapiens.GRCh38.cdna.21.Salmon.fmd \
-				--unzip \
-				--file_format fastq.gz \
-				--CleanSam \
-				--knownsites /work_dir/example/variants_21.vcf.gz \
-				--strand_pos /work_dir/example/GRCh38_strand_pos_.bed \
-				--genes_pos /work_dir/example/GRCh38_genes_pos_.bed \
-				--data_dir /work_dir/example/fusioncatcher_data/human_v95/ \
-				--giremi_dir /usr/local/bin/ \
-				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
-				--htslib_dir /opt/htslib-1.9/ \
-				--picard /usr/local/bin/picard.jar
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py all \
+# 				--outdir /work_dir/example/out \
+# 				--workdir /work_dir/example/work \
+# 				--threads 10 \
+# 				--1 /work_dir/A1_1.fq.gz,/work_dir/A2_1.fq.gz /work_dir/B1_1.fq.gz,/work_dir/B2_1.fq.gz \
+# 				--2 /work_dir/A1_2.fq.gz,/work_dir/A2_2.fq.gz /work_dir/B1_2.fq.gz,/work_dir/B2_2.fq.gz \
+# 				--sample all_A1,all_A2 all_B1,all_B2  \
+# 				--ref_gtf /work_dir/example/Homo_sapiens.GRCh38.90.chromosome.21.gtf  \
+# 				--ref_genome /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
+# 				--align_idx /work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.HISAT2  \
+# 				--quantifier_idx /work_dir/example/Homo_sapiens.GRCh38.cdna.21.Salmon.fmd \
+# 				--unzip \
+# 				--file_format fastq.gz \
+# 				--CleanSam \
+# 				--knownsites /work_dir/example/variants_21.vcf.gz \
+# 				--strand_pos /work_dir/example/GRCh38_strand_pos_.bed \
+# 				--genes_pos /work_dir/example/GRCh38_genes_pos_.bed \
+# 				--data_dir /work_dir/example/fusioncatcher_data/human_v95/ \
+# 				--giremi_dir /usr/local/bin/ \
+# 				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
+# 				--htslib_dir /opt/htslib-1.3/ \
+# 				--picard /usr/local/bin/picard.jar
 
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-echo "Test run all pipeline (Long-read example)"
-echo "Thid example should successfully run for short-read alignment,"
-echo "reconstruction, denovo assembly, quantification, "
-echo "variant calling and long-read error correction," 
-echo "alignment, and reconstruction"
-echo "--------------------------------------------------------"
-echo "--------------------------------------------------------"
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 gmap_build \
-				-d /work_dir/example/gmap_chromosome.21 \
-				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 bowtie2-build \
-				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
-				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 bowtie2-build \
-				/work_dir/example/Homo_sapiens.GRCh38.cdna.21.fa \
-				/work_dir/example/Homo_sapiens.GRCh38.cdna.21
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 bgzip /work_dir/example/variants_21.vcf
-docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 tabix /work_dir/example/variants_21.vcf.gz
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# echo "Test run all pipeline (Long-read example)"
+# echo "Thid example should successfully run for short-read alignment,"
+# echo "reconstruction, denovo assembly, quantification, "
+# echo "variant calling and long-read error correction," 
+# echo "alignment, and reconstruction"
+# echo "--------------------------------------------------------"
+# echo "--------------------------------------------------------"
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 gmap_build \
+# 				-d /work_dir/example/gmap_chromosome.21 \
+# 				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 bowtie2-build \
+# 				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21.fa \
+# 				/work_dir/example/Homo_sapiens.GRCh38.dna.chromosome.21
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 bowtie2-build \
+# 				/work_dir/example/Homo_sapiens.GRCh38.cdna.21.fa \
+# 				/work_dir/example/Homo_sapiens.GRCh38.cdna.21
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 bgzip /work_dir/example/variants_21.vcf
+# docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 tabix /work_dir/example/variants_21.vcf.gz
 
 docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py all \
 				--outdir /work_dir/example/out \
@@ -442,7 +442,7 @@ docker run -u $UID -v=${PWD}/../:/work_dir/ rnacocktail:0.3 run_rnacocktail.py a
 				--hisat2_opts \"-f\" \
 				--giremi_dir /usr/local/bin/ \
 				--gatk /opt/gatk-4.1.4.0/gatk-package-4.1.4.0-local.jar \
-				--htslib_dir /opt/htslib-1.9/ \
+				--htslib_dir /opt/htslib-1.3/ \
 				--picard /usr/local/bin/picard.jar \
 				--idp /opt/IDP/src/main/python/runIDP.py \
 				--idpfusion /opt/IDP-fusion_1.1.1/bin/runIDP.py
