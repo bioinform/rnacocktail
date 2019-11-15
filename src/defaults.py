@@ -32,18 +32,12 @@ STARLONG_DEFAULTS = {"outSAMattributes": "NH HI NM MD", "readNameSeparator": "sp
                      "alignTranscriptsPerWindowNmax": "10000"}
 
 
-GATK_SN_RF = "ReassignOneMappingQuality"
-GATK_SN_RMQF = 255
-GATK_SN_RMQT = 60
-GATK_SN_OPT = (("-rf %s " % GATK_SN_RF) if GATK_SN_RF else "") + \
-              (("-RMQF %s " % GATK_SN_RMQF) if GATK_SN_RMQF else "") + \
-              (("-RMQT %s " % GATK_SN_RMQT) if GATK_SN_RMQT else "") + "-U ALLOW_N_CIGAR_READS"
+GATK_SN_OPT = "" 
 
 GATK_HC_STANDCALLCONF = 20.0
 GATK_HC_STANDEMITCONF = 20.0
-GATK_HC_OPT = (("-stand_call_conf %f " % GATK_HC_STANDCALLCONF) if GATK_HC_STANDCALLCONF else "") + \
-              (("-stand_emit_conf %f " % GATK_HC_STANDEMITCONF) if GATK_HC_STANDEMITCONF else "") + \
-              "-dontUseSoftClippedBases "
+GATK_HC_OPT = (("-stand-call-conf %f " % GATK_HC_STANDCALLCONF) if GATK_HC_STANDCALLCONF else "") + \
+              "--dont-use-soft-clipped-bases "
 
 GATK_VF_WINDOW = 35
 GATK_VF_CLUSTER = 3
@@ -51,8 +45,8 @@ GATK_VF_FSMIN = 30.0
 GATK_VF_QDMAX = 2.0
 GATK_VF_OPT = (("-window %d " % GATK_VF_WINDOW) if GATK_VF_WINDOW else "") + \
               (("-cluster %d " % GATK_VF_CLUSTER) if GATK_VF_CLUSTER else "") + \
-              (("-filterName FS -filter 'FS > %f' " % GATK_VF_FSMIN) if GATK_VF_FSMIN else "") + \
-              (("-filterName QD -filter 'QD < %f' " % GATK_VF_QDMAX) if GATK_VF_QDMAX else "") 
+              (("--filter-name FS -filter 'FS > %f' " % GATK_VF_FSMIN) if GATK_VF_FSMIN else "") + \
+              (("--filter-name QD -filter 'QD < %f' " % GATK_VF_QDMAX) if GATK_VF_QDMAX else "") 
 
 JAVA_XMS = "-Xms1g"
 JAVA_XMG = "-Xmx5g"

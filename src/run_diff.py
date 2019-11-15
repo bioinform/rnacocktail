@@ -163,7 +163,7 @@ def run_deseq2(quant_files="", alignments="",
             command = "%s -e \"library('readr'); library('tximport'); \
                        samples=c(%s); (files <- file.path(c(%s))); names(files) <- samples; \
                        tx2gene <- read.csv(file.path('%s'),sep='\\t'); \
-                       txi <- tximport(files, type = 'salmon', tx2gene = tx2gene, reader = read_tsv); \
+                       txi <- tximport(files, type = 'salmon', tx2gene = tx2gene); \
                        save(txi, file='%s/txi.rda'); \
                        write.table(txi$abundance, file = '%s/txi.abundances',\
                        quote = FALSE, sep='\\t'); \

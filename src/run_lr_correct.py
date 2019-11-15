@@ -46,12 +46,11 @@ def run_lordec(kmer=23,
     if "-T " not in lordec_opts:
         lordec_opts += " -T %d"%nthreads 
 
-
     msg = "LoRDEC for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s  -k %d -s %d -i %s -2 %s -o %s/long_corrected.fa" % (
-            lordec, lordec_opts, kmer, solid, long, short, work_lordec )
+        command="%s %s  -k %d -s %d -i %s -2 %s -O %s -o %s/long_corrected.fa" % (
+            lordec, lordec_opts, kmer, solid, long, short, work_lordec, work_lordec)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
         retcode = cmd.run(cmd_log_fd_out=lordec_log_fd, cmd_log=lordec_log, msg=msg, timeout=timeout)   

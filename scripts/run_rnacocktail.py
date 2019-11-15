@@ -255,7 +255,7 @@ if __name__ == "__main__":
                                   help="The long-read error correction tool to use.", default="LoRDEC")
         lrcorrect_parser.add_argument("--kmer", type=int, metavar="kmer",
                                   help="LoRDEC k-mer length", required=True)
-        lrcorrect_parser.add_argument("--solid", type=int, metavar="kmer",
+        lrcorrect_parser.add_argument("--solid", type=int, metavar="solid",
                                   help="LoRDEC solidity abundance threshold for k-mers.", required=True)
         lrcorrect_parser.add_argument("--long", metavar="seq_l",
                                   help="The FASTA file containing long reads ", required=True)
@@ -450,15 +450,13 @@ if __name__ == "__main__":
                                   , required=True)
         variant_parser.add_argument("--CleanSam", action="store_true",
                                   help="Use Picard's CleanSam command to clean the input alignment.")
-        variant_parser.add_argument("--IndelRealignment", action="store_true",
-                                  help="Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).")
         variant_parser.add_argument("--no_BaseRecalibrator", action="store_true",
                                   help="Don't run BaseRecalibrator step.")
         variant_parser.add_argument("--ref_genome", metavar="ref_genome",
                                   help="The reference genome FASTA file",  required=True)
         variant_parser.add_argument("--knownsites", metavar="knownsites",
                                   help="A database of known polymorphic sites (e.g. dbSNP). Used \
-                                  in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step \
+                                  in GATK BaseRecalibrator. NOTE: to run BaseRecalibrator step \
                                   knownsites should be provided.", default="")
         variant_parser.add_argument("--start", metavar="start", type=int,
                                   help="It re-starts executing the workflow/pipeline \
@@ -487,37 +485,27 @@ if __name__ == "__main__":
                                   help="Other options used for GATK SplitNCigarReads command. \
                                   (should be put between \" \") \
                                    (For GATK SplitNCigarReads check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
-        variant_parser.add_argument("--RealignerTargetCreator_opts", metavar="RealignerTargetCreator_opts",
-                                  help="Other options used for GATK RealignerTargetCreator command. \
-                                  (should be put between \" \") \
-                                   (For GATK RealignerTargetCreator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php).", default="")
-        variant_parser.add_argument("--IndelRealigner_opts", metavar="IndelRealigner_opts",
-                                  help="Other options used for GATK IndelRealigner command. \
-                                  (should be put between \" \") \
-                                   (For GATK IndelRealigner check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php).", default="")
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
         variant_parser.add_argument("--BaseRecalibrator_opts", metavar="BaseRecalibrator_opts",
                                   help="Other options used for GATK BaseRecalibrator command. \
                                   (should be put between \" \") \
                                    (For GATK BaseRecalibrator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
-        variant_parser.add_argument("--PrintReads_opts", metavar="PrintReads_opts",
-                                  help="Other options used for GATK PrintReads command. \
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
+        variant_parser.add_argument("--ApplyBQSR_opts", metavar="ApplyBQSR_opts",
+                                  help="Other options used for GATK ApplyBQSR command. \
                                   (should be put between \" \") \
-                                   (For GATK PrintReads check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php).", default="")
+                                   (For GATK ApplyBQSR check \
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_ApplyBQSR.php).", default="")
         variant_parser.add_argument("--HaplotypeCaller_opts", metavar="HaplotypeCaller_opts",
                                   help="Other options used for GATK HaplotypeCaller command. \
                                   (should be put between \" \") \
                                    (For GATK HaplotypeCaller check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
         variant_parser.add_argument("--VariantFiltration_opts", metavar="VariantFiltration_opts",
                                   help="Other options used for GATK VariantFiltration command. \
                                   (should be put between \" \") \
                                    (For GATK VariantFiltration check \
-                                   https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
     elif mode == "editing":
         edit_parser = parser.add_argument_group("RNA Editing prediction options")
         edit_parser.add_argument("--editing_caller", metavar="editing_caller",
@@ -575,7 +563,7 @@ if __name__ == "__main__":
                                   help="Other options used for GATK VariantAnnotator command. \
                                   (should be put between \" \") \
                                    (For GATK VariantAnnotator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php)."
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.1.2.0/org_broadinstitute_hellbender_tools_walkers_annotator_VariantAnnotator.php)."
                                    , default="")
     elif mode == "fusion":
         fusion_parser = parser.add_argument_group("RNA fusion prediction options")
@@ -651,7 +639,7 @@ if __name__ == "__main__":
                                   (Required for long-read transcriptome reconstruction).", default="")
         all_parser.add_argument("--knownsites", metavar="knownsites",
                                   help="A database of known polymorphic sites (e.g. dbSNP). Used \
-                                  in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step \
+                                  in GATK BaseRecalibrator. NOTE: to run BaseRecalibrator step \
                                   knownsites should be provided.", default="")
         all_parser.add_argument("--strand_pos", metavar="strand_pos",
                                   help="A BED file which specifies the strand of the genes/transcripts. \
@@ -710,7 +698,7 @@ if __name__ == "__main__":
                                    default=DNV_READTYPE)
         all_parser.add_argument("--kmer", type=int, metavar="kmer",
                                   help="LoRDEC k-mer length. (Required for long-read error correction.)", default=23)
-        all_parser.add_argument("--solid", type=int, metavar="kmer",
+        all_parser.add_argument("--solid", type=int, metavar="solid",
                                   help="LoRDEC solidity abundance threshold for k-mers.\
                                   (Required for long-read error correction.)", default=3)
         all_parser.add_argument("--star_genome_dir", metavar="genome_dir",
@@ -740,8 +728,6 @@ if __name__ == "__main__":
                                   help="Path to the directory with GMAP index for the reference genome (used for IDP-fusion)")
         all_parser.add_argument("--CleanSam", action="store_true",
                                   help="Use Picard's CleanSam command to clean the input alignment.")
-        all_parser.add_argument("--IndelRealignment", action="store_true",
-                                  help="Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).")
         all_parser.add_argument("--no_BaseRecalibrator", action="store_true",
                                   help="Don't run BaseRecalibrator step.")
         all_parser.add_argument("--sr_aligner", metavar="sr_aligner",
@@ -870,37 +856,27 @@ if __name__ == "__main__":
                                   help="Other options used for GATK SplitNCigarReads command. \
                                   (should be put between \" \") \
                                    (For GATK SplitNCigarReads check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
-        all_parser.add_argument("--RealignerTargetCreator_opts", metavar="RealignerTargetCreator_opts",
-                                  help="Other options used for GATK RealignerTargetCreator command. \
-                                  (should be put between \" \") \
-                                   (For GATK RealignerTargetCreator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php).", default="")
-        all_parser.add_argument("--IndelRealigner_opts", metavar="IndelRealigner_opts",
-                                  help="Other options used for GATK IndelRealigner command. \
-                                  (should be put between \" \") \
-                                   (For GATK IndelRealigner check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php).", default="")
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_rnaseq_SplitNCigarReads.php).", default=GATK_SN_OPT)
         all_parser.add_argument("--BaseRecalibrator_opts", metavar="BaseRecalibrator_opts",
                                   help="Other options used for GATK BaseRecalibrator command. \
                                   (should be put between \" \") \
                                    (For GATK BaseRecalibrator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
-        all_parser.add_argument("--PrintReads_opts", metavar="PrintReads_opts",
-                                  help="Other options used for GATK PrintReads command. \
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_BaseRecalibrator.php).", default="")
+        all_parser.add_argument("--ApplyBQSR_opts", metavar="ApplyBQSR_opts",
+                                  help="Other options used for GATK ApplyBQSR command. \
                                   (should be put between \" \") \
-                                   (For GATK PrintReads check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php).", default="")
+                                   (For GATK ApplyBQSR check \
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_ApplyBQSR.php).", default="")
         all_parser.add_argument("--HaplotypeCaller_opts", metavar="HaplotypeCaller_opts",
                                   help="Other options used for GATK HaplotypeCaller command. \
                                   (should be put between \" \") \
                                    (For GATK HaplotypeCaller check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_haplotypecaller_HaplotypeCaller.php).", default=GATK_HC_OPT)
         all_parser.add_argument("--VariantFiltration_opts", metavar="VariantFiltration_opts",
                                   help="Other options used for GATK VariantFiltration command. \
                                   (should be put between \" \") \
                                    (For GATK VariantFiltration check \
-                                   https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_filters_VariantFiltration.php).", default=GATK_VF_OPT)
         all_parser.add_argument("--giremi_dir", help="Path to giremi directory that include  \
                                   giremi executable and giremi.r R script. \
                                   (required for RNA editing detection.)", default="")
@@ -914,7 +890,7 @@ if __name__ == "__main__":
                                   help="Other options used for GATK VariantAnnotator command. \
                                   (should be put between \" \") \
                                    (For GATK VariantAnnotator check \
-                                   https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php)."
+                                   https://software.broadinstitute.org/gatk/documentation/tooldocs/4.1.2.0/org_broadinstitute_hellbender_tools_walkers_annotator_VariantAnnotator.php)."
                                    , default="")
         all_parser.add_argument("--fusioncatcher", help="Path to FusionCatcher executable", default=FUSIONCATCHER)
         all_parser.add_argument("--fusioncatcher_opts", metavar="fusioncatcher_opts",

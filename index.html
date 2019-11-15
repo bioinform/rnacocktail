@@ -145,7 +145,7 @@ w.addEventListener ? w.addEventListener("load",function(){document.body.addEvent
 				</table>
 				</p>
         <div class="jumbotron">
-			<p><i>For more information contact us at <a href="mailto:bina.rd@roche.com">bina.rd@roche.com</a></i>
+			<p><i>For more information contact us at <a href="mailto:bioinformatics.red@roche.com">bioinformatics.red@roche.com</a></i>
             </p>
             
         </div>
@@ -168,20 +168,22 @@ w.addEventListener ? w.addEventListener("load",function(){document.body.addEvent
 
 <h2>Download RNACocktail</h2>
 
-<p>Latest version:  <a href="https://github.com/bioinform/RNACocktail/archive/v0.2.2.tar.gz"
-onclick="trackOutboundLink('https://github.com/bioinform/RNACocktail/archive/v0.2.2.tar.gz'); return false;">https://github.com/bioinform/RNACocktail/archive/v0.2.2.tar.gz</a></p>
+<p>Latest version:  <a href="https://github.com/bioinform/RNACocktail/archive/v0.3.0.tar.gz"
+onclick="trackOutboundLink('https://github.com/bioinform/RNACocktail/archive/v0.3.0.tar.gz'); return false;">https://github.com/bioinform/RNACocktail/archive/v0.3.0.tar.gz</a></p>
 
 <p>For other versions, see "releases". <a href="https://github.com/bioinform/RNACocktail/releases"
 onclick="trackOutboundLink('https://github.com/bioinform/RNACocktail/releases'); return false;">https://github.com/bioinform/RNACocktail/releases</a></p>
 
 <h2>RNACocktail Docker Image</h2>
-<p>The docker image with all the packages installed can be found at <a href="https://hub.docker.com/r/marghoob/rnacocktail/"
-onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); return false;">https://hub.docker.com/r/marghoob/rnacocktail/</a></p>
+<p>The docker image with all the packages installed can be found at <a href="https://hub.docker.com/repository/docker/rssbred/rnacocktail/"
+onclick="trackOutboundLink('https://hub.docker.com/repository/docker/rssbred/rnacocktail'); return false;">https://hub.docker.com/repository/docker/rssbred/rnacocktail/</a></p>
+<p>Older docker images (versions < 0.2.2) can be found <a href="https://hub.docker.com/r/marghoob/rnacocktail/"
+onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); return false;">here</a>.</p>
 <p>The dockerfile is also available at <code>docker/Dockerfile</code> for local build.</p>
 
 <h2>System Requirements</h2>
 <p>
-   Python 2.7 and the following Python packages must be installed:
+   The current implementation of RNACocktail is tested with Python 2.7 and the following Python packages:
 
 	<table style="width:100%">
 		  <tr>
@@ -191,46 +193,46 @@ onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); ret
 		  </tr>
 		  <tr>
 			<td><a href="http://pythonhosted.org/pybedtools">pybedtools</a></td>
-			<td>0.7.7</td>
+			<td>0.8.0</td>
 			<td><b>editing</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://github.com/pysam-developers/pysam">pysam</a></td>
-			<td>0.9.0</td>
+			<td>0.15.0</td>
 			<td><b>editing</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://www.numpy.org/">numpy</a></td>
-			<td>1.12.0</td>
+			<td>1.16.5</td>
 			<td><b>editing</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://scipy.org/">scipy</a></td>
-			<td>0.18.1</td>
+			<td>1.2.2</td>
 			<td><b>long_fusion</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://biopython.org/">biopython</a></td>
-			<td>1.66</td>
+			<td>1.74</td>
 			<td><b>fusion</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://openpyxl.readthedocs.io/en/default/">openpyxl</a></td>
-			<td>1.5.6</td>
+			<td>2.6.4</td>
 			<td><b>fusion</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://pandas.pydata.org/">pandas</a></td>
-			<td>0.19.2</td>
+			<td>0.24.2</td>
 			<td><b>fusion</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://pypi.python.org/pypi/xlrd">xlrd</a></td>
-			<td>0.6.1</td>
+			<td>1.1.0</td>
 			<td><b>fusion</b></td> 
 		  </tr>
 	</table>
-    <p>Note that <a href="https://github.com/arq5x/bedtools2">bedtools</a> has to be installed separately in order for pybedtools to work.</p>
+    <p>Note that <a href="https://github.com/arq5x/bedtools2">bedtools</a> (v2.29.0) has to be installed separately in order for pybedtools to work.</p>
    
    <p>In addition, paths to the following tools must be provided as RNACocktail arguments. Alternatively, the executables can be on PATH environmental variable or defined on defaults.py:</p>
    
@@ -247,17 +249,17 @@ onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); ret
 		  </tr>
 		  <tr>
 			<td><a href="http://ccb.jhu.edu/software/hisat2/index.shtml">HISAT2</a></td>
-			<td>2.0.5</td>
+			<td>2.1.0</td>
 			<td><b>align</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://ccb.jhu.edu/software/stringtie/index.shtml">StringTie</a></td>
-			<td>1.3.3</td>
+			<td>2.0.4</td>
 			<td><b>reconstruct</b> and <b>diff</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://github.com/COMBINE-lab/salmon">Salmon</a></td>
-			<td>0.8.0</td>
+			<td>0.11.0</td>
 			<td><b>quantify</b></td> 
 		  </tr>
 		  <tr>
@@ -271,23 +273,23 @@ onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); ret
 			<td><b>assembly</b></td> 
 		  </tr>
 		  <tr>
-			<td><a href="https://www.r-project.org/">R</a> with <a href="https://www.bioconductor.org/packages/devel/bioc/html/DESeq2.html">DESeq2</a>, <a href="https://github.com/hadley/readr">readr</a>, and <a href="https://github.com/mikelove/tximport">tximport</a> libraries</td>
-			<td>3.3.2</td>
+			<td><a href="https://www.r-project.org/">R</a> with <a href="https://bioconductor.org/packages/release/bioc/html/DESeq2.html">DESeq2</a>, <a href="https://github.com/hadley/readr">readr</a>, and <a href="https://github.com/mikelove/tximport">tximport</a> libraries</td>
+			<td>3.6.1</td>
 			<td><b>diff</b>, <b>editing</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://bioinf.wehi.edu.au/featureCounts/">featureCounts</a></td>
-			<td>1.5.0-p1</td>
+			<td>2.0.0</td>
 			<td><b>diff</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://www.atgc-montpellier.fr/lordec/">LoRDEC</a></td>
-			<td>0.6</td>
+			<td>0.9</td>
 			<td><b>long_correct</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://github.com/alexdobin/STAR">STAR</a></td>
-			<td>2.5.2b</td>
+			<td>2.7.0f</td>
 			<td><b>long_align</b></td> 
 		  </tr>
 		  <tr>
@@ -302,22 +304,17 @@ onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); ret
 		  </tr>
 		  <tr>
 			<td><a href="https://software.broadinstitute.org/gatk/">GATK</a></td>
-			<td>3.5-0</td>
+			<td>4.1.4.0</td>
 			<td><b>variant</b> and <b>editing</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://broadinstitute.github.io/picard/">Picard</a></td>
-			<td>2.2.2</td>
+			<td>2.19.0</td>
 			<td><b>variant</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://github.com/zhqingit/giremi">GIREMI</a></td>
 			<td>0.2.1</td>
-			<td><b>editing</b></td> 
-		  </tr>
-		  <tr>
-			<td><a href="https://github.com/GATB/gatb-core/archive">gatb-core</a></td>
-			<td>1.1.0</td>
 			<td><b>editing</b></td> 
 		  </tr>
 		  <tr>
@@ -327,12 +324,12 @@ onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); ret
 		  </tr>
 		  <tr>
 			<td><a href="https://github.com/ndaniel/fusioncatcher">FusionCatcher</a></td>
-			<td>0.99.5a beta</td>
+			<td>1.10</td>
 			<td><b>fusion</b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://bowtie-bio.sourceforge.net/index.shtml">bowtie</a></td>
-			<td>1.2.0</td>
+			<td>1.2.2</td>
 			<td><b>fusion</b></b></td> 
 		  </tr>
 		  <tr>
@@ -342,17 +339,17 @@ onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); ret
 		  </tr>
 		  <tr>
 			<td><a href="http://bio-bwa.sourceforge.net/">bwa</a></td>
-			<td>0.7.15</td>
+			<td>0.7.17</td>
 			<td><b>fusion</b></b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="https://github.com/ncbi/sra-tools">sra toolkit</a></td>
-			<td>2.8.1</td>
+			<td>2.9.6</td>
 			<td><b>fusion</b></b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://ftp.gnu.org/gnu/coreutils/">coreutils</a></td>
-			<td>8.25</td>
+			<td>8.27</td>
 			<td><b>fusion</b></b></td> 
 		  </tr>
 		  <tr>
@@ -377,22 +374,20 @@ onclick="trackOutboundLink('https://hub.docker.com/r/marghoob/rnacocktail'); ret
 		  </tr>
 		  <tr>
 			<td><a href="https://github.com/ndaniel/seqtk">SeqTK</a></td>
-			<td>1.0-r82b</td>
+			<td>1.2-r101c</td>
 			<td><b>fusion</b></b></td> 
 		  </tr>
 		  <tr>
 			<td><a href="http://research-pub.gene.com/gmap/">gmap</a></td>
-			<td>2017-02-15</td>
+			<td>2019-09-12</td>
 			<td><b>long_fusion</b></b></td> 
 		  </tr>
 	</table>
 </p>
 
-
-
 <h2>Installing RNACocktail</h2>
-<p>RNACocktail is a python package and can be installed using <code>pip</code>. To install type <code>pip install https://github.com/bioinform/RNACocktail/archive/v0.2.2.tar.gz</code>. The current version
-of RNACocktail is v0.2.2. In general, the install source would be https://github.com/bioinform/RNACocktail/archive/version.tar.gz</p>
+<p>RNACocktail is a python package and can be installed using <code>pip</code>. To install type <code>pip install https://github.com/bioinform/RNACocktail/archive/v0.3.0.tar.gz</code>. The current version
+of RNACocktail is v0.3.0. In general, the install source would be https://github.com/bioinform/RNACocktail/archive/version.tar.gz</p>
 
 
 <h2>Running RNACocktail</h2>
@@ -595,15 +590,15 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
  </code></p>
 
 
-	<h4>Example 14 (variant):</h4> Run of RNACocktail for RNA-Seq variant calling (GATK) with enabled IndelRealignment.
+	<h4>Example 14 (variant):</h4> Run of RNACocktail for RNA-Seq variant calling (GATK).
 
-	<p><code>run_rnacocktail.py variant --alignment  work/hisat2/A/alignments.sorted.bam --outdir out --workdir work --picard /path/to/picard.jar --gatk /path/to/GenomeAnalysisTK.jar --threads 10 --sample A --ref_genome genome.GRCh37.fa --IndelRealignment --knownsites dbsnp_138.b37.vcf
+	<p><code>run_rnacocktail.py variant --alignment  work/hisat2/A/alignments.sorted.bam --outdir out --workdir work --picard /path/to/picard.jar --gatk /path/to/gatk.jar --threads 10 --sample A --ref_genome genome.GRCh37.fa --knownsites dbsnp_138.b37.vcf
  </code></p>
 
 
 	<h4>Example 15 (editing):</h4> Run of RNACocktail for RNA editing detection (GIREMI)
 
-	<p><code>run_rnacocktail.py editing --alignment  work/gatk/A/bsqr.bam --variant work/gatk/A/variants_filtered.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --outdir out --workdir work --giremi_dir /path/to/giremi/directory/ --gatk /path/to/GenomeAnalysisTK.jar --samtools /path/to/samtools --htslib_dir /path/to/htslib/directory/ --threads 10 --sample A --ref_genome genome.GRCh37.fa --knownsites dbsnp_138.b37.vcf
+	<p><code>run_rnacocktail.py editing --alignment  work/gatk/A/bsqr.bam --variant work/gatk/A/variants_filtered.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --outdir out --workdir work --giremi_dir /path/to/giremi/directory/ --gatk /path/to/gatk.jar --samtools /path/to/samtools --htslib_dir /path/to/htslib/directory/ --threads 10 --sample A --ref_genome genome.GRCh37.fa --knownsites dbsnp_138.b37.vcf
  </code></p>
 
 
@@ -613,11 +608,11 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
  </code></p>
 
 	<h4>Example 17 (all):</h4> Run all pipeline steps (Short-read example)
-	<p><code>run_rnacocktail.py all --outdir out --workdir work --threads 10 --1 A1_1.fq.gz,A2_1.fq.gz B1_1.fq.gz,B2_1.fq.gz --2 A1_2.fq.gz,A2_2.fq.gz B1_2.fq.gz,B2_2.fq.gz --sample all_A1,all_A2 all_B1,all_B2  --ref_gtf genes.GRCh37.gtf --ref_genome  genome.GRCh37.fa --align_idx hisat2-idx  --quantifier_idx salmon_fmd_idx --unzip --file_format fastq.gz --IndelRealignment --CleanSam --knownsites dbsnp_138.b37.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --giremi_dir /path/to/giremi/directory/ --gatk /path/to/GenomeAnalysisTK.jar --htslib_dir /path/to/htslib/directory/ --picard /path/to/picard.jar --samtools /path/to/samtools --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py --stringtie /path/to/stringtie --salmon /path/to/salmon --featureCounts /path/to/featureCounts --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --lordec /path/to/lordec-correct --sam2psl /path/to/sam2psl.py --fusioncatcher /path/to/fusioncatcher
+	<p><code>run_rnacocktail.py all --outdir out --workdir work --threads 10 --1 A1_1.fq.gz,A2_1.fq.gz B1_1.fq.gz,B2_1.fq.gz --2 A1_2.fq.gz,A2_2.fq.gz B1_2.fq.gz,B2_2.fq.gz --sample all_A1,all_A2 all_B1,all_B2  --ref_gtf genes.GRCh37.gtf --ref_genome  genome.GRCh37.fa --align_idx hisat2-idx  --quantifier_idx salmon_fmd_idx --unzip --file_format fastq.gz --CleanSam --knownsites dbsnp_138.b37.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --giremi_dir /path/to/giremi/directory/ --gatk /path/to/gatk.jar --htslib_dir /path/to/htslib/directory/ --picard /path/to/picard.jar --samtools /path/to/samtools --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py --stringtie /path/to/stringtie --salmon /path/to/salmon --featureCounts /path/to/featureCounts --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --lordec /path/to/lordec-correct --sam2psl /path/to/sam2psl.py --fusioncatcher /path/to/fusioncatcher
  </code></p>
 
 	<h4>Example 18 (all):</h4> Run all pipeline steps (long-read example)
-	<p><code>run_rnacocktail.py all --outdir out --workdir work --threads 10 --U seq_short.fa --long seq_long.fa --sample all_C  --ref_gtf genes.GRCh37.gtf --ref_genome  genome.GRCh37.fa --align_idx hisat2-idx  --quantifier_idx salmon_fmd_idx --unzip --file_format fasta --IndelRealignment --CleanSam --knownsites dbsnp_138.b37.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --giremi_dir /path/to/giremi/directory/ --gatk /path/to/GenomeAnalysisTK.jar --htslib_dir /path/to/htslib/directory/ --star_genome_dir /path/to/STAR/genome_idx/ --genome_bowtie2_idx genome.bt2_idx --transcriptome_bowtie2_idx genes.bt2_idx --uniqueness_bedgraph uniqueness.bedGraph --gmap_idx gmap_idx --ref_all_gpd hg19.all.refSeq_gencode_ensemble_EST_known.gpd --ref_gpd genes.GRCh37.refFlat.txt --read_length 100 --picard /path/to/picard.jar --hisat2_opts \"-f\" --idp /path/to/idp/runIDP.py --idpfusion /path/to/idpfusion/runIDP.py --samtools /path/to/samtools --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py --stringtie /path/to/stringtie --salmon /path/to/salmon --featureCounts /path/to/featureCounts --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --lordec /path/to/lordec-correct --sam2psl /path/to/sam2psl.py --fusioncatcher /path/to/fusioncatcher 
+	<p><code>run_rnacocktail.py all --outdir out --workdir work --threads 10 --U seq_short.fa --long seq_long.fa --sample all_C  --ref_gtf genes.GRCh37.gtf --ref_genome  genome.GRCh37.fa --align_idx hisat2-idx  --quantifier_idx salmon_fmd_idx --unzip --file_format fasta --CleanSam --knownsites dbsnp_138.b37.vcf --strand_pos test/GRCh37_strand_pos.bed --genes_pos test/GRCh37_genes_pos.bed --data_dir /path/to/fusioncatcher/ensembl/data/directory/ --giremi_dir /path/to/giremi/directory/ --gatk /path/to/gatk.jar --htslib_dir /path/to/htslib/directory/ --star_genome_dir /path/to/STAR/genome_idx/ --genome_bowtie2_idx genome.bt2_idx --transcriptome_bowtie2_idx genes.bt2_idx --uniqueness_bedgraph uniqueness.bedGraph --gmap_idx gmap_idx --ref_all_gpd hg19.all.refSeq_gencode_ensemble_EST_known.gpd --ref_gpd genes.GRCh37.refFlat.txt --read_length 100 --picard /path/to/picard.jar --hisat2_opts \"-f\" --idp /path/to/idp/runIDP.py --idpfusion /path/to/idpfusion/runIDP.py --samtools /path/to/samtools --hisat2 /path/to/hisat2 --hisat2_sps /path/to/hisat2_extract_splice_sites.py --stringtie /path/to/stringtie --salmon /path/to/salmon --featureCounts /path/to/featureCounts --oases /path/to/oases --velveth /path/to/velveth --velvetg /path/to/velvetg --lordec /path/to/lordec-correct --sam2psl /path/to/sam2psl.py --fusioncatcher /path/to/fusioncatcher 
  </code></p>
 
 
@@ -1182,10 +1177,6 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 			<td>Use Picard's CleanSam command to clean the input alignment.</td>
 		  </tr>
 		  <tr>
-			<td><code>--IndelRealignment</code></td>
-			<td>Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).</td>
-		  </tr>
-		  <tr>
 			<td><code>--no_BaseRecalibrator</code></td>
 			<td>Don't run BaseRecalibrator step.</td>
 		  </tr>
@@ -1195,7 +1186,7 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--knownsites</code></td>
-			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
+			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
 		  </tr>
 		  <tr>
 			<td><code>--picard</code></td>
@@ -1223,31 +1214,23 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--SplitNCigarReads_opts</code></td>
-			<td>Other options used for GATK SplitNCigarReads command. (should be put between " ")  (For GATK SplitNCigarReads check  <a href="https://software.broadinstitute.org/gatk/gatkdocs org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php">here</a>) (default: "-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS")  </td>
-		  </tr>
-		  <tr>
-			<td><code>--RealignerTargetCreator_opts</code></td>
-			<td>Other options used for GATK RealignerTargetCreator command. (should be put between " ")  (For GATK RealignerTargetCreator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php">here</a>). </td>
-		  </tr>
-		  <tr>
-			<td><code>--IndelRealigner_opts</code></td>
-			<td>Other options used for GATK IndelRealigner command. (should be put between " ")  (For GATK IndelRealigner check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php">here</a>).</td>
+			<td>Other options used for GATK SplitNCigarReads command. (should be put between " ")  (For GATK SplitNCigarReads check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_rnaseq_SplitNCigarReads.php">here</a>) (default: "-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS")  </td>
 		  </tr>
 		  <tr>
 			<td><code>--BaseRecalibrator_opts</code></td>
-			<td>Other options used for GATK BaseRecalibrator command. (should be put between " ")  (For GATK BaseRecalibrator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php">here</a>).</td>
+			<td>Other options used for GATK BaseRecalibrator command. (should be put between " ")  (For GATK BaseRecalibrator check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_BaseRecalibrator.php">here</a>).</td>
 		  </tr>
 		  <tr>
-			<td><code>--PrintReads_opts</code></td>
-			<td>Other options used for GATK PrintReads command. (should be put between " ")  (For GATK PrintReads check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php">here</a>).</td>
+			<td><code>--ApplyBQSR_opts</code></td>
+			<td>Other options used for GATK ApplyBQSR command. (should be put between " ")  (For GATK ApplyBQSR check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_ApplyBQSR.php">here</a>).</td>
 		  </tr>
 		  <tr>
 			<td><code>--HaplotypeCaller_opts</code></td>
-			<td>Other options used for GATK HaplotypeCaller command. (should be put between " ")  (For GATK HaplotypeCaller check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php">here</a>). (default: "-stand_call_conf 20.0 -stand_emit_conf 20.0 -dontUseSoftClippedBases" </td>
+			<td>Other options used for GATK HaplotypeCaller command. (should be put between " ")  (For GATK HaplotypeCaller check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_haplotypecaller_HaplotypeCaller.php">here</a>). (default: "-stand-call-conf --dont-use-soft-clipped-bases" </td>
 		  </tr>
 		  <tr>
 			<td><code>--VariantFiltration_opts</code></td>
-			<td>Other options used for GATK VariantFiltration command. (should be put between " ")  (For GATK VariantFiltration check  <a href="https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php">here</a>). (default: "-window 35 -cluster 3 -filterName FS -filter 'FS > 30.0' -filterName QD -filter 'QD < 2.0'" </td>
+			<td>Other options used for GATK VariantFiltration command. (should be put between " ")  (For GATK VariantFiltration check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_filters_VariantFiltration.php">here</a>). (default: "-window 35 -cluster 3 --filter-name FS -filter 'FS > 30.0' --filter-name QD -filter 'QD < 2.0'" </td>
 		  </tr>
 		</table>
 
@@ -1317,7 +1300,7 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--VariantAnnotator_opts</code></td>
-			<td>Other options used for GATK VariantAnnotator command. (should be put between " ")  (For GATK VariantAnnotator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php">here</a>). </td>
+			<td>Other options used for GATK VariantAnnotator command. (should be put between " ")  (For GATK VariantAnnotator check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.1.2.0/org_broadinstitute_hellbender_tools_walkers_annotator_VariantAnnotator.php">here</a>). </td>
 		  </tr>
 		</table>
 
@@ -1509,10 +1492,6 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 			<td>Use Picard's CleanSam command to clean the input alignment.</td>
 		  </tr>
 		  <tr>
-			<td><code>--IndelRealignment</code></td>
-			<td>Use GATK RealignerTargetCreator command to perfrom indel realignment (optional).</td>
-		  </tr>
-		  <tr>
 			<td><code>--no_BaseRecalibrator</code></td>
 			<td>Don't run BaseRecalibrator step.</td>
 		  </tr>
@@ -1546,7 +1525,7 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--knownsites</code></td>
-			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator and RealignerTargetCreator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
+			<td>A database of known polymorphic sites (e.g. dbSNP). Used in GATK BaseRecalibrator. NOTE: to run BaseRecalibrator step knownsites should be provided.</td>
 		  </tr>
 		  <tr>
 			<td><code>--strand_pos STRING</code></td>
@@ -1711,31 +1690,23 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--SplitNCigarReads_opts</code></td>
-			<td>Other options used for GATK SplitNCigarReads command. (should be put between " ")  (For GATK SplitNCigarReads check  <a href="https://software.broadinstitute.org/gatk/gatkdocs org_broadinstitute_gatk_tools_walkers_rnaseq_SplitNCigarReads.php">here</a>) (default: "-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS")  </td>
-		  </tr>
-		  <tr>
-			<td><code>--RealignerTargetCreator_opts</code></td>
-			<td>Other options used for GATK RealignerTargetCreator command. (should be put between " ")  (For GATK RealignerTargetCreator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php">here</a>). </td>
-		  </tr>
-		  <tr>
-			<td><code>--IndelRealigner_opts</code></td>
-			<td>Other options used for GATK IndelRealigner command. (should be put between " ")  (For GATK IndelRealigner check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php">here</a>).</td>
+			<td>Other options used for GATK SplitNCigarReads command. (should be put between " ")  (For GATK SplitNCigarReads check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_rnaseq_SplitNCigarReads.php">here</a>) (default: "-rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -U ALLOW_N_CIGAR_READS")  </td>
 		  </tr>
 		  <tr>
 			<td><code>--BaseRecalibrator_opts</code></td>
-			<td>Other options used for GATK BaseRecalibrator command. (should be put between " ")  (For GATK BaseRecalibrator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php">here</a>).</td>
+			<td>Other options used for GATK BaseRecalibrator command. (should be put between " ")  (For GATK BaseRecalibrator check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_BaseRecalibrator.php">here</a>).</td>
 		  </tr>
 		  <tr>
-			<td><code>--PrintReads_opts</code></td>
-			<td>Other options used for GATK PrintReads command. (should be put between " ")  (For GATK PrintReads check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php">here</a>).</td>
+			<td><code>--ApplyBQSR_opts</code></td>
+			<td>Other options used for GATK ApplyBQSR command. (should be put between " ")  (For GATK ApplyBQSR check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_bqsr_ApplyBQSR.php">here</a>).</td>
 		  </tr>
 		  <tr>
 			<td><code>--HaplotypeCaller_opts</code></td>
-			<td>Other options used for GATK HaplotypeCaller command. (should be put between " ")  (For GATK HaplotypeCaller check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php">here</a>). (default: "-stand_call_conf 20.0 -stand_emit_conf 20.0 -dontUseSoftClippedBases" </td>
+			<td>Other options used for GATK HaplotypeCaller command. (should be put between " ")  (For GATK HaplotypeCaller check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_haplotypecaller_HaplotypeCaller.php">here</a>). (default: "-stand-call-conf --dont-use-soft-clipped-bases" </td>
 		  </tr>
 		  <tr>
 			<td><code>--VariantFiltration_opts</code></td>
-			<td>Other options used for GATK VariantFiltration command. (should be put between " ")  (For GATK VariantFiltration check  <a href="https://software.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php">here</a>). (default: "-window 35 -cluster 3 -filterName FS -filter 'FS > 30.0' -filterName QD -filter 'QD < 2.0'" </td>
+			<td>Other options used for GATK VariantFiltration command. (should be put between " ")  (For GATK VariantFiltration check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.2.0/org_broadinstitute_hellbender_tools_walkers_filters_VariantFiltration.php">here</a>). (default: "-window 35 -cluster 3 --filter-name FS -filter 'FS > 30.0' --filter-name QD -filter 'QD < 2.0'" </td>
 		  </tr>
 		  <tr>
 			<td><code>--giremi_dir</code></td>
@@ -1755,7 +1726,7 @@ of RNACocktail is v0.2.2. In general, the install source would be https://github
 		  </tr>
 		  <tr>
 			<td><code>--VariantAnnotator_opts</code></td>
-			<td>Other options used for GATK VariantAnnotator command. (should be put between " ")  (For GATK VariantAnnotator check  <a href="https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_annotator_VariantAnnotator.php">here</a>). </td>
+			<td>Other options used for GATK VariantAnnotator command. (should be put between " ")  (For GATK VariantAnnotator check  <a href="https://software.broadinstitute.org/gatk/documentation/tooldocs/4.1.2.0/org_broadinstitute_hellbender_tools_walkers_annotator_VariantAnnotator.php">here</a>). </td>
 		  </tr>
 		 <tr>
 			<td><code>--fusioncatcher</code></td>

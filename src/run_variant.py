@@ -13,11 +13,11 @@ logger.addHandler(consoleHandler)
 def run_gatk(alignment="", ref_genome="", knownsites="",
                   picard=PICARD, gatk=GATK,                  
                   java=JAVA, java_opts="",
-                  CleanSam=False, IndelRealignment=False, no_BaseRecalibrator=False ,               
+                  CleanSam=False, no_BaseRecalibrator=False ,               
                   AddOrReplaceReadGroups_opts="",  MarkDuplicates_opts="",
-                  SplitNCigarReads_opts="",  RealignerTargetCreator_opts="",
-                  IndelRealigner_opts="",  BaseRecalibrator_opts="",
-                  PrintReads_opts="",  HaplotypeCaller_opts="",
+                  SplitNCigarReads_opts="",
+                  BaseRecalibrator_opts="",
+                  ApplyBQSR_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1,
                   workdir=None, outdir=None, timeout=TIMEOUT):
@@ -65,50 +65,28 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     if "VALIDATION_STRINGENCY=" not in MarkDuplicates_opts:
         MarkDuplicates_opts += " VALIDATION_STRINGENCY=SILENT"
 
-
-    if "-rf " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -rf %s" % GATK_SN_RF
-    if "-RMQF " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -RMQF %d" % GATK_SN_RMQF
-    if "-RMQT " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -RMQT %d" % GATK_SN_RMQT
-    if "-U " not in SplitNCigarReads_opts:
-        SplitNCigarReads_opts += " -U ALLOW_N_CIGAR_READS"
-    
     if knownsites:    
         if not os.path.exists(knownsites):
             logger.error("Aborting!")
             raise Exception("No VCF knownsites file %s"%knownsites)
-        if "--known " not in RealignerTargetCreator_opts:
-            RealignerTargetCreator_opts += " --known %s"%knownsites
-        if "-known " not in IndelRealigner_opts and "--knownAlleles " not in IndelRealigner_opts:
-            IndelRealigner_opts += " -known %s"%knownsites
-        if "-knownSites " not in BaseRecalibrator_opts:
-            BaseRecalibrator_opts += " -knownSites %s"%knownsites
+        if "--known-sites " not in BaseRecalibrator_opts:
+            BaseRecalibrator_opts += " --known-sites %s"%knownsites
 
 
 
-    if "-dontUseSoftClippedBases " not in HaplotypeCaller_opts:
-        HaplotypeCaller_opts += " -dontUseSoftClippedBases"
-    if "-stand_call_conf " not in HaplotypeCaller_opts:
-        HaplotypeCaller_opts += " -stand_call_conf %f"%GATK_HC_STANDCALLCONF
-    if "-stand_emit_conf " not in HaplotypeCaller_opts:
-        HaplotypeCaller_opts += " -stand_emit_conf %f"%GATK_HC_STANDEMITCONF
+    if "--dont-use-soft-clipped-bases " not in HaplotypeCaller_opts:
+        HaplotypeCaller_opts += " --dont-use-soft-clipped-bases"
+    if "-stand-call-conf " not in HaplotypeCaller_opts:
+        HaplotypeCaller_opts += " -stand-call-conf %f"%GATK_HC_STANDCALLCONF
 
     if "-window " not in VariantFiltration_opts:
         VariantFiltration_opts += " -window %d"%GATK_VF_WINDOW
     if "-cluster " not in VariantFiltration_opts:
         VariantFiltration_opts += " -cluster %d"%GATK_VF_CLUSTER
-    if "-filterName FS " not in VariantFiltration_opts:
-        VariantFiltration_opts += " -filterName FS -filter 'FS > %f'"%GATK_VF_FSMIN
-    if "-filterName QD " not in VariantFiltration_opts:
-        VariantFiltration_opts += " -filterName QD -filter 'QD < %f'"%GATK_VF_QDMAX
-
-    if nthreads>1:
-        if "-nct " not in BaseRecalibrator_opts:
-            BaseRecalibrator_opts += " -nct %d"%nthreads 
-        if "-nct " not in PrintReads_opts:
-            PrintReads_opts += " -nct %d"%nthreads 
+    if "--filter-name FS " not in VariantFiltration_opts:
+        VariantFiltration_opts += " --filter-name FS -filter 'FS > %f'"%GATK_VF_FSMIN
+    if "--filter-name QD " not in VariantFiltration_opts:
+        VariantFiltration_opts += " --filter-name QD -filter 'QD < %f'"%GATK_VF_QDMAX
 
     if "-Xms" not in java_opts:
         java_opts += " %s"%JAVA_XMS
@@ -116,6 +94,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         java_opts += " %s"%JAVA_XMG
     if "-Djava.io.tmpdir" not in java_opts:
         java_opts += " -Djava.io.tmpdir=%s/javatmp/"%(work_gatk)
+        create_dirs(["%s/javatmp/"%(work_gatk)])
 
     msg = "picard CleanSam for %s"%sample
     if start<=step:
@@ -161,7 +140,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "GATK SplitNCigarReads for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T SplitNCigarReads -R %s -I %s/dedupped.bam -o %s/split.bam %s" % (
+        command="%s %s -jar %s SplitNCigarReads -R %s -I %s/dedupped.bam -O %s/split.bam %s" % (
             java, java_opts, gatk, ref_genome,work_gatk,work_gatk,SplitNCigarReads_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -171,46 +150,12 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     step+=1
 
     split_bam="%s/split.bam"%work_gatk
-    if IndelRealignment:
-        msg = "GATK RealignerTargetCreator for %s"%sample
-        if start<=step:
-            logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s -T RealignerTargetCreator -R %s -I %s/split.bam -o %s/forIndelRealigner.intervals %s" % (
-                java, java_opts, gatk, ref_genome,work_gatk,work_gatk,RealignerTargetCreator_opts)
-            command="bash -c \"%s\""%command      
-            cmd = TimedExternalCmd(command, logger, raise_exception=True)
-            retcode = cmd.run(cmd_log_fd_out=gatk_log_fd, cmd_log=gatk_log, msg=msg, timeout=timeout)   
-        else:
-            logger.info("Skipping step %d: %s"%(step,msg))
-        step+=1
-        
-        msg = "GATK IndelRealigner for %s"%sample
-        if start<=step:
-            logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s -T IndelRealigner -R %s -I %s/split.bam -targetIntervals %s/forIndelRealigner.intervals -o %s/split_realigned.bam %s" % (
-                java, java_opts, gatk, ref_genome,work_gatk,work_gatk,work_gatk,IndelRealigner_opts)
-            command="bash -c \"%s\""%command      
-            cmd = TimedExternalCmd(command, logger, raise_exception=True)
-            retcode = cmd.run(cmd_log_fd_out=gatk_log_fd, cmd_log=gatk_log, msg=msg, timeout=timeout)   
-        else:
-            logger.info("Skipping step %d: %s"%(step,msg))
-        step+=1
-        split_bam="%s/split_realigned.bam"%work_gatk
-    else:
-        msg = "GATK RealignerTargetCreator for %s"%sample
-        logger.info("Skipping step %d: %s"%(step,msg))
-        step+=1
-        msg = "GATK IndelRealigner for %s"%sample
-        logger.info("Skipping step %d: %s"%(step,msg))
-        step+=1
-        
-
 
     if not no_BaseRecalibrator:
         msg = "GATK BaseRecalibrator for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s -T BaseRecalibrator -R %s -I %s  -o %s/recal_data.table %s" % (
+            command="%s %s -jar %s BaseRecalibrator -R %s -I %s  -O %s/recal_data.table %s" % (
                 java, java_opts, gatk, ref_genome,split_bam,work_gatk,BaseRecalibrator_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -219,11 +164,11 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
             logger.info("Skipping step %d: %s"%(step,msg))
         step+=1
 
-        msg = "GATK PrintReads for %s"%sample
+        msg = "GATK ApplyBQSR for %s"%sample
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
-            command="%s %s -jar %s -T PrintReads -R %s -I %s -BQSR %s/recal_data.table -o %s/bsqr.bam %s" % (
-                java, java_opts, gatk, ref_genome,split_bam,work_gatk,work_gatk,PrintReads_opts)
+            command="%s %s -jar %s ApplyBQSR -R %s -I %s -bqsr %s/recal_data.table -O %s/bsqr.bam %s" % (
+                java, java_opts, gatk, ref_genome,split_bam,work_gatk,work_gatk,ApplyBQSR_opts)
             command="bash -c \"%s\""%command      
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=gatk_log_fd, cmd_log=gatk_log, msg=msg, timeout=timeout)   
@@ -235,14 +180,14 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
         msg = "GATK BaseRecalibrator for %s"%sample
         logger.info("Skipping step %d: %s"%(step,msg))
         step+=1
-        msg = "GATK PrintReads for %s"%sample
+        msg = "GATK ApplyBQSR for %s"%sample
         logger.info("Skipping step %d: %s"%(step,msg))
         step+=1
 
     msg = "GATK HaplotypeCaller for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T HaplotypeCaller -R %s -I %s -o %s/variants.vcf %s" % (
+        command="%s %s -jar %s HaplotypeCaller -R %s -I %s -O %s/variants.vcf %s" % (
             java, java_opts, gatk, ref_genome,split_bam,work_gatk,HaplotypeCaller_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -254,7 +199,7 @@ def run_gatk(alignment="", ref_genome="", knownsites="",
     msg = "GATK VariantFiltration for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T VariantFiltration -R %s -V %s/variants.vcf -o %s/variants_filtered.vcf %s" % (
+        command="%s %s -jar %s VariantFiltration -R %s -V %s/variants.vcf -O %s/variants_filtered.vcf %s" % (
             java, java_opts, gatk, ref_genome,work_gatk,work_gatk,VariantFiltration_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
@@ -291,11 +236,11 @@ def run_variant(variant_caller="GATK", alignment="",
                   ref_genome="", knownsites="",
                   picard=PICARD, gatk=GATK,                  
                   java=JAVA, java_opts="",
-                  CleanSam=False, IndelRealignment=False, no_BaseRecalibrator=False,                  
+                  CleanSam=False, no_BaseRecalibrator=False,                  
                   AddOrReplaceReadGroups_opts="",  MarkDuplicates_opts="",
-                  SplitNCigarReads_opts="",  RealignerTargetCreator_opts="",
-                  IndelRealigner_opts="",  BaseRecalibrator_opts="",
-                  PrintReads_opts="",  HaplotypeCaller_opts="",
+                  SplitNCigarReads_opts="",
+                  BaseRecalibrator_opts="",
+                  ApplyBQSR_opts="",  HaplotypeCaller_opts="",
                   VariantFiltration_opts="",  
                   start=0, sample= "", nthreads=1, 
                   workdir=None, outdir=None, timeout=TIMEOUT, ignore_exceptions=False):
@@ -306,15 +251,13 @@ def run_variant(variant_caller="GATK", alignment="",
                   ref_genome=ref_genome, knownsites=knownsites,
                   picard=picard, gatk=gatk,                  
                   java=java, java_opts=java_opts,
-                  CleanSam=CleanSam, IndelRealignment=IndelRealignment, 
+                  CleanSam=CleanSam,
                   no_BaseRecalibrator=no_BaseRecalibrator,                 
                   AddOrReplaceReadGroups_opts=AddOrReplaceReadGroups_opts,  
                   MarkDuplicates_opts=MarkDuplicates_opts,
                   SplitNCigarReads_opts=SplitNCigarReads_opts,  
-                  RealignerTargetCreator_opts=RealignerTargetCreator_opts,
-                  IndelRealigner_opts=IndelRealigner_opts,  
                   BaseRecalibrator_opts=BaseRecalibrator_opts,
-                  PrintReads_opts=PrintReads_opts,  HaplotypeCaller_opts=HaplotypeCaller_opts,
+                  ApplyBQSR_opts=ApplyBQSR_opts,  HaplotypeCaller_opts=HaplotypeCaller_opts,
                   VariantFiltration_opts=VariantFiltration_opts,  
                   start=start, sample= sample, nthreads=nthreads, 
                   workdir=workdir, outdir=outdir, timeout=timeout)

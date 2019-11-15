@@ -85,14 +85,20 @@ def find_SNV_strands(strand_pos_bed,genes_pos_bed,input_annotated_vcf,output_ann
     for w in [0,10,50,100,200,400,800,1000]:
         if w==0:
             SNV_no=SNV
-        SNV_fwd=SNV_no.window(final_fwd,w=w).each(merge_info_SNV).sort().groupby(g=[1,2,3],c=[4,5,6,7,8],o="first,first,first,max,min")
+        SNV_fwd=SNV_no.window(final_fwd,w=w).each(merge_info_SNV).sort()    
+        if len(SNV_fwd)>0:
+            SNV_fwd=SNV_fwd.groupby(g=[1,2,3],c=[4,5,6,7,8],o="first,first,first,max,min")
         SNV_fwd1=SNV_no.window(final_fwd,w=w,v=True)
         SNV_fwd=SNV_fwd.cat(SNV_fwd1,postmerge=False).sort()
 
-        SNV_rev=SNV_no.window(final_rev,w=w).each(merge_info_SNV).sort().groupby(g=[1,2,3],c=[4,5,6,7,8],o="first,first,first,max,min")
+        SNV_rev=SNV_no.window(final_rev,w=w).each(merge_info_SNV).sort()
+        if len(SNV_rev)>0:
+            SNV_rev=SNV_rev.groupby(g=[1,2,3],c=[4,5,6,7,8],o="first,first,first,max,min")
         SNV_rev1=SNV_no.window(final_rev,w=w,v=True)
         SNV_rev=SNV_rev.cat(SNV_rev1,postmerge=False).sort()
-        SNV_final=SNV_fwd.cat(SNV_rev,postmerge=False).sort().groupby(g=[1,2,3],c=[4,5,6,7,8],o="collapse,first,collapse,collapse,collapse")
+        SNV_final=SNV_fwd.cat(SNV_rev,postmerge=False).sort()
+        if len(SNV_final)>0:
+            SNV_final=SNV_final.groupby(g=[1,2,3],c=[4,5,6,7,8],o="collapse,first,collapse,collapse,collapse")
     
         SNV_good_=SNV_final.filter(lambda x:len(set(x[5].split(","))-set("."))==1).sort()
         SNV_no=SNV_final.filter(lambda x:len(set(x[5].split(","))-set("."))==0).each(fix_SNV_no).sort()
@@ -165,17 +171,14 @@ def run_giremi(alignment="", variant="",
     work_giremi=os.path.join(workdir,"giremi",sample)
     create_dirs([work_giremi])
     
-    if nthreads>1:
-        if "-nt " not in VariantAnnotator_opts:
-            VariantAnnotator_opts += " -nt %d"%nthreads 
-
+    tmp_dir = ""
     if "-Xms" not in java_opts:
         java_opts += " %s"%JAVA_XMS
     if "-Xmx" not in java_opts:
         java_opts += " %s"%JAVA_XMG
     if "-Djava.io.tmpdir" not in java_opts:
         java_opts += " -Djava.io.tmpdir=%s/javatmp/"%(work_giremi)
-
+        tmp_dir="%s/javatmp/"%(work_giremi)
 
 
     step=0
@@ -192,7 +195,9 @@ def run_giremi(alignment="", variant="",
     giremi_log = os.path.join(work_giremi, "giremi.log")
     giremi_log_fd = open(giremi_log, "w")
     
-    
+    if tmp_dir:
+        create_dirs([tmp_dir])
+
     msg = "Sort BAM by name for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
@@ -227,10 +232,23 @@ def run_giremi(alignment="", variant="",
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
 
+    msg = "GATK IndexFeatureFile for %s"%sample
+    if start<=step:
+        logger.info("--------------------------STEP %s--------------------------"%step)
+        command="%s %s -jar %s IndexFeatureFile -F %s" % (
+            java, java_opts, gatk, variant)
+        command="bash -c \"%s\""%command      
+        cmd = TimedExternalCmd(command, logger, raise_exception=True)
+        retcode = cmd.run(cmd_log_fd_out=giremi_log_fd, cmd_log=giremi_log, msg=msg, timeout=timeout)   
+    else:
+        logger.info("Skipping step %d: %s"%(step,msg))
+    step+=1
+
+
     msg = "GATK VariantAnnotator for %s"%sample
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        command="%s %s -jar %s -T VariantAnnotator -R %s -V %s -L %s -o %s/annotated.vcf --dbsnp %s %s" % (
+        command="%s %s -jar %s VariantAnnotator -R %s -V %s -L %s -O %s/annotated.vcf --dbsnp %s %s" % (
             java, java_opts, gatk, ref_genome,variant,variant,work_giremi,knownsites,VariantAnnotator_opts)
         command="bash -c \"%s\""%command      
         cmd = TimedExternalCmd(command, logger, raise_exception=True)
