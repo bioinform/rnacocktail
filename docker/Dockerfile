@@ -145,7 +145,7 @@ RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4
 
 RUN apt-get install -y --fix-missing build-essential tabix 
 
-RUN pip install https://github.com/bioinform/rnacocktail/archive/update_tools.zip
+RUN pip install https://github.com/bioinform/rnacocktail/archive/v0.3.0.tar.gz
 
 VOLUME /work_dir
 
