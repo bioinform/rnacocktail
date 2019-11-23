@@ -299,8 +299,8 @@ wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_referen
 echo "Download dbsnp files"
 wget ftp://ftp.ncbi.nih.gov/snp/organisms/human_9606/VCF/All_20180418.vcf.gz
 gunzip All_20180418.vcf.gz
- awk '{if($0 !~ /^#/) print "chr"$0; else print $0}' All_20180418.vcf |sed  "s/chrMT/chrM/g" > All_20180418_chr.vcf
- mv All_20180418_chr.vcf All_20180418.vcf
+awk '{if($0 !~ /^#/) print "chr"$0; else print $0}' All_20180418.vcf |sed  "s/chrMT/chrM/g" > All_20180418_chr.vcf
+mv All_20180418_chr.vcf All_20180418.vcf
 docker run -u $UID -v=${PWD}/../:/work_dir/ rssbred/rnacocktail:0.3.1 bgzip /work_dir/example/All_20180418.vcf
 docker run -u $UID -v=${PWD}/../:/work_dir/ rssbred/rnacocktail:0.3.1 tabix /work_dir/example/All_20180418.vcf.gz
 echo "Index reference genome FASTA file"
