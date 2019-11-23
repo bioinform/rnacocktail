@@ -143,7 +143,7 @@ RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/I
 
 RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip && chmod -R 777 /opt/gatk-4.1.4.0
 
-RUN pip install https://github.com/bioinform/rnacocktail/archive/v0.3.1.tar.gz
+RUN pip install https://github.com/bioinform/rnacocktail/archive/v${RNACOCKTAIL_VERSION}.tar.gz
 
 RUN cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/FC /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/fusioncatcher
 
