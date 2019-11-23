@@ -16,22 +16,22 @@ ENV OASES_VERSION 0.2.09
 ENV VELVET_VERSION 1.2.10
 ENV SUBREAD_VERSION 2.0.0
 ENV LORDEC_VERSION 0.9
-ENV STAR_VERSION 2.7.0f
+ENV STAR_VERSION 2.7.2b
 ENV PICARD_VERSION 2.19.0
 ENV HTSLIB_VERSION 1.9
 ENV GIREMI_VERSION 0.2.1
 ENV BIOPYTHON_VERSION 1.74
 ENV OPENPYXL_VERSION 2.6.4
 ENV XLRD_VERSION 1.1.0
-ENV BOWTIE_VERSION 1.2.2
-ENV BOWTIE2_VERSION 2.2.9
+ENV BOWTIE_VERSION 1.2.3
+ENV BOWTIE2_VERSION 2.3.5.1
 ENV BWA_VERSION 0.7.17
 ENV SRA_VERSION 2.9.6
 ENV COREUTILS_VERSION 8.27
-ENV PIGZ_VERSION 2.3.1
+ENV PIGZ_VERSION 2.4
 ENV GMAP_VERSION 2019-09-12
 ENV BBMAP_VERSION 38.44
-ENV FUSIONCATCHER_VERSION 1.10
+ENV FUSIONCATCHER_VERSION 1.20
 ENV GFFREAD_VERSION 0.11.5
 ENV IDPFUSION_VERSION 1.1.1
 ENV GATK_VERSION 4.1.4.0
@@ -94,8 +94,8 @@ RUN pip install pybedtools==${PYBEDTOOLS_VERSION} pysam==${PYSAM_VERSION} biopyt
 RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie/${BOWTIE_VERSION}/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip -O /opt/bowtie-${BOWTIE_VERSION}-linux-x86_64.zip
 RUN cd /opt && unzip bowtie-${BOWTIE_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie-${BOWTIE_VERSION}-linux-x86_64/bowtie* /usr/local/bin && cd /opt && rm -rf bowtie*
 
-RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip/download -O /opt/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip 
-RUN cd /opt && unzip bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie2-${BOWTIE2_VERSION}/bowtie2* /usr/local/bin && cd /opt && rm -rf bowtie2*
+RUN wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/${BOWTIE2_VERSION}/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip -O /opt/bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip 
+RUN cd /opt && unzip bowtie2-${BOWTIE2_VERSION}-linux-x86_64.zip && cp -p /opt/bowtie2-${BOWTIE2_VERSION}-linux-x86_64/bowtie2* /usr/local/bin && cd /opt && rm -rf bowtie2*
 
 RUN wget https://sourceforge.net/projects/bio-bwa/files/bwa-${BWA_VERSION}.tar.bz2/download -O /opt/bwa-${BWA_VERSION}.tar.bz2 
 RUN cd /opt && tar xjf bwa-${BWA_VERSION}.tar.bz2 && cd bwa-${BWA_VERSION} && make && cp -p /opt/bwa-${BWA_VERSION}/bwa /usr/local/bin && cd /opt && rm -rf bwa*
@@ -143,7 +143,9 @@ RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/I
 
 RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip && chmod -R 777 /opt/gatk-4.1.4.0
 
-RUN pip install https://github.com/bioinform/rnacocktail/archive/v0.3.0.tar.gz
+RUN pip install https://github.com/bioinform/rnacocktail/archive/v0.3.1.tar.gz
+
+RUN cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/FC /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/fusioncatcher
 
 VOLUME /work_dir
 
