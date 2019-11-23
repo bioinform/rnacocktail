@@ -131,7 +131,8 @@ RUN cd /opt && tar -xzvf BBMap_${BBMAP_VERSION}.tar.gz
 
 ENV PATH $PATH:/opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/
 
-RUN wget https://github.com/ndaniel/fusioncatcher/releases/download/${FUSIONCATCHER_VERSION}/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip -O /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip  && cd /opt && unzip fusioncatcher_v${FUSIONCATCHER_VERSION}.zip && cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/sam2psl.py /usr/local/bin
+RUN wget https://github.com/ndaniel/fusioncatcher/releases/download/${FUSIONCATCHER_VERSION}/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip -O /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}.zip  && cd /opt && unzip fusioncatcher_v${FUSIONCATCHER_VERSION}.zip && cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/sam2psl.py /usr/local/bin && cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/FC /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/fusioncatcher
+
 
 ADD http://ccb.jhu.edu/software/stringtie/dl/gffread-${GFFREAD_VERSION}.Linux_x86_64.tar.gz opt/gffread-${GFFREAD_VERSION}.Linux_x86_64.tar.gz 
 RUN cd /opt && tar -xzvf gffread-${GFFREAD_VERSION}.Linux_x86_64.tar.gz && cp -p /opt/gffread-${GFFREAD_VERSION}.Linux_x86_64/gffread /usr/local/bin && rm -rf /opt/gffread*
@@ -144,8 +145,6 @@ RUN cd /opt && tar -xzvf IDP-fusion_${IDPFUSION_VERSION}.tar.gz && rm -rf /opt/I
 RUN wget https://github.com/broadinstitute/gatk/releases/download/4.1.4.0/gatk-4.1.4.0.zip -O /opt/gatk-4.1.4.0.zip  && cd /opt && unzip gatk-4.1.4.0.zip && chmod -R 777 /opt/gatk-4.1.4.0
 
 RUN pip install https://github.com/bioinform/rnacocktail/archive/v${RNACOCKTAIL_VERSION}.tar.gz
-
-RUN cp -p /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/FC /opt/fusioncatcher_v${FUSIONCATCHER_VERSION}/bin/fusioncatcher
 
 VOLUME /work_dir
 
