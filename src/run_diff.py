@@ -194,11 +194,21 @@ def run_deseq2(quant_files="", alignments="",
                          lengths <- txi$length;    dimnames(lengths) <- dimnames(dds);\
                          assays(dds)[['avgTxLength']] <- lengths;  }; \
                          dds <- dds[ rowSums(counts(dds)) >= %d, ]; \
-                         dds$condition <- relevel(dds$condition, ref='C1'); \
-                         dds <- DESeq(dds); res <- results(dds, alpha=%f); \
-                         (summary(res)); save(txi,colData,condition,dds,res, \
-                         file='%s/deseq2.rda');  write.table(res, file = '%s/deseq2_res.tab', \
-                         quote = FALSE, sep='\\t');\""%(
+                         dds <- DESeq(dds); \
+                         for (i in seq_along(condition)){ \
+                         for (j in seq_along(condition)){ \
+                         if (i < j){\
+                         sample1 <- condition[i]; \
+                         sample2 <- condition[j]; \
+                         res <- results(dds, contrast=c('condition',sample1,sample2), alpha=%f); \
+                         (summary(res)); \
+                         write.table(res, file = '%s/deseq2_res_$sample1_vs_$sample2.tab', \
+                         quote = FALSE, sep='\\t'); \
+                         } \
+                         } \
+                         } \
+                         save(txi,colData,condition,dds,res, \
+                         file='%s/deseq2.rda');\""%(
                        R, work_deseq2, ",".join(map(lambda i:"rep('C%d', %d)"%(i,n_replicates[i]),range(len(samples)))),
                        mincount, alpha, work_deseq2, work_deseq2)
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
