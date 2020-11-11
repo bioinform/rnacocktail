@@ -3,6 +3,7 @@ from external_cmd import TimedExternalCmd
 from defaults import *
 from utils import *
 import csv
+import glob
 
 FORMAT = '%(levelname)s %(asctime)-15s %(name)-20s %(message)s'
 logFormatter = logging.Formatter(FORMAT)
@@ -182,6 +183,7 @@ def run_deseq2(quant_files="", alignments="",
         if start<=step:
             logger.info("--------------------------STEP %s--------------------------"%step)
             command = "%s -e \"library('DESeq2'); load('%s/txi.rda'); \
+                       samples <- c(%s); \
                        condition <- factor(c(%s)); \
                        (colData <- data.frame(row.names=colnames(txi$count), condition));\
                         counts <- round(txi$counts); mode(counts) <- 'integer'; \
@@ -193,12 +195,24 @@ def run_deseq2(quant_files="", alignments="",
                          lengths <- txi$length;    dimnames(lengths) <- dimnames(dds);\
                          assays(dds)[['avgTxLength']] <- lengths;  }; \
                          dds <- dds[ rowSums(counts(dds)) >= %d, ]; \
-                         dds$condition <- relevel(dds$condition, ref='C1'); \
-                         dds <- DESeq(dds); res <- results(dds, alpha=%f); \
-                         (summary(res)); save(txi,colData,condition,dds,res, \
-                         file='%s/deseq2.rda');  write.table(res, file = '%s/deseq2_res.tab', \
-                         quote = FALSE, sep='\\t');\""%(
-                       R, work_deseq2, ",".join(map(lambda i:"rep('C%d', %d)"%(i,n_replicates[i]),range(len(samples)))),
+                         dds <- DESeq(dds); \
+                         for (i in seq_along(samples)){ \
+                         for (j in seq_along(samples)){ \
+                         if (i < j){\
+                         sample1 <- samples[i]; \
+                         sample2 <- samples[j]; \
+                         res <- results(dds, contrast=c('condition',sample1,sample2), alpha=%f); \
+                         (summary(res)); \
+                         res_file= sprintf('%s/deseq2_res_%%s_vs_%%s.tab',sample1,sample2);\
+                         write.table(res, file = res_file, \
+                         quote = FALSE, sep='\\t'); \
+                         } \
+                         } \
+                         }; \
+                         save(txi,colData,condition,dds,res, \
+                         file='%s/deseq2.rda');\""%(
+                       R, work_deseq2, ",".join(map(lambda i:"'sample%d'"%(i),range(len(samples)))),
+                       ",".join(map(lambda i:"rep('sample%d', %d)"%(i,n_replicates[i]),range(len(samples)))),
                        mincount, alpha, work_deseq2, work_deseq2)
             cmd = TimedExternalCmd(command, logger, raise_exception=True)
             retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   
@@ -233,17 +247,29 @@ def run_deseq2(quant_files="", alignments="",
                 command = "%s -e \"library('DESeq2'); countData <- read.table('%s/featureCounts.txt', \
                            header=TRUE, row.names=1);  countData <- countData[ ,6:ncol(countData)]; \
                             countData <- as.matrix(countData); \
+                           samples <- c(%s); \
                            condition <- factor(c(%s)); \
                            (colData <- data.frame(row.names=colnames(countData), condition));\
                             dds <- DESeqDataSetFromMatrix(countData=countData, colData=colData, design=~ condition);\
                              dds <- dds[ rowSums(counts(dds)) >= %d, ]; \
-                             dds$condition <- relevel(dds$condition, ref='C1'); \
-                             dds <- DESeq(dds); res <- results(dds, alpha=%f); \
-                             (summary(res)); save(countData,colData,condition,dds,res, \
-                             file='%s/deseq2.rda');  write.table(res, file = '%s/deseq2_res.tab', \
-                             quote = FALSE, sep='\\t');\""%(
-                           R, work_deseq2, ",".join(map(lambda i:"rep('C%d', %d)"%(i,n_replicates[i]),
-                           range(len(samples)))),
+                             dds <- DESeq(dds); \
+                             for (i in seq_along(samples)){ \
+                             for (j in seq_along(samples)){ \
+                             if (i < j){\
+                             sample1 <- samples[i]; \
+                             sample2 <- samples[j]; \
+                             res <- results(dds, contrast=c('condition',sample1,sample2), alpha=%f); \
+                             (summary(res)); \
+                             res_file= sprintf('%s/deseq2_res_%%s_vs_%%s.tab',sample1,sample2);\
+                             write.table(res, file = res_file, \
+                             quote = FALSE, sep='\\t'); \
+                             } \
+                             } \
+                             }; \
+                             save(countData,colData,condition,dds,res, \
+                             file='%s/deseq2.rda');\""%(
+                           R, work_deseq2, ",".join(map(lambda i:"'sample%d'"%(i),range(len(samples)))),
+                           ",".join(map(lambda i:"rep('sample%d', %d)"%(i,n_replicates[i]),range(len(samples)))),
                            mincount, alpha, work_deseq2, work_deseq2)
                 cmd = TimedExternalCmd(command, logger, raise_exception=True)
                 retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   
@@ -299,17 +325,29 @@ def run_deseq2(quant_files="", alignments="",
                 command = "%s -e \"library('DESeq2'); countData <- read.table('%s/featureCounts.txt', \
                            header=TRUE, row.names=1);  countData <- countData[ ,6:ncol(countData)]; \
                             countData <- as.matrix(countData); \
+                           samples <- c(%s); \
                            condition <- factor(c(%s)); \
                            (colData <- data.frame(row.names=colnames(countData), condition));\
                             dds <- DESeqDataSetFromMatrix(countData=countData, colData=colData, design=~ condition);\
                              dds <- dds[ rowSums(counts(dds)) >= %d, ]; \
-                             dds$condition <- relevel(dds$condition, ref='C1'); \
-                             dds <- DESeq(dds); res <- results(dds, alpha=%f); \
-                             (summary(res)); save(countData,colData,condition,dds,res, \
-                             file='%s/deseq2.rda');  write.table(res, file = '%s/deseq2_res.tab', \
-                             quote = FALSE, sep='\\t');\""%(
-                           R, work_deseq2, ",".join(map(lambda i:"rep('C%d', %d)"%(i,n_replicates[i]),
-                           range(len(samples)))),
+                             dds <- DESeq(dds); \
+                             for (i in seq_along(samples)){ \
+                             for (j in seq_along(samples)){ \
+                             if (i < j){\
+                             sample1 <- samples[i]; \
+                             sample2 <- samples[j]; \
+                             res <- results(dds, contrast=c('condition',sample1,sample2), alpha=%f); \
+                             (summary(res)); \
+                             res_file= sprintf('%s/deseq2_res_%%s_vs_%%s.tab',sample1,sample2);\
+                             write.table(res, file = res_file, \
+                             quote = FALSE, sep='\\t'); \
+                             } \
+                             } \
+                             }; \
+                             save(countData,colData,condition,dds, \
+                             file='%s/deseq2.rda');\""%(
+                           R, work_deseq2, ",".join(map(lambda i:"'sample%d'"%(i),range(len(samples)))),
+                           ",".join(map(lambda i:"rep('sample%d', %d)"%(i,n_replicates[i]),range(len(samples)))),
                            mincount, alpha, work_deseq2, work_deseq2)
                 cmd = TimedExternalCmd(command, logger, raise_exception=True)
                 retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   
@@ -322,20 +360,21 @@ def run_deseq2(quant_files="", alignments="",
     msg="Copy predictions to output directory for %s."%samples_txt
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
-        if os.path.exists("%s/deseq2_res.tab"%work_deseq2):
-            command = "cp %s/deseq2_res.tab %s/deseq2_res.tab"%(
-                       work_deseq2, out_deseq2)
-            cmd = TimedExternalCmd(command, logger, raise_exception=True)
-            retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   
+        if len(glob.glob("%s/deseq2_res*.tab"%work_deseq2))>0:
+            for out_file in glob.glob("%s/deseq2_res*.tab"%work_deseq2):
+                command = "cp %s %s/"%(
+                       out_file, out_deseq2)
+                cmd = TimedExternalCmd(command, logger, raise_exception=True)
+                retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
 
     diff = ""
-    if os.path.exists("%s/deseq2_res.tab"%out_deseq2):
+    if len(glob.glob("%s/deseq2_res*.tab"%out_deseq2))>0:
         logger.info("DESeq2 was successfull!")
-        logger.info("Output differential expressions: %s/deseq2_res.tab"%out_deseq2)
-        diff = "%s/deseq2_res.tab"%out_deseq2   
+        logger.info("Output differential expressions: %s"%(glob.glob("%s/deseq2_res*.tab"%out_deseq2)))
+        diff = glob.glob("%s/deseq2_res*.tab"%out_deseq2)  
     else:            
         logger.info("DESeq2 failed!")
     return diff
