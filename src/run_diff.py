@@ -196,8 +196,8 @@ def run_deseq2(quant_files="", alignments="",
                          assays(dds)[['avgTxLength']] <- lengths;  }; \
                          dds <- dds[ rowSums(counts(dds)) >= %d, ]; \
                          dds <- DESeq(dds); \
-                         for (i in seq_along(condition)){ \
-                         for (j in seq_along(condition)){ \
+                         for (i in seq_along(samples)){ \
+                         for (j in seq_along(samples)){ \
                          if (i < j){\
                          sample1 <- samples[i]; \
                          sample2 <- samples[j]; \
@@ -208,7 +208,7 @@ def run_deseq2(quant_files="", alignments="",
                          quote = FALSE, sep='\\t'); \
                          } \
                          } \
-                         } \
+                         }; \
                          save(txi,colData,condition,dds,res, \
                          file='%s/deseq2.rda');\""%(
                        R, work_deseq2, ",".join(map(lambda i:"'sample%d'"%(i),range(len(samples)))),
@@ -253,8 +253,8 @@ def run_deseq2(quant_files="", alignments="",
                             dds <- DESeqDataSetFromMatrix(countData=countData, colData=colData, design=~ condition);\
                              dds <- dds[ rowSums(counts(dds)) >= %d, ]; \
                              dds <- DESeq(dds); \
-                             for (i in seq_along(condition)){ \
-                             for (j in seq_along(condition)){ \
+                             for (i in seq_along(samples)){ \
+                             for (j in seq_along(samples)){ \
                              if (i < j){\
                              sample1 <- samples[i]; \
                              sample2 <- samples[j]; \
@@ -265,7 +265,7 @@ def run_deseq2(quant_files="", alignments="",
                              quote = FALSE, sep='\\t'); \
                              } \
                              } \
-                             } \
+                             }; \
                              save(countData,colData,condition,dds,res, \
                              file='%s/deseq2.rda');\""%(
                            R, work_deseq2, ",".join(map(lambda i:"'sample%d'"%(i),range(len(samples)))),
@@ -331,8 +331,8 @@ def run_deseq2(quant_files="", alignments="",
                             dds <- DESeqDataSetFromMatrix(countData=countData, colData=colData, design=~ condition);\
                              dds <- dds[ rowSums(counts(dds)) >= %d, ]; \
                              dds <- DESeq(dds); \
-                             for (i in seq_along(condition)){ \
-                             for (j in seq_along(condition)){ \
+                             for (i in seq_along(samples)){ \
+                             for (j in seq_along(samples)){ \
                              if (i < j){\
                              sample1 <- samples[i]; \
                              sample2 <- samples[j]; \
@@ -343,7 +343,7 @@ def run_deseq2(quant_files="", alignments="",
                              quote = FALSE, sep='\\t'); \
                              } \
                              } \
-                             } \
+                             }; \
                              save(countData,colData,condition,dds, \
                              file='%s/deseq2.rda');\""%(
                            R, work_deseq2, ",".join(map(lambda i:"'sample%d'"%(i),range(len(samples)))),
