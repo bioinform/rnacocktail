@@ -361,10 +361,11 @@ def run_deseq2(quant_files="", alignments="",
     if start<=step:
         logger.info("--------------------------STEP %s--------------------------"%step)
         if len(glob.glob("%s/deseq2_res*.tab"%work_deseq2))>0:
-            command = "cp %s/deseq2_res*.tab %s/"%(
-                       work_deseq2, out_deseq2)
-            cmd = TimedExternalCmd(command, logger, raise_exception=True)
-            retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   
+            for out_file in glob.glob("%s/deseq2_res*.tab"%work_deseq2):
+                command = "cp %s %s/"%(
+                       out_file, out_deseq2)
+                cmd = TimedExternalCmd(command, logger, raise_exception=True)
+                retcode = cmd.run(cmd_log_fd_out=deseq2_log_fd, cmd_log=deseq2_log, msg=msg, timeout=timeout)   
     else:
         logger.info("Skipping step %d: %s"%(step,msg))
     step+=1
